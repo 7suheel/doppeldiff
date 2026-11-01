@@ -2,6 +2,8 @@ import { existsSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 import type { CompareOptions } from './compare/compare.js';
+import fc from 'fast-check';
+import type { FunctionConfig } from '../config.js';
 import { detectChanges, type Detection, type ListedFunction } from './detect/detect.js';
 import { prepareDependencies, type DepsResult } from './git/deps.js';
 import { isWorkingTreeClean, mergeBase, repoRoot, resolveCommit, git } from './git/git.js';
@@ -40,6 +42,8 @@ export interface RunOptions {
   poolSize?: number;
   noSandbox?: boolean;
   showConsole?: boolean;
+  /** Per-function overrides (from the config file), keyed by id (`file#export`) or export name. */
+  functions?: Record<string, FunctionConfig>;
   onEvent?: (event: RunEvent) => void;
 }
 
@@ -139,6 +143,20 @@ export async function run(options: RunOptions): Promise<RunResult> {
       ...(options.exclude ? { exclude: options.exclude } : {}),
       sourceFile: (side, file) => parser.sourceFile(side, file),
     });
+    // Config: functions explicitly skipped.
+    for (const t of [...detection.targets]) {
+      const fcfg = options.functions?.[t.id] ?? options.functions?.[t.exportName];
+      if (fcfg?.skip) {
+        detection.targets.splice(detection.targets.indexOf(t), 1);
+        detection.skipped.push({
+          id: t.id,
+          file: t.id.split('#')[0]!,
+          exportName: t.exportName,
+          kind: 'function',
+          reason: typeof fcfg.skip === 'string' ? fcfg.skip : 'skipped in doppeldiff.config',
+        });
+      }
+    }
     const only = options.only;
     if (only?.length) {
       detection.targets = detection.targets.filter((t) => only.some((o) => o === t.id || o === t.exportName));
@@ -198,9 +216,12 @@ export async function run(options: RunOptions): Promise<RunResult> {
         const remaining = options.timeBudgetMs - (Date.now() - tVerify);
         deadline = Date.now() + Math.max(500, remaining / (total - index));
       }
+      const fcfg = options.functions?.[target.id] ?? options.functions?.[target.exportName];
       const result = await verifyFunction(session, target, {
         seed,
-        runs,
+        runs: fcfg?.runs ?? runs,
+        ...(fcfg?.args ? { arbitrary: fcfg.args(fc) } : {}),
+        ...(fcfg?.examples ? { examples: fcfg.examples } : {}),
         ...(deadline !== undefined ? { deadline } : {}),
         ...(options.compare ? { compare: options.compare } : {}),
         onProgress: (p) => emit({ type: 'function-progress', target, ...p }),

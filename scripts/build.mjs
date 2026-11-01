@@ -16,7 +16,7 @@ const common = {
 
 await esbuild.build({
   ...common,
-  entryPoints: { index: 'src/index.ts' },
+  entryPoints: { index: 'src/index.ts', cli: 'src/bin.ts' },
   outdir: 'dist',
   packages: 'external',
 });

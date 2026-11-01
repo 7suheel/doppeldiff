@@ -3,6 +3,7 @@ import { compileSignature } from '../arbitraries/compile.js';
 import { asFunctionLike, reachableLocalFunctions, usesThis, type LocateResult } from '../analyze/locate.js';
 import { indexModule } from '../detect/toplevel.js';
 import type { SourceFile } from 'ts-morph';
+import type { Arbitrary } from 'fast-check';
 import type { CompareOptions } from '../compare/compare.js';
 import {
   explore,
@@ -36,6 +37,8 @@ export interface VerifyFunctionOptions {
   deadline?: number;
   compare?: CompareOptions;
   examples?: unknown[][];
+  /** Custom argument generator (from the config file); replaces the type-derived one. */
+  arbitrary?: Arbitrary<unknown[]>;
   onProgress?: (p: { inputsRun: number; clusters: number }) => void;
 }
 
@@ -144,9 +147,10 @@ export async function verifyFunction(
   const baseSig = signatureFromNode(baseLoc.node);
   const signature = printSignature(target.exportName, headSig);
   base.signature = signature;
-  const unsupported = signatureUnsupported(headSig);
-  if (unsupported) return skip(`unsupported parameter type: ${unsupported}`);
-  if (!signatureAccepts(baseSig, headSig)) {
+  const unsupported = options.arbitrary ? undefined : signatureUnsupported(headSig);
+  if (unsupported)
+    return skip(`unsupported parameter type: ${unsupported} (provide \`args\` in doppeldiff.config.ts)`);
+  if (!options.arbitrary && !signatureAccepts(baseSig, headSig)) {
     return skip(
       `signature changed incompatibly: ${printSignature(target.exportName, baseSig)} → ${signature}`,
     );
@@ -160,7 +164,7 @@ export async function verifyFunction(
     ...reachableLocalFunctions(headLoc.node, 3),
   ]);
   base.mined = { numbers: mined.numbers.length, strings: mined.strings.length, thresholds: mined.thresholds };
-  const arbitrary = compileSignature(headSig, { mined });
+  const arbitrary = options.arbitrary ?? compileSignature(headSig, { mined });
   if (!arbitrary) return skip('could not build an input generator for the signature');
 
   // 4. Load both versions in their sandboxes.
