@@ -1,6 +1,8 @@
 import { mineValues, type MinedValues } from '../arbitraries/mine.js';
 import { compileSignature } from '../arbitraries/compile.js';
-import { findExportedFunction, reachableLocalFunctions, usesThis } from '../analyze/locate.js';
+import { asFunctionLike, reachableLocalFunctions, usesThis, type LocateResult } from '../analyze/locate.js';
+import { indexModule } from '../detect/toplevel.js';
+import type { SourceFile } from 'ts-morph';
 import type { CompareOptions } from '../compare/compare.js';
 import {
   explore,
@@ -58,6 +60,14 @@ export interface FunctionResult {
   shrinkEvaluations: number;
   durationMs: number;
   mined?: { numbers: number; strings: number; thresholds: number[] };
+}
+
+/** Locate an exported function through the module index (ESM exports, re-exports and CommonJS). */
+export function locateExport(sf: SourceFile, exportName: string): LocateResult {
+  const index = indexModule(sf);
+  const top = index.exports.get(exportName);
+  if (top === undefined) return { ok: false, reason: `no export named \`${exportName}\``, missing: true };
+  return asFunctionLike(index.decls.get(top)!.node);
 }
 
 export function printSignature(name: string, sig: SignatureSpec): string {
@@ -119,8 +129,8 @@ export async function verifyFunction(
   // 1. Locate both versions.
   let baseLoc, headLoc;
   try {
-    baseLoc = findExportedFunction(session.sourceFile('base', target.baseFile), target.exportName);
-    headLoc = findExportedFunction(session.sourceFile('head', target.headFile), target.exportName);
+    baseLoc = locateExport(session.sourceFile('base', target.baseFile), target.exportName);
+    headLoc = locateExport(session.sourceFile('head', target.headFile), target.exportName);
   } catch (e) {
     return skip(`could not parse source: ${(e as Error).message}`);
   }

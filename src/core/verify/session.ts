@@ -1,6 +1,6 @@
 import { existsSync, realpathSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 import { Project, ts, type SourceFile } from 'ts-morph';
 import { bundleModule } from '../materialize/bundle.js';
 import { RunnerPool, type LoadResult } from '../runner/pool.js';
@@ -8,7 +8,9 @@ import { RunnerPool, type LoadResult } from '../runner/pool.js';
 export type Side = 'base' | 'head';
 
 export interface SessionOptions {
+  /** Root directory of the base version (repo root or worktree). */
   baseRoot: string;
+  /** Root directory of the head version. */
   headRoot: string;
   timeoutMs: number;
   freeze: boolean;
@@ -19,6 +21,10 @@ export interface SessionOptions {
   memoryMb?: number;
   showConsole?: boolean;
   noSandbox?: boolean;
+  /** Extra directories the runners may read (e.g. node_modules real paths). */
+  extraReadPaths?: string[];
+  /** The user's working copy (whose node_modules both versions share), for monorepo workspace mapping. */
+  sourceRepo?: string;
 }
 
 export interface LoadedModule {
@@ -28,16 +34,38 @@ export interface LoadedModule {
 
 export const DEFAULT_NOW = Date.UTC(2025, 0, 15, 12, 0, 0);
 
-function readPathsFor(root: string): string[] {
-  const paths = [root, join(tmpdir(), 'doppeldiff-bundles')];
+function readPathsFor(root: string, extra: string[]): string[] {
+  const paths = [root, join(tmpdir(), 'doppeldiff-bundles'), ...extra];
   const nm = join(root, 'node_modules');
   if (existsSync(nm)) paths.push(realpathSync(nm));
   return paths;
 }
 
 /**
- * Holds everything shared across functions of one run: the two runner pools (base/head),
- * a ts-morph project per version and the bundled modules.
+ * Nearest directory at or above `file` (but not above `root`) that contains a tsconfig.json or
+ * package.json: the "package root" used for type analysis and bundling.
+ */
+export function packageRootOf(root: string, file: string): string {
+  const absRoot = resolve(root);
+  let dir = dirname(resolve(file));
+  while (dir.startsWith(absRoot)) {
+    if (existsSync(join(dir, 'tsconfig.json')) || existsSync(join(dir, 'package.json'))) return dir;
+    if (dir === absRoot) break;
+    const parent = dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+  return absRoot;
+}
+
+/** Repo-relative, forward-slash path. */
+export function relPath(root: string, file: string): string {
+  return relative(root, file).split(sep).join('/');
+}
+
+/**
+ * Holds everything shared across functions of one run: the two runner pools (base/head), a ts-morph
+ * project per package root and version, and the bundled modules.
  */
 export class VerifySession {
   readonly pools: Record<Side, RunnerPool>;
@@ -57,39 +85,44 @@ export class VerifySession {
       ...(options.showConsole !== undefined ? { showConsole: options.showConsole } : {}),
       ...(options.noSandbox !== undefined ? { noSandbox: options.noSandbox } : {}),
     };
+    const extra = options.extraReadPaths ?? [];
     this.pools = {
-      base: new RunnerPool({ ...common, label: 'base', readPaths: readPathsFor(options.baseRoot) }),
-      head: new RunnerPool({ ...common, label: 'head', readPaths: readPathsFor(options.headRoot) }),
+      base: new RunnerPool({ ...common, label: 'base', readPaths: readPathsFor(options.baseRoot, extra) }),
+      head: new RunnerPool({ ...common, label: 'head', readPaths: readPathsFor(options.headRoot, extra) }),
     };
   }
 
-  project(side: Side): Project {
-    const root = this.roots[side];
-    let p = this.projects.get(side);
+  /** ts-morph project for the package containing `file` in the given version. */
+  project(side: Side, file: string): Project {
+    const pkg = packageRootOf(this.roots[side], file);
+    const key = `${side}:${pkg}`;
+    let p = this.projects.get(key);
     if (!p) {
-      const tsconfig = join(root, 'tsconfig.json');
+      const tsconfig = join(pkg, 'tsconfig.json');
       p = existsSync(tsconfig)
         ? new Project({
             tsConfigFilePath: tsconfig,
             skipAddingFilesFromTsConfig: true,
-            compilerOptions: { allowJs: true },
+            compilerOptions: { allowJs: true, noEmit: true },
           })
         : new Project({
             compilerOptions: {
               strict: true,
               allowJs: true,
+              checkJs: false,
               target: ts.ScriptTarget.ES2022,
               module: ts.ModuleKind.ESNext,
               moduleResolution: ts.ModuleResolutionKind.Bundler,
             },
           });
-      this.projects.set(side, p);
+      this.projects.set(key, p);
     }
     return p;
   }
 
+  /** Parsed source file (with its imports resolved for the type checker). */
   sourceFile(side: Side, file: string): SourceFile {
-    const project = this.project(side);
+    const project = this.project(side, file);
     const existing = project.getSourceFile(file);
     if (existing) return existing;
     const sf = project.addSourceFileAtPath(file);
@@ -103,10 +136,12 @@ export class VerifySession {
     let p = this.modules.get(key);
     if (!p) {
       p = (async () => {
-        const bundle = await bundleModule(this.roots[side], file, side);
-        const moduleId = key;
-        const load = await this.pools[side].load(moduleId, bundle.path);
-        return { moduleId, load };
+        const ws = this.options.sourceRepo
+          ? { workspace: { sourceRepo: this.options.sourceRepo, versionRepo: this.roots[side] } }
+          : {};
+        const bundle = await bundleModule(packageRootOf(this.roots[side], file), file, side, ws);
+        const load = await this.pools[side].load(key, bundle.path);
+        return { moduleId: key, load };
       })();
       this.modules.set(key, p);
     }

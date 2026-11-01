@@ -118,6 +118,14 @@ generates the inputs your tests never tried, runs both versions, and hands you t
   overloaded signatures and functions with `this` are listed as **skipped (reason)**, never dropped
   silently.
 
+> **Implementation note (Phase 2):** rather than mapping diff hunks to line ranges, detection compares each
+> module-level binding (functions, variables, classes, imports, CommonJS `exports.x` / `module.exports`)
+> by its *token stream* (comments, JSDoc and whitespace dropped; string literals by value). Formatting-only
+> edits therefore fall out naturally, and transitive impact follows any changed helper, constant or import
+> binding (within a module up to depth 3, across modules one hop, including unchanged files and workspace
+> packages). In monorepos, workspace packages are bundled from each version's own tree, so the base never
+> silently uses the working copy's sibling package.
+
 ### 3.2 Loading two versions (`core/materialize`, `runner/`)
 
 - **Base**: `git worktree add --detach <tmp>/base <sha>`. **Head**: the real checkout when comparing

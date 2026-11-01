@@ -58,3 +58,54 @@ export function materializeScenario(name: ScenarioName): MaterializedScenario {
     cleanup: () => rmSync(dir, { recursive: true, force: true }),
   };
 }
+
+export interface GitScenario {
+  repo: string;
+  claim: string;
+  cleanup(): void;
+}
+
+function gitIn(cwd: string, ...args: string[]): string {
+  return execFileSync('git', args, { cwd, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+}
+
+/**
+ * A real git repository for a scenario: the demo shop committed on `main`, and the scenario patch either
+ * left uncommitted in the working tree (`mode: 'worktree'`) or committed on a `pr` branch (`mode: 'branch'`).
+ */
+export function gitScenario(name: ScenarioName, mode: 'worktree' | 'branch' = 'worktree'): GitScenario {
+  const s = SCENARIOS[name];
+  const repo = mkdtempSync(join(tmpdir(), `doppeldiff-git-${name}-`));
+  copyShop(repo);
+  gitIn(repo, 'init', '-q', '-b', 'main');
+  gitIn(repo, 'add', '-A');
+  gitIn(repo, '-c', 'user.name=demo', '-c', 'user.email=demo@example.com', 'commit', '-qm', 'base');
+  if (mode === 'branch') gitIn(repo, 'checkout', '-qb', 'pr');
+  gitIn(repo, 'apply', join(DEMO_SHOP, 'scenarios', `${s.patch}.patch`));
+  const claim = readFileSync(join(DEMO_SHOP, 'scenarios', `${s.patch}.md`), 'utf8');
+  if (mode === 'branch') {
+    gitIn(repo, 'add', '-A');
+    gitIn(
+      repo,
+      '-c',
+      'user.name=demo',
+      '-c',
+      'user.email=demo@example.com',
+      'commit',
+      '-qm',
+      claim.split('\n')[0]!,
+    );
+  }
+  return {
+    repo,
+    claim,
+    cleanup: () => {
+      try {
+        gitIn(repo, 'worktree', 'prune');
+      } catch {
+        /* ignore */
+      }
+      rmSync(repo, { recursive: true, force: true });
+    },
+  };
+}

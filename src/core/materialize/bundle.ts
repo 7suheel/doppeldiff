@@ -1,8 +1,8 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
 import { builtinModules } from 'node:module';
 import { tmpdir } from 'node:os';
-import { join, relative } from 'node:path';
+import { isAbsolute, join, relative, sep } from 'node:path';
 import * as esbuild from 'esbuild';
 
 export interface BundleResult {
@@ -26,7 +26,60 @@ const REQUIRE_SHIM =
  * node_modules, so the bundle is written inside `<root>/node_modules/.cache/doppeldiff/` when the module
  * imports packages, and to the OS temp dir otherwise.
  */
-export async function bundleModule(root: string, entry: string, label: string): Promise<BundleResult> {
+export interface BundleOptions {
+  /**
+   * Monorepo support: the working copy whose node_modules are shared with this version, and this version's
+   * repo root. Bare imports that resolve (through workspace symlinks) to source files inside the working
+   * copy are redirected to the same path in this version's tree and bundled, so each version uses its own
+   * workspace packages.
+   */
+  workspace?: { sourceRepo: string; versionRepo: string };
+}
+
+function isInside(child: string, parent: string): boolean {
+  const rel = relative(parent, child);
+  return rel !== '' && !rel.startsWith('..') && !isAbsolute(rel);
+}
+
+function workspacePlugin(ws: NonNullable<BundleOptions['workspace']>): esbuild.Plugin {
+  const sourceRepo = realpathSync(ws.sourceRepo);
+  const versionRepo = realpathSync(ws.versionRepo);
+  return {
+    name: 'doppeldiff-workspaces',
+    setup(build) {
+      build.onResolve({ filter: /^[^./]|^\.[^./]|^\.\.[^/]/ }, async (args) => {
+        if (args.pluginData === 'doppeldiff-skip' || BUILTINS.has(args.path) || args.kind === 'entry-point')
+          return undefined;
+        const r = await build.resolve(args.path, {
+          resolveDir: args.resolveDir,
+          kind: args.kind,
+          pluginData: 'doppeldiff-skip',
+        });
+        if (r.errors.length > 0 || !r.path) return { path: args.path, external: true };
+        let real: string;
+        try {
+          real = realpathSync(r.path);
+        } catch {
+          return { path: args.path, external: true };
+        }
+        if (real.split(sep).includes('node_modules')) return { path: args.path, external: true };
+        // tsconfig `paths` aliases and similar: already inside this version's tree.
+        if (isInside(real, versionRepo) || isInside(r.path, ws.versionRepo)) return { path: r.path };
+        if (!isInside(real, sourceRepo)) return { path: args.path, external: true };
+        // A workspace package symlinked from the shared node_modules: bundle this version's copy of it.
+        const mapped = join(ws.versionRepo, relative(sourceRepo, real));
+        return { path: existsSync(mapped) ? mapped : real };
+      });
+    },
+  };
+}
+
+export async function bundleModule(
+  root: string,
+  entry: string,
+  label: string,
+  options: BundleOptions = {},
+): Promise<BundleResult> {
   const tsconfig = existsSync(join(root, 'tsconfig.json')) ? join(root, 'tsconfig.json') : undefined;
   const result = await esbuild.build({
     entryPoints: [entry],
@@ -35,7 +88,9 @@ export async function bundleModule(root: string, entry: string, label: string): 
     platform: 'node',
     format: 'esm',
     target: 'node22',
-    packages: 'external',
+    ...(options.workspace
+      ? { plugins: [workspacePlugin(options.workspace)] }
+      : { packages: 'external' as const }),
     write: false,
     metafile: true,
     logLevel: 'silent',
