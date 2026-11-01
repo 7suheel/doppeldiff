@@ -3,6 +3,14 @@
   "version": "0.0.0",
   "description": "See what your PR actually changed: runs the old and new version of every changed function on thousands of generated inputs and reports minimal counterexamples.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/7suheel/doppeldiff.git"
+  },
+  "homepage": "https://github.com/7suheel/doppeldiff#readme",
+  "bugs": {
+    "url": "https://github.com/7suheel/doppeldiff/issues"
+  },
   "type": "module",
   "engines": {
     "node": ">=22.13"

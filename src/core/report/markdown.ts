@@ -2,7 +2,7 @@ import type { Behavior, BehaviorLabel, FunctionReport, Report } from './model.js
 
 export const STICKY_MARKER = '<!-- doppeldiff:sticky -->';
 const GITHUB_LIMIT = 60_000;
-const PROJECT_URL = 'https://github.com/doppeldiff/doppeldiff';
+const PROJECT_URL = 'https://github.com/7suheel/doppeldiff';
 
 /** Escape untrusted text for Markdown prose: HTML, mentions, and Markdown control characters. */
 export function escapeText(s: string): string {

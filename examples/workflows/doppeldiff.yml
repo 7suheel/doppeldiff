@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: doppeldiff/doppeldiff@v0
+      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
 
   # Never runs pull request code: reads the report artifact and posts one sticky comment.
   comment:
@@ -34,7 +34,7 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: doppeldiff/doppeldiff@v0
+      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
         with:
           # Optional: match behavior changes against the PR description.
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
