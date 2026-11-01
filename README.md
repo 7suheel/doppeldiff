@@ -120,10 +120,12 @@ Node.js 22.13 or newer. Exit codes: `0` OK, `1` findings matching `--fail-on`, `
 
 ### GitHub Action
 
-Copy [`examples/workflows/doppeldiff.yml`](examples/workflows/doppeldiff.yml) to `.github/workflows/`. That is the
-whole setup. It posts one sticky comment per PR and updates it on every push. It is safe for pull requests from
-forks: the job that runs PR code has no secrets and a read-only token, and the job that comments never runs PR
-code. See [docs/ACTION.md](docs/ACTION.md).
+Copy the two files in [`examples/workflows/`](examples/workflows) to `.github/workflows/` on your default branch.
+No secrets are required. doppeldiff posts one sticky comment per PR and updates it on every push.
+
+It is safe for pull requests from forks. `doppeldiff.yml` runs the PR's code without secrets and with a read-only
+token. `doppeldiff-comment.yml` posts the comment and never runs PR code. These have to be two files because
+GitHub does not let a workflow trigger itself with `workflow_run`. See [docs/ACTION.md](docs/ACTION.md).
 
 ### MCP server for coding agents
 

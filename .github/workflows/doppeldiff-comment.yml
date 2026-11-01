@@ -1,0 +1,28 @@
+# Dogfooding, part 2 of 2: posts the report of the `doppeldiff` workflow as one sticky PR comment.
+# Never checks out or runs pull request code. (GitHub does not allow a workflow to trigger itself with
+# workflow_run, which is why this is a separate file.)
+name: doppeldiff comment
+
+on:
+  workflow_run:
+    workflows: [doppeldiff]
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    steps:
+      # Checks out the default branch (trusted), only to use the local action.
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

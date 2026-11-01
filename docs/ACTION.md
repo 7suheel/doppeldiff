@@ -1,17 +1,22 @@
 # GitHub Action
 
-doppeldiff posts **one sticky comment** per pull request and updates it on every push. Setup is one file:
-copy [`examples/workflows/doppeldiff.yml`](../examples/workflows/doppeldiff.yml) to `.github/workflows/doppeldiff.yml`
-in your default branch. No secrets are required.
+doppeldiff posts **one sticky comment** per pull request and updates it on every push. Setup is two files: copy
+[`examples/workflows/doppeldiff.yml`](../examples/workflows/doppeldiff.yml) and
+[`examples/workflows/doppeldiff-comment.yml`](../examples/workflows/doppeldiff-comment.yml) to `.github/workflows/`
+on your default branch. No secrets are required.
+
+They have to be two files: the comment job is triggered by the completion of the analyze workflow
+(`workflow_run`), and GitHub rejects a workflow file whose `workflow_run` trigger names the workflow itself. We
+verified this on GitHub: such a file is treated as invalid and fails on every push.
 
 ## How it stays safe for pull requests from forks
 
 doppeldiff **executes the code under review**. The workflow therefore has two jobs with different trust levels:
 
-| Job       | Trigger                                    | Runs PR code?  | Secrets                                             | Token                  |
-| --------- | ------------------------------------------ | -------------- | --------------------------------------------------- | ---------------------- |
-| `analyze` | `pull_request`                             | yes, sandboxed | none (GitHub never passes secrets to fork PRs here) | read-only              |
-| `comment` | `workflow_run` (after `analyze` completes) | **never**      | optional LLM key                                    | `pull-requests: write` |
+| Job                                  | Trigger                                    | Runs PR code?  | Secrets                                             | Token                  |
+| ------------------------------------ | ------------------------------------------ | -------------- | --------------------------------------------------- | ---------------------- |
+| `analyze`                            | `pull_request`                             | yes, sandboxed | none (GitHub never passes secrets to fork PRs here) | read-only              |
+| `comment` (`doppeldiff-comment.yml`) | `workflow_run` (after `analyze` completes) | **never**      | optional LLM key                                    | `pull-requests: write` |
 
 The `analyze` job uploads the JSON report as an artifact. The `comment` job treats that artifact as **untrusted
 data**:
@@ -39,9 +44,7 @@ test also runs with a scrubbed environment and no network.
 
 - `workflow_run` only fires for workflow files that exist on the **default branch**. The PR that adds the workflow
   gets no comment; the next ones do. The report is always in the `analyze` job's summary.
-- The single-file setup listens to its own completion (`workflow_run: workflows: [doppeldiff]`). The extra runs
-  this creates have only skipped jobs. If your organization's policy forbids that, split the two jobs into two
-  files (`doppeldiff-analyze.yml` named `doppeldiff`, and `doppeldiff-comment.yml` with the `workflow_run` trigger).
+- If you rename the first workflow, update `workflows: [doppeldiff]` in the second one to match its `name:`.
 - Comparison is between the PR's base commit and GitHub's merge commit for the PR, i.e. exactly what merging
   would change.
 - Budget: up to 10,000 inputs per function, bounded by a 60 s total exploration budget (`time-budget`). The

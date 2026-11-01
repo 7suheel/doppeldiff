@@ -1,18 +1,14 @@
-# Copy to .github/workflows/doppeldiff.yml. Works for pull requests from branches and from forks.
+# File 1 of 2: copy to .github/workflows/doppeldiff.yml
+# Runs the pull request's code in a sandbox. No secrets and a read-only token: safe for pull requests from forks.
 name: doppeldiff
 
 on:
   pull_request:
-  workflow_run:
-    workflows: [doppeldiff]
-    types: [completed]
 
 permissions: {}
 
 jobs:
-  # Runs the pull request's code in a sandbox. No secrets and a read-only token: safe for forks.
   analyze:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,19 +18,3 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
-
-  # Never runs pull request code: reads the report artifact and posts one sticky comment.
-  comment:
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion != 'cancelled'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      pull-requests: write
-    steps:
-      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
-        with:
-          # Optional: match behavior changes against the PR description.
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

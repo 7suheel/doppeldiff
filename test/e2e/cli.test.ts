@@ -79,7 +79,8 @@ describe('CLI', () => {
         encoding: 'utf8',
       },
     );
-    expect(r.stdout + r.stderr).toMatch(/Tests\s+3 passed/);
+    // eslint-disable-next-line no-control-regex
+    expect((r.stdout + r.stderr).replace(/\x1b\[[0-9;]*m/g, '')).toMatch(/Tests\s+3 passed/);
     expect(r.status).toBe(0);
   });
 

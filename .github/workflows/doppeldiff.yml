@@ -1,17 +1,14 @@
-# Dogfooding: doppeldiff on its own pull requests, using the action from this repository.
+# Dogfooding, part 1 of 2: runs doppeldiff on pull requests, using the action from this repository.
+# Runs the pull request's code: no secrets, read-only token.
 name: doppeldiff
 
 on:
   pull_request:
-  workflow_run:
-    workflows: [doppeldiff]
-    types: [completed]
 
 permissions: {}
 
 jobs:
   analyze:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -21,22 +18,3 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: ./
-
-  comment:
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.event == 'pull_request' &&
-      github.event.workflow_run.conclusion != 'cancelled'
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      pull-requests: write
-    steps:
-      # Checks out the default branch (trusted), only to use the local action. PR code is never checked out here.
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: ./
-        with:
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

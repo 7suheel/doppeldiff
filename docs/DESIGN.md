@@ -429,6 +429,8 @@ runner, broken down by phase (worktree, deps, bundle, explore, shrink).
    inputs actually run per function.
 4. **Determinism:** clock frozen and randomness seeded by default; `--no-freeze` disables it.
 5. **Action:** two-job fork-safe design, installable from one copy-paste workflow file in the README.
+   _Update (post-launch): GitHub rejects a workflow whose `workflow_run` trigger names itself (verified on the
+   real repository), so the setup is two copy-paste files instead of one._
    Same-repo PRs work with minimal configuration.
 6. Before writing the README comparison, study the `receipts` and `receipts-cli` npm packages so our
    positioning against them is accurate and fair.

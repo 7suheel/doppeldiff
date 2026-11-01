@@ -171,7 +171,7 @@ class RunnerProcess {
 
   async loadModule(moduleId: string, path: string): Promise<LoadResult> {
     const m = await this.request<LoadedMessage>(
-      { t: 'load', moduleId, path },
+      { t: 'load', moduleId, path: realpathSync(path) },
       (r) => r.t === 'loaded' && r.moduleId === moduleId,
     );
     return { ok: m.ok, exports: m.exports, ...(m.error ? { error: m.error } : {}) };
@@ -280,7 +280,9 @@ export class RunnerPool {
 
   async start(): Promise<void> {
     if (this.started) return;
-    const entry = await resolveChildEntry();
+    // Real paths: on macOS the temp dir is under /var -> /private/var, and resolving a symlinked path makes
+    // Node read the symlink itself, which the permission model denies.
+    const entry = realpathSync(await resolveChildEntry());
     this.procs = Array.from(
       { length: this.size },
       () => new RunnerProcess(entry, this.options, this.loads, this.guarded),

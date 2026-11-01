@@ -1,0 +1,24 @@
+# File 2 of 2: copy to .github/workflows/doppeldiff-comment.yml
+# Never runs pull request code: reads the report of the `doppeldiff` workflow and posts one sticky comment.
+# Must be on the default branch to run (GitHub's rule for workflow_run).
+name: doppeldiff comment
+
+on:
+  workflow_run:
+    workflows: [doppeldiff] # the `name:` of file 1
+    types: [completed]
+
+permissions: {}
+
+jobs:
+  comment:
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
+        with:
+          # Optional: match behavior changes against the PR description.
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
