@@ -1,0 +1,33 @@
+diff --git a/src/pricing.ts b/src/pricing.ts
+index 3d31979..28d81f5 100644
+--- a/src/pricing.ts
++++ b/src/pricing.ts
+@@ -6,10 +6,9 @@ export type Region = 'US' | 'EU' | 'UK' | 'NONE';
+ export function applyDiscount(price: number, rate: number): number {
+   if (price < 0) throw new RangeError('price must be non-negative');
+   if (rate < 0 || rate > 1) throw new RangeError('rate must be between 0 and 1');
+-  const discounted = price * (1 - rate);
+-  // Large orders are rounded down to whole cents to keep invoices conservative.
+-  if (price > 1000) return Math.floor(discounted * 100) / 100;
+-  return roundMoney(discounted);
++  // Round to the nearest cent for every price. Large orders used to be rounded down,
++  // which under-charged by up to a cent on prices over $1000.
++  return roundMoney(price * (1 - rate));
+ }
+ 
+ /** Add sales tax for a region. */
+diff --git a/test/pricing.test.ts b/test/pricing.test.ts
+index 100be75..8c1e4cc 100644
+--- a/test/pricing.test.ts
++++ b/test/pricing.test.ts
+@@ -6,6 +6,10 @@ describe('applyDiscount', () => {
+     expect(applyDiscount(100, 0.15)).toBe(85);
+     expect(applyDiscount(19.99, 0.1)).toBe(17.99);
+   });
++  it('rounds large prices to the nearest cent', () => {
++    expect(applyDiscount(1299.99, 0.15)).toBe(1104.99);
++    expect(applyDiscount(1000.07, 0.5)).toBe(500.04);
++  });
+   it('rejects invalid input', () => {
+     expect(() => applyDiscount(-1, 0.1)).toThrow(RangeError);
+     expect(() => applyDiscount(10, 1.5)).toThrow(RangeError);

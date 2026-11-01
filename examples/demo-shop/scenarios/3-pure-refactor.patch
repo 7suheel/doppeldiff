@@ -1,0 +1,75 @@
+diff --git a/src/dates.ts b/src/dates.ts
+index 84ed0d1..2a6a9df 100644
+--- a/src/dates.ts
++++ b/src/dates.ts
+@@ -1,21 +1,20 @@
++const isWeekend = (date: Date): boolean => date.getUTCDay() === 0 || date.getUTCDay() === 6;
++
+ /** Add business days (Mon–Fri) to a date, in UTC. Negative values go backwards. */
+ export function addBusinessDays(date: Date, days: number): Date {
+   if (!Number.isInteger(days)) throw new TypeError('days must be an integer');
+   const result = new Date(date.getTime());
+-  const step = days < 0 ? -1 : 1;
+-  let remaining = Math.abs(days);
+-  while (remaining > 0) {
+-    result.setUTCDate(result.getUTCDate() + step);
+-    const day = result.getUTCDay();
+-    if (day !== 0 && day !== 6) remaining--;
++  const direction = Math.sign(days) || 1;
++  for (let remaining = Math.abs(days); remaining > 0; ) {
++    result.setUTCDate(result.getUTCDate() + direction);
++    if (!isWeekend(result)) remaining -= 1;
+   }
+   return result;
+ }
+ 
++const pad2 = (n: number): string => n.toString().padStart(2, '0');
++
+ /** ISO calendar date (YYYY-MM-DD) in UTC. */
+ export function formatDate(date: Date): string {
+-  const y = date.getUTCFullYear();
+-  const m = String(date.getUTCMonth() + 1).padStart(2, '0');
+-  const d = String(date.getUTCDate()).padStart(2, '0');
+-  return `${y}-${m}-${d}`;
++  return [date.getUTCFullYear(), pad2(date.getUTCMonth() + 1), pad2(date.getUTCDate())].join('-');
+ }
+diff --git a/src/pricing.ts b/src/pricing.ts
+index 3d31979..9e2da5c 100644
+--- a/src/pricing.ts
++++ b/src/pricing.ts
+@@ -12,24 +12,21 @@ export function applyDiscount(price: number, rate: number): number {
+   return roundMoney(discounted);
+ }
+ 
++const TAX_MULTIPLIERS: Record<Region, number> = { US: 1.07, EU: 1.2, UK: 1.2, NONE: 1 };
++
+ /** Add sales tax for a region. */
+ export function applyTax(price: number, region: Region): number {
+-  switch (region) {
+-    case 'US':
+-      return roundMoney(price * 1.07);
+-    case 'EU':
+-      return roundMoney(price * 1.2);
+-    case 'UK':
+-      return roundMoney(price * 1.2);
+-    case 'NONE':
+-      return roundMoney(price);
+-  }
++  const multiplier = TAX_MULTIPLIERS[region];
++  return region === 'NONE' ? roundMoney(price) : roundMoney(price * multiplier);
+ }
+ 
+ /** Unit price with volume discounts: 5% from 10 units, 10% from 100 units. */
+ export function bulkPrice(unitPrice: number, quantity: number): number {
+-  let rate = 0;
+-  if (quantity >= 100) rate = 0.1;
+-  else if (quantity >= 10) rate = 0.05;
+-  return roundMoney(unitPrice * quantity * (1 - rate));
++  return roundMoney(unitPrice * quantity * (1 - volumeDiscountRate(quantity)));
++}
++
++function volumeDiscountRate(quantity: number): number {
++  if (quantity >= 100) return 0.1;
++  if (quantity >= 10) return 0.05;
++  return 0;
+ }

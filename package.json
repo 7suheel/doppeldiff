@@ -1,0 +1,65 @@
+{
+  "name": "doppeldiff",
+  "version": "0.0.0",
+  "description": "See what your PR actually changed: runs the old and new version of every changed function on thousands of generated inputs and reports minimal counterexamples.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "bin": {
+    "doppeldiff": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "schema"
+  ],
+  "keywords": [
+    "differential-testing",
+    "regression-testing",
+    "property-based-testing",
+    "code-review",
+    "pull-request",
+    "typescript",
+    "fast-check",
+    "mcp"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "node --import tsx scripts/bench-throughput.ts",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm test"
+  },
+  "dependencies": {
+    "cac": "^7.1.0",
+    "esbuild": "^0.28.2",
+    "fast-check": "^4.10.2",
+    "picocolors": "^1.1.1",
+    "pure-rand": "^8.4.2",
+    "ts-morph": "^28.0.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^22.20.5",
+    "eslint": "^10.14.0",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  }
+}

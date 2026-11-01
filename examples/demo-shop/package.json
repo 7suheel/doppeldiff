@@ -1,0 +1,13 @@
+{
+  "name": "demo-shop",
+  "private": true,
+  "version": "1.0.0",
+  "description": "A small, realistic TypeScript library used to demonstrate doppeldiff.",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  }
+}

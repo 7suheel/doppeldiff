@@ -1,10 +1,8 @@
 # Design: behavioral diffs for pull requests
 
-> Status: **Phase 0 draft, awaiting approval.** Working name is `receipts` until the naming
-> decision in §1 is made. Every identifier that depends on the final name sits behind one constant
-> (`TOOL_NAME`) and the `bin`/package fields, so renaming is cheap.
+> Status: **Approved (2026-11-01).** Name: **doppeldiff**. Decisions are recorded in §7.
 
-Tagline: **"Every PR comes with receipts."**
+Tagline: **"See what your PR actually changed."**
 
 ---
 
@@ -26,21 +24,21 @@ regression test file. The core runs with no API key and is reproducible from a s
 
 Checked on 2026-11-01 (npm registry plus GitHub repository search):
 
-| Name | npm | GitHub | Notes |
-|---|---|---|---|
-| `receipts` | **taken** | crowded (641 repos match) | npm package dates from 2017. Its current description is "Deterministic evidence for code changes", which overlaps conceptually. |
-| `receipts-cli` | **taken** | — | Active (created 2026-06, updated 2026-10-23): *"Verification gates for AI-written code"*. Direct positioning collision. |
-| `@receipts/cli` | scope free | — | `npx receipts` would still resolve to the *other* package. Confusing. |
-| `doppeldiff` | free | 0 repos | |
-| `twinrun` | free | 6 repos | |
-| `counterproof` | free | 6 repos | |
-| `behaviordiff` | free | taken | `BehaviorDiff` was the earlier name of RealDiff (prior art, see §2), so avoid it. |
+| Name            | npm        | GitHub                    | Notes                                                                                                                           |
+| --------------- | ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `receipts`      | **taken**  | crowded (641 repos match) | npm package dates from 2017. Its current description is "Deterministic evidence for code changes", which overlaps conceptually. |
+| `receipts-cli`  | **taken**  | —                         | Active (created 2026-06, updated 2026-10-23): _"Verification gates for AI-written code"_. Direct positioning collision.         |
+| `@receipts/cli` | scope free | —                         | `npx receipts` would still resolve to the _other_ package. Confusing.                                                           |
+| `doppeldiff`    | free       | 0 repos                   |                                                                                                                                 |
+| `twinrun`       | free       | 6 repos                   |                                                                                                                                 |
+| `counterproof`  | free       | 6 repos                   |                                                                                                                                 |
+| `behaviordiff`  | free       | taken                     | `BehaviorDiff` was the earlier name of RealDiff (prior art, see §2), so avoid it.                                               |
 
-**Conclusion: do not ship as `receipts`.** The npm name is taken, and an active package with
-near-identical positioning owns `receipts-cli`. Keep "receipts" as the *vocabulary* (tagline, PR
-comment header "🧾 receipts", the `--write-tests` output folder) and pick a distinct product name:
+**Conclusion: do not ship as `receipts`, and do not use "receipts" as vocabulary either** (it would
+send people to a similarly-described package). Chosen name: **doppeldiff**. The PR comment header is
+"🔬 doppeldiff"; the regression test folder is `tests/doppeldiff/`. Candidates considered:
 
-1. **`doppeldiff`** *(recommended)*. Runs your function's doppelgänger (old version) next to it and
+1. **`doppeldiff`** _(recommended)_. Runs your function's doppelgänger (old version) next to it and
    diffs behavior. Memorable, unique (0 GitHub repos, so we would own the search results), and says
    "diff", so developers immediately get that it compares versions. `npx doppeldiff`.
 2. **`twinrun`**. Short and describes the mechanism. Slightly generic, and it does not say "diff"
@@ -54,21 +52,21 @@ comment header "🧾 receipts", the `--write-tests` output folder) and pick a di
 
 ## 2. Prior art and positioning
 
-| Project | What it does | Gap that we fill |
-|---|---|---|
-| **fast-check** (JS) | Property-based testing library with excellent arbitraries and shrinking. | A library, not a tool. You must write the properties, load both versions yourself, and handle isolation. **We build on it** (generation and shrinking) and add everything around it. |
-| **RealDiff** (formerly *BehaviorDiff*, issacnitin, MIT; .NET/Java/Node/Go/Rust/Python) | Instruments both sides of a PR, runs the **existing test suite**, and diffs recorded arguments and return values. Comments on PRs. | Only observes inputs that the existing tests already exercise. It cannot find a difference on an input nobody wrote a test for, which is exactly the AI-PR failure mode. We **generate** inputs (types + mined literals + shrinking) and use existing tests only as a seed source. |
-| **Keploy** | Record/replay of API traffic (eBPF) into integration tests with mocks. A separate LLM unit-test generator (Go-first). | HTTP/API level, needs a running app and recorded traffic. No function-level old/new diff on generated inputs. Complementary ("HTTP-level diffs" is on our roadmap). |
-| **Testora** (Pradel, ICSE 2026; Python) | An LLM writes tests for the PR, runs them on old and new code, and classifies differences as intended or unintended using the PR text. Found 19 regressions in popular Python projects, at about $0.003 per PR. | Closest academic prior art for **claim matching**, and it validates our framing. Research prototype, Python, LLM-*required* for input generation. We are deterministic-first (no key needed), TypeScript, with a shipped CLI, Action and MCP server. |
-| **DiffTestGen** (Hu, Cadar, Pradel, 2026; Python) | Change-directed LLM test generation using call graphs and union-coverage feedback. Exposes differences in 78% of PRs. | Research. LLM-driven. Its **coverage-feedback idea** is a strong v2 direction for us (see roadmap). |
-| **Mokav**, **Differential Prompting** (Python) | LLM-generated difference-exposing tests. | Research, LLM-only, Python. |
-| **CrossHair `diffbehavior`** (Python) | Symbolic execution finds inputs where two functions differ. | Python-only. Manual targeting ("one function at a time"). No git or PR integration. |
-| **BERT** (Jin/Orso/Xie 2010; Java) | Original "behavioral regression testing". Generates tests for the changed code and diffs behavior. | Academic, Java, unmaintained. It reported many differences that were not regressions, which is the noise problem we address with clustering and claim matching. |
-| **AI review bots** (CodeRabbit, Copilot review, …) | Read the diff and give opinions. | No execution, no evidence. |
+| Project                                                                                | What it does                                                                                                                                                                                                    | Gap that we fill                                                                                                                                                                                                                                                                   |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **fast-check** (JS)                                                                    | Property-based testing library with excellent arbitraries and shrinking.                                                                                                                                        | A library, not a tool. You must write the properties, load both versions yourself, and handle isolation. **We build on it** (generation and shrinking) and add everything around it.                                                                                               |
+| **RealDiff** (formerly _BehaviorDiff_, issacnitin, MIT; .NET/Java/Node/Go/Rust/Python) | Instruments both sides of a PR, runs the **existing test suite**, and diffs recorded arguments and return values. Comments on PRs.                                                                              | Only observes inputs that the existing tests already exercise. It cannot find a difference on an input nobody wrote a test for, which is exactly the AI-PR failure mode. We **generate** inputs (types + mined literals + shrinking) and use existing tests only as a seed source. |
+| **Keploy**                                                                             | Record/replay of API traffic (eBPF) into integration tests with mocks. A separate LLM unit-test generator (Go-first).                                                                                           | HTTP/API level, needs a running app and recorded traffic. No function-level old/new diff on generated inputs. Complementary ("HTTP-level diffs" is on our roadmap).                                                                                                                |
+| **Testora** (Pradel, ICSE 2026; Python)                                                | An LLM writes tests for the PR, runs them on old and new code, and classifies differences as intended or unintended using the PR text. Found 19 regressions in popular Python projects, at about $0.003 per PR. | Closest academic prior art for **claim matching**, and it validates our framing. Research prototype, Python, LLM-_required_ for input generation. We are deterministic-first (no key needed), TypeScript, with a shipped CLI, Action and MCP server.                               |
+| **DiffTestGen** (Hu, Cadar, Pradel, 2026; Python)                                      | Change-directed LLM test generation using call graphs and union-coverage feedback. Exposes differences in 78% of PRs.                                                                                           | Research. LLM-driven. Its **coverage-feedback idea** is a strong v2 direction for us (see roadmap).                                                                                                                                                                                |
+| **Mokav**, **Differential Prompting** (Python)                                         | LLM-generated difference-exposing tests.                                                                                                                                                                        | Research, LLM-only, Python.                                                                                                                                                                                                                                                        |
+| **CrossHair `diffbehavior`** (Python)                                                  | Symbolic execution finds inputs where two functions differ.                                                                                                                                                     | Python-only. Manual targeting ("one function at a time"). No git or PR integration.                                                                                                                                                                                                |
+| **BERT** (Jin/Orso/Xie 2010; Java)                                                     | Original "behavioral regression testing". Generates tests for the changed code and diffs behavior.                                                                                                              | Academic, Java, unmaintained. It reported many differences that were not regressions, which is the noise problem we address with clustering and claim matching.                                                                                                                    |
+| **AI review bots** (CodeRabbit, Copilot review, …)                                     | Read the diff and give opinions.                                                                                                                                                                                | No execution, no evidence.                                                                                                                                                                                                                                                         |
 
-**One-line positioning for the README:** *"fast-check gives you the engine, RealDiff replays
+**One-line positioning for the README:** _"fast-check gives you the engine, RealDiff replays
 the tests you already have, Testora showed the idea works in research. We are the zero-config tool that
-generates the inputs your tests never tried, runs both versions, and hands you the counterexamples."*
+generates the inputs your tests never tried, runs both versions, and hands you the counterexamples."_
 
 ---
 
@@ -99,6 +97,7 @@ generates the inputs your tests never tried, runs both versions, and hands you t
 ```
 
 ### 3.1 Change detection (`core/detect`)
+
 - `git diff --no-renames -U0 base head`. The default `head` is the **working tree** (staged and unstaged),
   `base` is `HEAD`. The Action uses PR base and head SHAs (merge-base of base, so unrelated base
   commits do not appear as changes).
@@ -112,7 +111,7 @@ generates the inputs your tests never tried, runs both versions, and hands you t
 - **Transitive impact:** build an intra-module reference graph (identifiers, not types). An unchanged
   exported function that reaches a changed non-exported function within depth N (default 3) becomes a
   target with `reason: "calls changed helper toCents()"`.
-  *Refinement proposed:* also follow **cross-module imports with depth 1** (exported `b()` in module B
+  _Refinement proposed:_ also follow **cross-module imports with depth 1** (exported `b()` in module B
   imports changed `a()` from module A). It is cheap with the same graph and catches the common
   "changed a util" case. Behind a flag if it turns out noisy.
 - Added and removed exports are listed separately. Class methods, getters/setters, generators,
@@ -120,6 +119,7 @@ generates the inputs your tests never tried, runs both versions, and hands you t
   silently.
 
 ### 3.2 Loading two versions (`core/materialize`, `runner/`)
+
 - **Base**: `git worktree add --detach <tmp>/base <sha>`. **Head**: the real checkout when comparing
   against the working tree, otherwise a second worktree. Worktrees are cached per SHA in the OS temp
   dir and cleaned up on exit (`--keep-worktrees` for debugging).
@@ -147,12 +147,13 @@ generates the inputs your tests never tried, runs both versions, and hands you t
   **skipped (reason)**, together with the denied permission from `ERR_ACCESS_DENIED`.
 
 ### 3.3 Input generation (`core/arbitraries`)
+
 Two layers, so that generation is unit-testable without fast-check:
 
 1. **`ArbSpec` IR** (plain JSON, serializable, hashable) is derived from parameter types via the type checker:
    `number | integer-hint | bigint | string | boolean | literal | enum | union | array | tuple (+rest) |
-   object {required, optional, nullable} | record | Date | Map | Set | function(returns ArbSpec) |
-   branded(base) | recursive(ref, depth) | anything | unsupported(reason)`.
+object {required, optional, nullable} | record | Date | Map | Set | function(returns ArbSpec) |
+branded(base) | recursive(ref, depth) | anything | unsupported(reason)`.
    - `any`/`unknown` → `anything` (a broad but serializable value space, with no functions or class instances).
    - Branded types (`number & {__brand}`) → base type.
    - Recursive types → `ref` with a depth limit of 3.
@@ -160,27 +161,29 @@ Two layers, so that generation is unit-testable without fast-check:
    - Classes as parameters → `unsupported` for v1. The function is skipped unless the config supplies
      an arbitrary.
    - Function-typed parameters (callbacks) → deterministic stub functions that return generated values.
-     These are materialized *inside* the runner from a tagged descriptor, because functions cannot cross IPC.
+     These are materialized _inside_ the runner from a tagged descriptor, because functions cannot cross IPC.
 2. **Compiler** ArbSpec → fast-check `Arbitrary`, mixed with **mined values**:
    - Numeric and string literals from both versions of the target function and of every helper it
      reaches. For numbers: `v`, `v±1`, `v±0.01`, plus the universal boundaries `0, -0, 1, -1, NaN, ±Infinity,
-     MAX_SAFE_INTEGER, MIN_VALUE`. For strings: `""`, the literal itself, the literal with surrounding
+MAX_SAFE_INTEGER, MIN_VALUE`. For strings: `""`, the literal itself, the literal with surrounding
      whitespace, and case variants. For arrays: empty and single-element.
      Comparison operands (`price > 1000`) are the highest-value literals, so they get extra weight.
    - **Values from existing tests:** statically scan test files for calls `targetName(<literal args>)` and
      evaluate literal-only argument expressions. These run first as explicit examples.
-   - Mined values are injected per *type-compatible position* via weighted `fc.oneof` (default 30 % mined,
+   - Mined values are injected per _type-compatible position_ via weighted `fc.oneof` (default 30 % mined,
      70 % type-driven), so the type-driven search still explores.
+
 - **Signature changes:** derive an ArbSpec for both versions. If they are equal, use it. If the base spec
-  *subsumes* the head spec (e.g. a parameter became optional, or a union widened), use the head spec.
+  _subsumes_ the head spec (e.g. a parameter became optional, or a union widened), use the head spec.
   Otherwise mark the function **skipped: "signature changed incompatibly"** and show both signatures.
 - **Reproducibility:** one root seed (`--seed`, printed on every run). Each function gets
   `hash(rootSeed, moduleId, exportName)`, so adding a function does not reshuffle the others.
 
 ### 3.4 Execution and comparison (`core/compare`, `runner/encode`)
+
 - The runner **encodes** every outcome into a canonical `Observed` IR before sending it back:
   `returned(value) | threw(errorClass, message, ownProps) | resolved(value) | rejected(…) | timeout |
-  crash`, plus `argsAfter` (snapshots for mutation detection). Values are encoded structurally: class
+crash`, plus `argsAfter` (snapshots for mutation detection). Values are encoded structurally: class
   instances become `{$instance: ctorName, props}`, functions become `{$fn: name, length}`, symbols
   become their description, and cycles become back-refs. Comparison is a **pure function over two
   `Observed` trees**, which makes it trivially unit-testable.
@@ -193,7 +196,7 @@ Two layers, so that generation is unit-testable without fast-check:
   (`strictUndefined: true` opt-in); errors by class + message (`ignoreErrorMessages`); optional numeric
   tolerance (`epsilon`, default exact).
 - **Async:** each call is awaited with the timeout. Resolved vs rejected is a difference. Unhandled
-  rejections and uncaught exceptions *during* the call are attributed to that call.
+  rejections and uncaught exceptions _during_ the call are attributed to that call.
 - **Determinism environment (refinement):** the spec says "run twice, then freeze time if it disagrees".
   I propose freezing **by default**, because it is cheaper and catches more. Before every call the
   runner pins `Date.now()`/`new Date()` to a fixed instant (configurable), resets a seeded
@@ -204,11 +207,12 @@ Two layers, so that generation is unit-testable without fast-check:
   before it is reported. This gives the same guarantee as the spec with less work.
 
 ### 3.5 Exploration, shrinking, clustering (`core/explore`)
+
 I validated this design with a spike against fast-check 4.10's public `Arbitrary.generate/shrink`
 API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluations.
 
 - **Why not `fc.assert`:** it stops at the first failure and evaluates inputs one at a time. We need
-  *all distinct* differences and high throughput across process boundaries.
+  _all distinct_ differences and high throughput across process boundaries.
 - **Exploration:** generate inputs in batches of 256 with the seeded `fc.Random`. Each batch goes to
   both pools in parallel, and outcomes are compared. Each difference gets a **cluster key**:
   `(outcome transition, input feature vector)`.
@@ -226,6 +230,7 @@ API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluati
   used (we want all clusters), and at most 10 clusters per function.
 
 ### 3.6 Claim matching (`core/claims`, optional)
+
 - Inputs: PR title and body (or `--claim`), a trimmed diff, and clusters with **IDs** and their witnesses.
 - Providers: Anthropic and OpenAI via env keys (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`), temperature 0,
   JSON-schema-constrained output, response cached by content hash.
@@ -239,13 +244,14 @@ API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluati
   - the LLM cannot add findings, because the schema doesn't allow it.
   - On validation failure: one retry, then fall back to neutral.
 - **Deterministic claim modes (no LLM):**
-  - `verify_refactor` / `--claim "no behavior change"` (exact keyword) → every cluster is *unclaimed*;
+  - `verify_refactor` / `--claim "no behavior change"` (exact keyword) → every cluster is _unclaimed_;
   - otherwise clusters are reported neutrally as "behavior change".
-- Prompt-injection posture: PR text is untrusted. It can only influence *labels and wording* of
+- Prompt-injection posture: PR text is untrusted. It can only influence _labels and wording_ of
   findings that the deterministic engine already produced, never their existence. The report states
   which labels come from an LLM.
 
 ### 3.7 Outputs (`report/`)
+
 - **`Report` model** (zod schema, versioned `schemaVersion: 1`, JSON Schema exported into `schema/`).
   Every renderer consumes only this model, and snapshot tests pin it.
 - **Terminal:** per-function progress lines, then grouped results. Uses picocolors with no heavy TUI
@@ -261,6 +267,7 @@ API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluati
   `never`), `2` tool error.
 
 ### 3.8 Interfaces
+
 - **CLI** (`cac`): flags as specified, plus `--json <file|->`, `--markdown <file>`, `--only <fn>`,
   `--keep-worktrees`, `--verbose`.
 - **GitHub Action**: a JS action that bundles the core (`action/dist`, committed).
@@ -269,25 +276,34 @@ API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluati
      and uploads `report.json` as an artifact.
   2. `workflow_run` job (trusted, has a write token and an optional LLM key, **never checks out or executes
      PR code**): downloads the artifact, validates it against the schema (treated as untrusted data), runs
-     claim matching, and posts or updates **one sticky comment** (hidden marker `<!-- receipts:sticky -->`).
+     claim matching, and posts or updates **one sticky comment** (hidden marker `<!-- doppeldiff:sticky -->`).
 
-  This keeps secrets out of reach of untrusted code *and* lets fork PRs get comments and LLM labels.
+  This keeps secrets out of reach of untrusted code _and_ lets fork PRs get comments and LLM labels.
   For same-repo-only setups, a simpler single-job mode is documented. `pull_request_target` with a
   checkout of the head is documented as **unsafe, don't**.
+
 - **MCP server** (`<name> mcp`, stdio, `@modelcontextprotocol/sdk`). Tools:
   - `verify_change({cwd, base?, claim?, functions?, runs?})` → summary text + JSON report;
   - `verify_refactor(...)` → same, but asserts no behavior change and returns a crisp pass/fail with
     counterexamples.
 
   Tool descriptions coach agents to call it before claiming they are done.
-- **Config** `receipts.config.ts` (loaded via esbuild):
+
+- **Config** `doppeldiff.config.ts` (loaded via esbuild):
   ```ts
-  export default defineConfig({ functions: { 'src/pricing.ts#applyDiscount':
-    { args: (fc) => [fc.double({min: 0, max: 1e6}), fc.double({min: 0, max: 1})] } },
-    ignore: ['src/legacy/**'], compare: { epsilon: 1e-9, ignoreErrorMessages: false } })
+  export default defineConfig({
+    functions: {
+      'src/pricing.ts#applyDiscount': {
+        args: (fc) => [fc.double({ min: 0, max: 1e6 }), fc.double({ min: 0, max: 1 })],
+      },
+    },
+    ignore: ['src/legacy/**'],
+    compare: { epsilon: 1e-9, ignoreErrorMessages: false },
+  });
   ```
 
 ### 3.9 Security model (to be documented in `SECURITY.md`)
+
 - The tool **executes the code under review**. This is the same trust level as running the PR's test
   suite, and the docs say so plainly.
 - Defense in depth, not a security boundary:
@@ -349,19 +365,19 @@ script.
 
 ## 5. Key risks and mitigations
 
-| # | Risk | Mitigation |
-|---|---|---|
-| 1 | **Input generation misses the interesting region** (e.g. a bug only at `price > 1000`). This is the core value. | Literal mining with comparison operands weighted highest; existing-test seeds; boundary sets; optional LLM edge cases; report *coverage honesty* ("10,000 inputs" never means "proved"). Measured in EVALUATION.md, including misses. v2: branch-coverage-guided generation (DiffTestGen-style union coverage via V8 coverage). |
-| 2 | **Real-world functions aren't pure / don't load** (top-level side effects, env, DB clients). | Clear "skipped (reason)" categories with counts in the report; module-load failures carry the denied permission; config hooks. The evaluation reports the skip rate honestly. |
-| 3 | **Noise:** too many differences on intended changes → people ignore the tool. | Clustering by transition + input features; 1–3 examples per cluster; claim matching; `verify_refactor` mode where every difference matters. |
-| 4 | **Nondeterminism** → false positives. | Frozen clock/random/UUID by default, self-consistency sample, re-confirmation of every reported counterexample. |
-| 5 | **Complex types** (generics, conditional/mapped types, classes, huge unions) produce nothing useful. | ArbSpec `unsupported(reason)` surfaces it. Fallback to `anything` only for `any`/`unknown`. Per-function config arbitraries. Track an "unsupported types" metric in the evaluation. |
-| 6 | **Dependency install is slow** when the lockfile changed. | Symlink when the hash is unchanged (the common case); content-addressed install cache; `--ignore-scripts`; report install time separately. |
-| 7 | **Sandbox overpromises.** | Wording: "guardrail, not a security boundary". Fork-safe Action design keeps secrets away from untrusted code regardless. |
-| 8 | **IPC throughput** for 10 k inputs × 2 versions. | Batches of 256, a parallel pool per version, structured-clone serialization. Target ≥ 20 k calls/s for trivial pure functions; measured in Phase 1. |
-| 9 | **Windows** (symlinks, paths in permission flags, process kill semantics). | Junctions, `path.win32` handling in flags, `taskkill`-free kill via `child.kill()`; CI matrix from Phase 1. |
-| 10 | **LLM hallucination** in claim matching. | Schema-constrained output, ID validation, quoting rule, fallback to neutral; LLM labels visibly marked. |
-| 11 | **TypeScript 7 transition** (user code written for TS 7, our parser is TS 6.0). | The syntax is identical in 7.0; we parse/type-check with our bundled compiler, independent of the user's version. Track TS 7's stable API for a later migration. |
+| #   | Risk                                                                                                            | Mitigation                                                                                                                                                                                                                                                                                                                      |
+| --- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Input generation misses the interesting region** (e.g. a bug only at `price > 1000`). This is the core value. | Literal mining with comparison operands weighted highest; existing-test seeds; boundary sets; optional LLM edge cases; report _coverage honesty_ ("10,000 inputs" never means "proved"). Measured in EVALUATION.md, including misses. v2: branch-coverage-guided generation (DiffTestGen-style union coverage via V8 coverage). |
+| 2   | **Real-world functions aren't pure / don't load** (top-level side effects, env, DB clients).                    | Clear "skipped (reason)" categories with counts in the report; module-load failures carry the denied permission; config hooks. The evaluation reports the skip rate honestly.                                                                                                                                                   |
+| 3   | **Noise:** too many differences on intended changes → people ignore the tool.                                   | Clustering by transition + input features; 1–3 examples per cluster; claim matching; `verify_refactor` mode where every difference matters.                                                                                                                                                                                     |
+| 4   | **Nondeterminism** → false positives.                                                                           | Frozen clock/random/UUID by default, self-consistency sample, re-confirmation of every reported counterexample.                                                                                                                                                                                                                 |
+| 5   | **Complex types** (generics, conditional/mapped types, classes, huge unions) produce nothing useful.            | ArbSpec `unsupported(reason)` surfaces it. Fallback to `anything` only for `any`/`unknown`. Per-function config arbitraries. Track an "unsupported types" metric in the evaluation.                                                                                                                                             |
+| 6   | **Dependency install is slow** when the lockfile changed.                                                       | Symlink when the hash is unchanged (the common case); content-addressed install cache; `--ignore-scripts`; report install time separately.                                                                                                                                                                                      |
+| 7   | **Sandbox overpromises.**                                                                                       | Wording: "guardrail, not a security boundary". Fork-safe Action design keeps secrets away from untrusted code regardless.                                                                                                                                                                                                       |
+| 8   | **IPC throughput** for 10 k inputs × 2 versions.                                                                | Batches of 256, a parallel pool per version, structured-clone serialization. Target ≥ 20 k calls/s for trivial pure functions; measured in Phase 1.                                                                                                                                                                             |
+| 9   | **Windows** (symlinks, paths in permission flags, process kill semantics).                                      | Junctions, `path.win32` handling in flags, `taskkill`-free kill via `child.kill()`; CI matrix from Phase 1.                                                                                                                                                                                                                     |
+| 10  | **LLM hallucination** in claim matching.                                                                        | Schema-constrained output, ID validation, quoting rule, fallback to neutral; LLM labels visibly marked.                                                                                                                                                                                                                         |
+| 11  | **TypeScript 7 transition** (user code written for TS 7, our parser is TS 6.0).                                 | The syntax is identical in 7.0; we parse/type-check with our bundled compiler, independent of the user's version. Track TS 7's stable API for a later migration.                                                                                                                                                                |
 
 ---
 
@@ -370,29 +386,31 @@ script.
 Estimates are focused agent-work sessions. Each phase ends with lint + typecheck + tests green, a commit,
 and a status report to you.
 
-| Phase | Deliverable | Est. |
-|---|---|---|
-| **1. Core engine** | ArbSpec from types (fixture-driven), compiler + mining, runner pool with sandbox/timeouts/crash isolation, Observed encoding + comparison, batched exploration + constrained shrinking, determinism env. Driver that takes two hardcoded file versions. Demo-shop library + 3 scenario patches; prove findings on them. Throughput benchmark. CI skeleton (Linux/macOS/Windows). | 1.5–2 days |
-| **2. Git integration** | Diff → targets (all export forms, re-exports), formatting-only fast path, transitive impact, added/removed/skipped, worktrees, dependency reuse/install cache, esbuild bundling with tsconfig paths. | 1–1.5 days |
-| **3. Reports** | Report zod model + JSON Schema, clustering polish, terminal/markdown/json renderers, Vitest/Jest test generation, exit codes, CLI flags complete, e2e snapshot tests on scenarios. | 1 day |
-| **4. LLM layer** | Anthropic/OpenAI providers, claim prompt, validation, edge-case suggestions validated against ArbSpec, response cache, tests with recorded fixtures (no network in CI). | 0.5–1 day |
-| **5. Action + MCP** | Two-job fork-safe Action, sticky comment, MCP server with verify_change/verify_refactor, docs for both. | 1 day |
-| **6. Evaluation + polish** | 5–10 real commits (candidates: `date-fns`, `semver`, `validator.js`, `change-case`, `ufo`, `defu`, `ms`, `dayjs`, `slugify`) run and recorded honestly in EVALUATION.md, performance numbers, VHS tape, README, SECURITY.md, CONTRIBUTING, LICENSE. | 1–1.5 days |
+| Phase                      | Deliverable                                                                                                                                                                                                                                                                                                                                                                      | Est.       |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| **1. Core engine**         | ArbSpec from types (fixture-driven), compiler + mining, runner pool with sandbox/timeouts/crash isolation, Observed encoding + comparison, batched exploration + constrained shrinking, determinism env. Driver that takes two hardcoded file versions. Demo-shop library + 3 scenario patches; prove findings on them. Throughput benchmark. CI skeleton (Linux/macOS/Windows). | 1.5–2 days |
+| **2. Git integration**     | Diff → targets (all export forms, re-exports), formatting-only fast path, transitive impact, added/removed/skipped, worktrees, dependency reuse/install cache, esbuild bundling with tsconfig paths.                                                                                                                                                                             | 1–1.5 days |
+| **3. Reports**             | Report zod model + JSON Schema, clustering polish, terminal/markdown/json renderers, Vitest/Jest test generation, exit codes, CLI flags complete, e2e snapshot tests on scenarios.                                                                                                                                                                                               | 1 day      |
+| **4. LLM layer**           | Anthropic/OpenAI providers, claim prompt, validation, edge-case suggestions validated against ArbSpec, response cache, tests with recorded fixtures (no network in CI).                                                                                                                                                                                                          | 0.5–1 day  |
+| **5. Action + MCP**        | Two-job fork-safe Action, sticky comment, MCP server with verify_change/verify_refactor, docs for both.                                                                                                                                                                                                                                                                          | 1 day      |
+| **6. Evaluation + polish** | 5–10 real commits (candidates: `date-fns`, `semver`, `validator.js`, `change-case`, `ufo`, `defu`, `ms`, `dayjs`, `slugify`) run and recorded honestly in EVALUATION.md, performance numbers, VHS tape, README, SECURITY.md, CONTRIBUTING, LICENSE.                                                                                                                              | 1–1.5 days |
 
 Performance budget check (Phase 3 onward, in CI): ≤ 10 changed functions in < 60 s on a GitHub-hosted
 runner, broken down by phase (worktree, deps, bundle, explore, shrink).
 
 ---
 
-## 7. Open questions for you
+## 7. Decisions (approved 2026-11-01)
 
-1. **Name:** `doppeldiff` (recommended), `twinrun`, or `counterproof`? Keep "Every PR comes with receipts."
-   as the tagline either way.
-2. **Node version:** Node 20 reached end-of-life in April 2026. I propose `engines: >=22.13` (permission
-   model stable, `require(esm)` unflagged) and a CI matrix of 22/24/26. Is that OK, or must 20 still
-   work? On 20 we would need `--experimental-permission` and weaker guarantees.
-3. **Default `--runs`:** 1,000 per function locally (fast feedback) and 10,000 in the Action? The PR comment
-   always states the real number.
-4. **Determinism refinement** (§3.4): freeze clock/random by default instead of only after a
-   self-disagreement. OK?
-5. **Fork-safe two-job Action** (§3.8) instead of a single job. OK?
+1. **Name:** `doppeldiff`. Tagline: "See what your PR actually changed." No "receipts" wording anywhere
+   (an npm package of that name has a similar description). PR comment header: 🔬 doppeldiff.
+2. **Node:** `engines: >=22.13`, CI matrix Node 22/24/26 on Linux, macOS and Windows. The sandbox is
+   documented as a guardrail, not a security boundary.
+3. **Budgets:** 1,000 inputs per function locally. The Action runs up to 10,000 per function, bounded by a
+   total time budget (default 60 s), split across functions. The report always states the number of
+   inputs actually run per function.
+4. **Determinism:** clock frozen and randomness seeded by default; `--no-freeze` disables it.
+5. **Action:** two-job fork-safe design, installable from one copy-paste workflow file in the README.
+   Same-repo PRs work with minimal configuration.
+6. Before writing the README comparison, study the `receipts` and `receipts-cli` npm packages so our
+   positioning against them is accurate and fair.

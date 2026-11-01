@@ -1,0 +1,9 @@
+dist
+coverage
+action/dist
+node_modules
+*.patch
+test/fixtures/**/__snapshots__
+examples/demo-shop/src
+examples/demo-shop/test
+examples/demo-shop/scenarios
