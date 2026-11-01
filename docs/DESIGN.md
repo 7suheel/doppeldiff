@@ -258,6 +258,15 @@ API. It found a `0` vs `-0` difference and shrank it to `[-0, 0]` in 66 evaluati
   findings that the deterministic engine already produced, never their existence. The report states
   which labels come from an LLM.
 
+> **Implementation note (Phase 4):** Anthropic calls use `claude-opus-5-5` by default with
+> `output_config.format` (JSON schema), `effort: "low"` (a small classification task; thinking stays
+> adaptive), no sampling parameters, and server-side `fallbacks: "default"` so a safety-classifier decline is
+> retried on Anthropic's recommended model (disable with `DOPPELDIFF_LLM_FALLBACKS=0`). OpenAI calls use the
+> Responses API with a strict JSON schema (`gpt-5.5` by default). `--llm-model` overrides either. Validated
+> responses are cached by content hash so re-runs on the same PR are stable. Input suggestions are parsed
+> with a literal-only parser (never `eval`) and must conform to the parameter types. In the fork-safe Action,
+> the untrusted job has no key, so suggestions only run in same-repo mode; claim matching runs in the trusted job.
+
 ### 3.7 Outputs (`report/`)
 
 - **`Report` model** (zod schema, versioned `schemaVersion: 1`, JSON Schema exported into `schema/`).

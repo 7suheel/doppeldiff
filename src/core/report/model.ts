@@ -71,6 +71,8 @@ export const FunctionReport = z.object({
   failures: z.number().int().nonnegative(),
   durationMs: z.number().nonnegative(),
   seed: z.number().int(),
+  /** Inputs suggested by the optional LLM step that passed type validation. */
+  llmInputs: z.number().int().nonnegative().optional(),
   behaviors: z.array(Behavior),
   nondeterministic: z
     .object({ side: z.enum(['base', 'head']), call: text(), first: text(), second: text() })

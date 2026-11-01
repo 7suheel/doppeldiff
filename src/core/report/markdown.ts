@@ -190,7 +190,11 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
     `[doppeldiff](${PROJECT_URL}) v${r.tool.version}`,
   ];
   lines.push('', `<sub>${footer.join(' · ')}</sub>`);
-  if (!r.claim.llm && !r.claim.refactor && s.behaviors > 0) {
+  if (r.claim.llm && s.behaviors > 0) {
+    lines.push(
+      `<sub>🤖 Claimed/unclaimed labels and explanations by ${escapeText(r.claim.llm.model)}, checked against the observed examples. The examples themselves come from running the code.</sub>`,
+    );
+  } else if (!r.claim.refactor && s.behaviors > 0) {
     lines.push(
       `<sub>Changes are not matched against the PR description. Add an LLM API key (optional) or state "no behavior change" for refactors.</sub>`,
     );

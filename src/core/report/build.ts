@@ -120,6 +120,7 @@ function functionReport(f: FunctionResult, refactor: boolean): FunctionReport {
     failures: f.failures,
     durationMs: f.durationMs,
     seed: f.seed,
+    ...(f.llmInputs !== undefined ? { llmInputs: f.llmInputs } : {}),
     behaviors,
     ...(nd
       ? {

@@ -8,7 +8,9 @@ import { renderMarkdown } from './core/report/markdown.js';
 import type { Report } from './core/report/model.js';
 import { progressPrinter, renderTerminal } from './core/report/terminal.js';
 import { generateTests } from './core/report/testgen.js';
-import { repoRoot } from './core/git/git.js';
+import { diffText, repoRoot } from './core/git/git.js';
+import { matchClaims } from './core/claims/match.js';
+import { selectProvider, type LlmProvider } from './core/claims/providers.js';
 import { DEFAULT_RUNS, DEFAULT_SEED, DEFAULT_TIMEOUT_MS, run, toolVersion } from './core/run.js';
 
 export type FailOn = 'unclaimed' | 'any' | 'never';
@@ -68,6 +70,9 @@ interface CliFlags {
   quiet?: boolean;
   showConsole?: boolean;
   sandbox?: boolean;
+  llm?: 'auto' | 'anthropic' | 'openai' | 'off';
+  llmModel?: string;
+  llmInputs?: boolean;
 }
 
 export async function main(argv = process.argv): Promise<number> {
@@ -100,6 +105,12 @@ export async function main(argv = process.argv): Promise<number> {
     .option('--no-install', 'Never install dependencies for the base version (reuse the working copy)')
     .option('--no-merge-base', 'Compare against --base exactly, not the merge base')
     .option('--keep-worktrees', 'Keep temporary git worktrees for debugging')
+    .option(
+      '--llm <provider>',
+      'Claim matching / input suggestions: auto (default, if an API key is set) | anthropic | openai | off',
+    )
+    .option('--llm-model <id>', 'Model for the LLM layer (default claude-opus-5-5 / gpt-5.5)')
+    .option('--no-llm-inputs', 'Do not ask the LLM for edge-case inputs (claim matching only)')
     .option('--config <path>', 'Config file (default doppeldiff.config.{ts,mts,js,mjs})')
     .option('--cwd <dir>', 'Repository directory (default: current directory)')
     .option('--quiet', 'Only print the final report')
@@ -145,8 +156,23 @@ async function runCli(flags: CliFlags): Promise<number> {
   const quiet = flags.quiet || stdoutTaken;
   if (!quiet) err(`${pc.bold('🔬 doppeldiff')} ${pc.dim(`v${toolVersion()}`)}`);
 
+  let provider: LlmProvider | null;
+  try {
+    provider = selectProvider({
+      ...(flags.llm ? { provider: flags.llm } : {}),
+      ...(flags.llmModel ? { model: String(flags.llmModel) } : {}),
+    });
+  } catch (e) {
+    err(pc.red(`doppeldiff: ${(e as Error).message}`));
+    return 2;
+  }
+  if (provider && !quiet) err(pc.dim(`  LLM layer: ${provider.name} (${provider.model})`));
+  const warn = (m: string) => err(pc.yellow(`  warning: ${m}`));
+
   try {
     const result = await run({
+      ...(provider && flags.llmInputs !== false ? { suggestProvider: provider } : {}),
+      onWarning: warn,
       cwd,
       ...(flags.base ? { base: String(flags.base) } : {}),
       ...(flags.head ? { head: String(flags.head) } : {}),
@@ -169,7 +195,20 @@ async function runCli(flags: CliFlags): Promise<number> {
       noSandbox: flags.sandbox === false,
       ...(quiet ? {} : { onEvent: progressPrinter(err) }),
     });
-    const report = buildReport(result, claim);
+    let report = buildReport(result, claim);
+    if (provider && report.summary.behaviors > 0 && claim.text && !report.claim.refactor) {
+      try {
+        const root = repoRoot(cwd);
+        const files = [...new Set(report.functions.filter((f) => f.behaviors.length).map((f) => f.file))];
+        const diff = diffText(root, result.base.sha, result.head.sha ?? undefined, files);
+        const m = await matchClaims(report, { provider, diff, onWarning: warn });
+        report = m.report;
+      } catch (e) {
+        warn(
+          `claim matching unavailable (${(e as Error).message}); behaviors are reported without claim labels`,
+        );
+      }
+    }
 
     if (flags.writeTests) {
       const dir =

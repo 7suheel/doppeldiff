@@ -121,3 +121,12 @@ export function showFile(cwd: string, rev: string, path: string): string {
 export function isWorkingTreeClean(cwd: string): boolean {
   return git(['status', '--porcelain'], cwd).trim().length === 0;
 }
+
+/** Unified diff text between base and head (or the working tree) restricted to `paths`. */
+export function diffText(cwd: string, base: string, head: string | undefined, paths: string[]): string {
+  if (paths.length === 0) return '';
+  const args = ['diff', '-U3', '-M', '--no-color', '--no-ext-diff', base];
+  if (head) args.push(head);
+  args.push('--', ...paths);
+  return git(args, cwd);
+}

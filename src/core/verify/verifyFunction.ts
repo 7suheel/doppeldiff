@@ -39,6 +39,15 @@ export interface VerifyFunctionOptions {
   examples?: unknown[][];
   /** Custom argument generator (from the config file); replaces the type-derived one. */
   arbitrary?: Arbitrary<unknown[]>;
+  /** Optional source of extra inputs (e.g. LLM edge-case suggestions); results are validated against the types. */
+  suggest?: (ctx: {
+    name: string;
+    signature: string;
+    spec: SignatureSpec;
+    baseSource: string;
+    headSource: string;
+  }) => Promise<unknown[][]>;
+  onWarning?: (message: string) => void;
   onProgress?: (p: { inputsRun: number; clusters: number }) => void;
 }
 
@@ -63,6 +72,8 @@ export interface FunctionResult {
   shrinkEvaluations: number;
   durationMs: number;
   mined?: { numbers: number; strings: number; thresholds: number[] };
+  /** Number of suggested (LLM) inputs that passed type validation and were run first. */
+  llmInputs?: number;
 }
 
 /** Locate an exported function through the module index (ESM exports, re-exports and CommonJS). */
@@ -167,6 +178,24 @@ export async function verifyFunction(
   const arbitrary = options.arbitrary ?? compileSignature(headSig, { mined });
   if (!arbitrary) return skip('could not build an input generator for the signature');
 
+  // Optional suggested inputs (validated against the signature by the suggester).
+  let examples = options.examples ?? [];
+  if (options.suggest) {
+    try {
+      const suggested = await options.suggest({
+        name: target.exportName,
+        signature,
+        spec: headSig,
+        baseSource: baseLoc.node.getText(),
+        headSource: headLoc.node.getText(),
+      });
+      base.llmInputs = suggested.length;
+      examples = [...suggested, ...examples];
+    } catch (e) {
+      options.onWarning?.(`input suggestions for ${target.exportName} failed: ${(e as Error).message}`);
+    }
+  }
+
   // 4. Load both versions in their sandboxes.
   let baseMod, headMod;
   try {
@@ -207,7 +236,7 @@ export async function verifyFunction(
     thresholds: featureThresholds(mined),
     ...(options.deadline !== undefined ? { deadline: options.deadline } : {}),
     ...(options.compare ? { compare: options.compare } : {}),
-    ...(options.examples ? { examples: options.examples } : {}),
+    ...(examples.length ? { examples } : {}),
     ...(options.onProgress ? { onProgress: options.onProgress } : {}),
   });
 

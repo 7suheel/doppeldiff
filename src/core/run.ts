@@ -4,6 +4,8 @@ import { join } from 'node:path';
 import type { CompareOptions } from './compare/compare.js';
 import fc from 'fast-check';
 import type { FunctionConfig } from '../config.js';
+import type { LlmProvider } from './claims/providers.js';
+import { suggestInputs } from './claims/suggest.js';
 import { detectChanges, type Detection, type ListedFunction } from './detect/detect.js';
 import { prepareDependencies, type DepsResult } from './git/deps.js';
 import { isWorkingTreeClean, mergeBase, repoRoot, resolveCommit, git } from './git/git.js';
@@ -42,6 +44,9 @@ export interface RunOptions {
   poolSize?: number;
   noSandbox?: boolean;
   showConsole?: boolean;
+  /** Optional LLM provider for edge-case input suggestions. */
+  suggestProvider?: LlmProvider | null;
+  onWarning?: (message: string) => void;
   /** Per-function overrides (from the config file), keyed by id (`file#export`) or export name. */
   functions?: Record<string, FunctionConfig>;
   onEvent?: (event: RunEvent) => void;
@@ -222,6 +227,15 @@ export async function run(options: RunOptions): Promise<RunResult> {
         runs: fcfg?.runs ?? runs,
         ...(fcfg?.args ? { arbitrary: fcfg.args(fc) } : {}),
         ...(fcfg?.examples ? { examples: fcfg.examples } : {}),
+        ...(options.suggestProvider
+          ? {
+              suggest: async (ctx) => {
+                const r = await suggestInputs(options.suggestProvider!, ctx);
+                return r.accepted;
+              },
+            }
+          : {}),
+        ...(options.onWarning ? { onWarning: options.onWarning } : {}),
         ...(deadline !== undefined ? { deadline } : {}),
         ...(options.compare ? { compare: options.compare } : {}),
         onProgress: (p) => emit({ type: 'function-progress', target, ...p }),
