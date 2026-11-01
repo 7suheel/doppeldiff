@@ -166,6 +166,11 @@ function installDeterminism(options) {
     return new RealDate(...args);
   }
   FakeDate.prototype = RealDate.prototype;
+  Object.defineProperty(RealDate.prototype, "constructor", {
+    value: FakeDate,
+    writable: true,
+    configurable: true
+  });
   FakeDate.now = () => now;
   FakeDate.parse = RealDate.parse;
   FakeDate.UTC = RealDate.UTC;
@@ -410,7 +415,8 @@ process.on("message", (raw) => {
           modules.set(msg.moduleId, mod);
           const def = mod.default;
           const names = new Set(Object.keys(mod));
-          if (def && typeof def === "object") for (const k of Object.keys(def)) names.add(k);
+          if (def && (typeof def === "object" || typeof def === "function"))
+            for (const k of Object.keys(def)) names.add(k);
           send({ t: "loaded", moduleId: msg.moduleId, ok: true, exports: [...names] });
         } catch (e) {
           const err = e;

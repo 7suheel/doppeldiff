@@ -188,6 +188,8 @@ function objectLike(type: Type, ctx: Ctx): ArbSpec {
       const [t] = type.getTypeArguments();
       return { kind: 'set', items: t ? fromType(t, ctx) : { kind: 'anything' } };
     }
+    // JSDoc `{Object}` (the global Object interface): any object.
+    if (name === 'Object') return { kind: 'anything' };
     if (!HANDLED_BUILTINS.has(name) && name !== '__type' && name !== '__object') {
       return { kind: 'unsupported', reason: `built-in type \`${name}\`` };
     }

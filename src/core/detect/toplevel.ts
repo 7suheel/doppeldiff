@@ -56,6 +56,7 @@ export function indexModule(sf: SourceFile): ModuleIndex {
   const decls = new Map<string, TopLevel>();
   const sideEffects: string[] = [];
   const cjsExports = new Map<string, string>();
+  const cjsStatements: Node[] = [];
   const add = (name: string, kind: TopLevel['kind'], node: Node, printed: Node = node) =>
     decls.set(name, { name, kind, node, normalized: normalize(printed), raw: printed.getText() });
 
@@ -118,7 +119,9 @@ export function indexModule(sf: SourceFile): ModuleIndex {
       }
     } else if (Node.isExportAssignment(st)) {
       add('default', 'default', st);
-    } else if (Node.isExpressionStatement(st) && cjsExport(st, decls, cjsExports, add)) {
+    } else if (isCjsExport(st)) {
+      // Handled after the loop: `module.exports = parse` may precede the (hoisted) `function parse`.
+      cjsStatements.push(st);
       continue;
     } else if (
       Node.isInterfaceDeclaration(st) ||
@@ -133,6 +136,8 @@ export function indexModule(sf: SourceFile): ModuleIndex {
     }
   }
 
+  for (const st of cjsStatements) cjsExport(st, decls, cjsExports, add);
+
   const exports = new Map<string, string>(cjsExports);
   for (const [exportName, ds] of sf.getExportedDeclarations()) {
     for (const d of ds) {
@@ -145,6 +150,16 @@ export function indexModule(sf: SourceFile): ModuleIndex {
     }
   }
   return { sf, decls, sideEffects, exports };
+}
+
+function isCjsExport(st: Node): boolean {
+  if (!Node.isExpressionStatement(st)) return false;
+  const expr = st.getExpression();
+  return (
+    Node.isBinaryExpression(expr) &&
+    expr.getOperatorToken().getKind() === SyntaxKind.EqualsToken &&
+    cjsTarget(expr.getLeft()) !== undefined
+  );
 }
 
 /** `module.exports` / `exports` target of an assignment's left side: undefined, '' (whole object) or a name. */

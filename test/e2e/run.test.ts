@@ -408,3 +408,58 @@ describe('generator coverage', () => {
     expect(calls.some((c) => c.includes('Object.create('))).toBe(true);
   });
 });
+
+describe('detection and runtime edge cases', () => {
+  it('recognizes `module.exports = fn; module.exports.parse = parse` before hoisted declarations', async () => {
+    const lib = (ret: string) =>
+      `module.exports = bytes;\nmodule.exports.parse = parse;\nfunction bytes(v) { return parse(v); }\nfunction parse(v) { const n = parseFloat(v); ${ret} }\n`;
+    const repo = makeRepo(
+      { 'index.js': lib('return n;') },
+      { 'index.js': lib('return isNaN(n) ? null : n;') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    const byId = Object.fromEntries(r.functions.map((f) => [f.id, f.status]));
+    expect(byId['index.js#parse']).toBe('changed');
+    expect(byId['index.js#default']).toBe('changed');
+  });
+
+  it('keeps the clock frozen for `new date.constructor()`', async () => {
+    const stamp = (tail: string) =>
+      `export function stamp(d: Date): number {\n  return new (d.constructor as DateConstructor)().getTime()${tail};\n}\n`;
+    const repo = makeRepo({ 'src/s.ts': stamp('') }, { 'src/s.ts': stamp(' + 0') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 100, seed: 1 });
+    expect(r.functions[0]!.status).toBe('unchanged');
+  });
+
+  it('treats a JSDoc `{Object}` parameter as any object', async () => {
+    const fmt = (body: string) =>
+      `/**\n * @param {number} n\n * @param {Object} opts\n */\nexport function fmt(n, opts) {\n  ${body}\n}\n`;
+    const repo = makeRepo(
+      { 'src/f.js': fmt('return String(n);') },
+      { 'src/f.js': fmt('return n < 0 ? "-" : String(n);') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    expect(r.functions[0]!.status).toBe('changed');
+  });
+
+  it('follows impact across files through unchanged functions that use changed ones', async () => {
+    const helpers = (sign: string) =>
+      `export function round(n: number) { return Math.round(n${sign}); }\nexport function decorate(n: number) { return round(n) + ' B'; }\n`;
+    const repo = makeRepo(
+      {
+        'src/helpers.ts': helpers(''),
+        'src/main.ts':
+          "import { decorate } from './helpers';\nexport function size(n: number) { return decorate(n); }\n",
+      },
+      { 'src/helpers.ts': helpers(' + 0.5') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    const size = r.functions.find((f) => f.id === 'src/main.ts#size')!;
+    expect(size.targetReason).toContain('which uses changed `round`');
+    expect(size.status).toBe('changed');
+  });
+});
