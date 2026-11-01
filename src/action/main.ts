@@ -1,16 +1,13 @@
-import { mkdtempSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import * as core from '@actions/core';
-import { DefaultArtifactClient } from '@actions/artifact';
 import * as github from '@actions/github';
 import { analyze, type PullRequestEvent } from './analyze.js';
 import { comment, type WorkflowRunEvent } from './comment.js';
 import type { ActionIO, PullsApi } from './types.js';
 
 function io(): ActionIO {
-  const artifacts = new DefaultArtifactClient();
-  const { owner, repo } = github.context.repo;
   return {
     getInput: (n) => core.getInput(n),
     info: (m) => core.info(m),
@@ -19,24 +16,16 @@ function io(): ActionIO {
     writeSummary: async (md) => {
       await core.summary.addRaw(md).write();
     },
-    uploadArtifact: async (name, files, rootDir) => {
-      await artifacts.uploadArtifact(name, files, rootDir, { retentionDays: 7 });
+    // Upload/download are done by actions/upload-artifact and actions/download-artifact steps in action.yml
+    // (composite `run:` steps do not get the Actions runtime token the artifact toolkit needs).
+    uploadArtifact: async (_name, _files, rootDir) => {
+      core.setOutput('report-dir', rootDir);
     },
-    downloadArtifact: async (name, runId, dest) => {
-      const findBy = {
-        token: core.getInput('github-token'),
-        workflowRunId: runId,
-        repositoryOwner: owner,
-        repositoryName: repo,
-      };
-      try {
-        const { artifact } = await artifacts.getArtifact(name, { findBy });
-        await artifacts.downloadArtifact(artifact.id, { path: dest, findBy });
-        return true;
-      } catch (e) {
-        core.info(`artifact lookup failed: ${(e as Error).message}`);
-        return false;
-      }
+    downloadArtifact: async (_name, _runId, dest) => {
+      const dir = core.getInput('report-download-dir');
+      if (!dir || !['report.json', 'meta.json'].every((f) => existsSync(join(dir, f)))) return false;
+      for (const f of ['report.json', 'meta.json']) copyFileSync(join(dir, f), join(dest, f));
+      return true;
     },
   };
 }

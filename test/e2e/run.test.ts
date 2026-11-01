@@ -80,6 +80,14 @@ describe('dependencies', () => {
     '.gitignore': 'node_modules\n',
   };
 
+  function npmPack(dir: string, dest: string) {
+    execFileSync('npm', ['pack', '--pack-destination', dest], {
+      cwd: dir,
+      stdio: 'pipe',
+      shell: process.platform === 'win32',
+    });
+  }
+
   function npmInstall(cwd: string) {
     execFileSync('npm', ['install', '--ignore-scripts', '--no-audit', '--no-fund', '--offline'], {
       cwd,
@@ -126,22 +134,23 @@ describe('dependencies', () => {
   });
 
   it('installs dependencies in the base worktree when the lockfile changed (scripts disabled)', async () => {
+    // Tarball dependencies are extracted as real copies by every npm version (unlike `file:` folders, which
+    // npm links), so the install can be cached like one from the registry.
     const pkgBase = JSON.stringify({
       name: 'app',
       type: 'module',
-      dependencies: { 'tiny-lib': 'file:./vendor/tiny-lib' },
+      dependencies: { 'tiny-lib': 'file:./vendor/tiny-lib-1.0.0.tgz' },
     });
-    // install-links: file: deps are copied like registry packages, so the install can be cached.
     const repo = makeRepo(
       {
         ...vendor,
-        '.npmrc': 'install-links=true\n',
         'package.json': pkgBase,
         'src/a.ts': "import { double } from 'tiny-lib';\nexport const f = (x: number) => double(x);",
       },
       {},
     );
     cleanups.push(repo.cleanup);
+    npmPack(join(repo.root, 'vendor', 'tiny-lib'), join(repo.root, 'vendor'));
     npmInstall(repo.root);
     gitIn(repo.root, 'add', '-A');
     gitIn(repo.root, '-c', 'user.name=t', '-c', 'user.email=t@t', 'commit', '-qm', 'lock');
@@ -168,10 +177,11 @@ describe('dependencies', () => {
       'node',
       [
         '-e',
-        `require('fs').writeFileSync('package.json', ${JSON.stringify(JSON.stringify({ name: 'app', type: 'module', dependencies: { 'tiny-lib': 'file:./vendor/tiny-lib', 'other-lib': 'file:./vendor/other-lib' } }))})`,
+        `require('fs').writeFileSync('package.json', ${JSON.stringify(JSON.stringify({ name: 'app', type: 'module', dependencies: { 'tiny-lib': 'file:./vendor/tiny-lib-1.0.0.tgz', 'other-lib': 'file:./vendor/other-lib-1.0.0.tgz' } }))})`,
       ],
       { cwd: repo.root },
     );
+    npmPack(join(repo.root, 'vendor', 'other-lib'), join(repo.root, 'vendor'));
     npmInstall(repo.root);
     execFileSync(
       'node',
@@ -263,8 +273,12 @@ describe('monorepo workspaces', () => {
       'uses changed `clamp` from packages/b/src/index.ts',
     );
     // If base resolved @org/b to the working copy, both versions would be identical and report "unchanged".
-    expect(f['packages/a/src/index.ts#score']!.status).toBe('changed');
-    expect(f['packages/b/src/index.ts#clamp']!.status).toBe('changed');
+    expect(f['packages/a/src/index.ts#score']!.status, f['packages/a/src/index.ts#score']!.reason).toBe(
+      'changed',
+    );
+    expect(f['packages/b/src/index.ts#clamp']!.status, f['packages/b/src/index.ts#clamp']!.reason).toBe(
+      'changed',
+    );
   });
 });
 
