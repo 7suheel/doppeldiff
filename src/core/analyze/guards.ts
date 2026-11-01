@@ -111,10 +111,8 @@ function compile(node: Node, params: Set<string>): Expr | undefined {
       case SyntaxKind.ExclamationEqualsEqualsToken:
         return cmp((a, b) => a !== b);
       case SyntaxKind.EqualsEqualsToken:
-         
         return cmp((a, b) => a == b);
       case SyntaxKind.ExclamationEqualsToken:
-         
         return cmp((a, b) => a != b);
       case SyntaxKind.AmpersandAmpersandToken:
         return (env) => {
