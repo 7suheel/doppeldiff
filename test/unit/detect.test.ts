@@ -255,3 +255,38 @@ describe('CommonJS', () => {
     expect(ids(d)).toEqual(['src/a.cjs#inline [code changed]', 'src/a.cjs#total [code changed]']);
   });
 });
+
+describe('workspace packages', () => {
+  it('reads npm/yarn workspaces and pnpm-workspace.yaml from a tree', async () => {
+    const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
+    const { tmpdir } = await import('node:os');
+    const { join } = await import('node:path');
+    const { workspacePackages } = await import('../../src/core/materialize/bundle.js');
+    const mk = (root: string, files: Record<string, string>) => {
+      for (const [p, c] of Object.entries(files)) {
+        mkdirSync(join(root, p, '..'), { recursive: true });
+        writeFileSync(join(root, p), c);
+      }
+    };
+    const npmRoot = mkdtempSync(join(tmpdir(), 'dd-ws-npm-'));
+    mk(npmRoot, {
+      'package.json': JSON.stringify({ workspaces: ['packages/*', 'tools/cli'] }),
+      'packages/a/package.json': JSON.stringify({ name: '@org/a' }),
+      'packages/b/package.json': JSON.stringify({ name: '@org/b' }),
+      'tools/cli/package.json': JSON.stringify({ name: 'cli' }),
+    });
+    expect([...workspacePackages(npmRoot).keys()].sort()).toEqual(['@org/a', '@org/b', 'cli']);
+    const yarnRoot = mkdtempSync(join(tmpdir(), 'dd-ws-yarn-'));
+    mk(yarnRoot, {
+      'package.json': JSON.stringify({ workspaces: { packages: ['libs/*'] } }),
+      'libs/x/package.json': JSON.stringify({ name: 'x' }),
+    });
+    expect([...workspacePackages(yarnRoot).keys()]).toEqual(['x']);
+    const pnpmRoot = mkdtempSync(join(tmpdir(), 'dd-ws-pnpm-'));
+    mk(pnpmRoot, {
+      'pnpm-workspace.yaml': 'packages:\n  - \'pkgs/*\'\n  - "!pkgs/ignored"\n',
+      'pkgs/p/package.json': JSON.stringify({ name: 'p' }),
+    });
+    expect([...workspacePackages(pnpmRoot).keys()]).toEqual(['p']);
+  });
+});

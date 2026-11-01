@@ -107,6 +107,13 @@ export async function analyze(ctx: AnalyzeContext): Promise<{ report: Report; ex
     },
   });
   const report = buildReport(result, { text: claimText || null, source: claimText ? 'pr' : 'none' });
+  // The checkout is GitHub's merge commit for the PR (clean working tree): name it instead of "working tree".
+  try {
+    const sha = execFileSync('git', ['rev-parse', 'HEAD'], { cwd: workspace, encoding: 'utf8' }).trim();
+    report.head = { ref: `pull request #${pr.number}`, sha };
+  } catch {
+    /* keep the default */
+  }
 
   mkdirSync(ctx.tempDir, { recursive: true });
   const reportPath = join(ctx.tempDir, 'report.json');

@@ -96,6 +96,9 @@ function encode(value, limits = DEFAULT_LIMITS) {
         if (key === "stack" || key === "message") continue;
         props.push([key, readProp(e, key, depth)]);
       }
+      if (Object.prototype.hasOwnProperty.call(e, "cause") && !Object.keys(e).includes("cause")) {
+        props.push(["cause", readProp(e, "cause", depth)]);
+      }
       let message;
       try {
         message = String(e.message);

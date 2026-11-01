@@ -110,6 +110,10 @@ export function encode(value: unknown, limits: EncodeLimits = DEFAULT_LIMITS): E
         if (key === 'stack' || key === 'message') continue;
         props.push([key, readProp(e, key, depth)]);
       }
+      // `cause` is non-enumerable but often carries the real reason (e.g. fetch → ERR_ACCESS_DENIED).
+      if (Object.prototype.hasOwnProperty.call(e, 'cause') && !Object.keys(e).includes('cause')) {
+        props.push(['cause', readProp(e, 'cause', depth)]);
+      }
       let message: string;
       try {
         message = String(e.message);
