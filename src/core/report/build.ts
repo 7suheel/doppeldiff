@@ -4,6 +4,8 @@ import { formatArgs, formatEnc, formatOutcome } from '../format/format.js';
 import type { RunResult } from '../run.js';
 import type { FunctionResult } from '../verify/verifyFunction.js';
 import { groupBehaviors } from './behaviors.js';
+import { REALISM_NAMES } from '../explore/realism.js';
+import { analyzeClaim, helpersFromReason, ruleLabel, type RuleLabel } from '../claims/rules.js';
 import { argsToCode, encToCode } from './codegen.js';
 import {
   SCHEMA_VERSION,
@@ -21,21 +23,49 @@ export interface ClaimInput {
   refactor?: boolean;
 }
 
-const REFACTOR_PATTERNS = [
-  /\bno (?:functional|behaviou?ral|behaviou?r|logic) changes?\b/i,
-  /\bno changes? (?:in|to) (?:behaviou?r|functionality|logic)\b/i,
-  /\bpure(?:ly)?[- ]refactor/i,
-  /\bbehaviou?r[- ]preserving\b/i,
-  /\bnon[- ]functional (?:change|refactor)/i,
-  /\bwithout (?:changing|any change (?:in|to)) (?:behaviou?r|functionality)\b/i,
-];
-
 /**
- * Deterministic claim rule (no LLM): a PR description that explicitly asserts "no behavior change" puts the
- * report in refactor mode, where every behavior change is unclaimed.
+ * True when the claim says the change should not alter behavior (see the rules in ../claims/rules.ts):
+ * explicit phrases, refactor-type conventional commits, or refactor-style wording without change words.
  */
 export function isRefactorClaim(text: string | null | undefined): boolean {
-  return !!text && REFACTOR_PATTERNS.some((re) => re.test(text));
+  return analyzeClaim(text).intent === 'no-change';
+}
+
+/**
+ * Label every behavior from the claim with the deterministic rules (no LLM). Mutates and returns the report.
+ * `forceRefactor` comes from --refactor / verify_refactor.
+ */
+export function applyRuleLabels(report: Report, forceRefactor = false): Report {
+  const a = analyzeClaim(report.claim.text);
+  const refactor = forceRefactor || a.intent === 'no-change';
+  report.claim.refactor = refactor;
+  const targets = new Map(
+    report.functions
+      .filter((f) => f.behaviors.length > 0)
+      .map(
+        (f) =>
+          [
+            f,
+            { exportName: f.exportName, file: f.file, helpers: helpersFromReason(f.targetReason) },
+          ] as const,
+      ),
+  );
+  const all = [...targets.values()];
+  for (const [f, target] of targets) {
+    const r: RuleLabel = refactor
+      ? { label: 'unclaimed' }
+      : report.claim.text
+        ? ruleLabel(target, a, all)
+        : { label: 'behavior-change' };
+    for (const b of f.behaviors) {
+      b.label = r.label;
+      b.labelSource = r.label === 'behavior-change' ? 'none' : 'rules';
+      if (r.explanation) b.explanation = r.explanation;
+      else delete b.explanation;
+    }
+  }
+  report.summary = summarize(report.functions, report.skipped.length, report.summary.durationMs);
+  return report;
 }
 
 const MAX_DISPLAY = 300;
@@ -95,13 +125,15 @@ export function exampleFrom(exportName: string, w: Witness): Example {
   return ex;
 }
 
-function functionReport(f: FunctionResult, refactor: boolean): FunctionReport {
+function functionReport(f: FunctionResult): FunctionReport {
   const behaviors: Behavior[] = groupBehaviors(f.clusters).map((b, i) => ({
     id: `${f.id}/${i + 1}`,
     key: b.key,
     title: b.title,
-    label: refactor ? 'unclaimed' : 'behavior-change',
-    labelSource: refactor ? 'refactor-claim' : 'none',
+    realism: REALISM_NAMES[b.realism.tier],
+    ...(b.realism.tier < 2 && b.realism.reason ? { realismNote: b.realism.reason } : {}),
+    label: 'behavior-change',
+    labelSource: 'none',
     count: b.count,
     variants: b.variants,
     examples: b.examples.map((w) => exampleFrom(f.exportName, w)),
@@ -120,6 +152,8 @@ function functionReport(f: FunctionResult, refactor: boolean): FunctionReport {
     failures: f.failures,
     durationMs: f.durationMs,
     seed: f.seed,
+    ...(f.usage ? { usage: f.usage } : {}),
+    ...(f.guards ? { guards: f.guards.map((g) => g.slice(0, 300)) } : {}),
     ...(f.llmInputs !== undefined ? { llmInputs: f.llmInputs } : {}),
     behaviors,
     ...(nd
@@ -140,8 +174,13 @@ export function summarize(
   skippedListed: number,
   durationMs: number,
 ): Report['summary'] {
-  const behaviors = functions.flatMap((f) => f.behaviors);
-  const unclaimed = behaviors.filter((b) => b.label === 'unclaimed' || b.label === 'suspicious').length;
+  const all = functions.flatMap((f) => f.behaviors);
+  const behaviors = all.filter((b) => b.realism !== 'edge');
+  const isUnclaimed = (b: Behavior) => b.label === 'unclaimed' || b.label === 'suspicious';
+  const unclaimed = behaviors.filter(isUnclaimed).length;
+  const unclaimedRealistic = behaviors.filter(
+    (b) => isUnclaimed(b) && (b.realism === 'seen' || b.realism === 'ordinary'),
+  ).length;
   return {
     verdict: behaviors.length === 0 ? 'no-change' : unclaimed > 0 ? 'unclaimed' : 'changes',
     functions: functions.length,
@@ -150,21 +189,22 @@ export function summarize(
     skipped: functions.filter((f) => f.status === 'skipped').length + skippedListed,
     nondeterministic: functions.filter((f) => f.status === 'nondeterministic').length,
     behaviors: behaviors.length,
+    edgeCaseBehaviors: all.length - behaviors.length,
     unclaimed,
+    unclaimedRealistic,
     inputsRun: functions.reduce((s, f) => s + f.inputsRun, 0),
     durationMs,
   };
 }
 
 export function buildReport(run: RunResult, claim: ClaimInput = { text: null, source: 'none' }): Report {
-  const refactor = claim.refactor ?? isRefactorClaim(claim.text);
-  const functions = run.functions.map((f) => functionReport(f, refactor));
-  return {
+  const functions = run.functions.map((f) => functionReport(f));
+  const report: Report = {
     schemaVersion: SCHEMA_VERSION,
     tool: run.tool,
     base: run.base,
     head: run.head,
-    claim: { source: claim.source, text: claim.text, refactor, llm: null },
+    claim: { source: claim.source, text: claim.text, refactor: false, llm: null },
     settings: { seed: run.seed, ...run.settings },
     summary: summarize(functions, run.skipped.length, run.timing.totalMs),
     functions,
@@ -176,6 +216,7 @@ export function buildReport(run: RunResult, claim: ClaimInput = { text: null, so
     regressionTests: null,
     timing: run.timing,
   };
+  return applyRuleLabels(report, claim.refactor ?? false);
 }
 
 /**
@@ -183,16 +224,8 @@ export function buildReport(run: RunResult, claim: ClaimInput = { text: null, so
  * labels it carried. Used by the GitHub Action's trusted job on the report produced by the untrusted job.
  */
 export function relabel(report: Report, claim: ClaimInput): Report {
-  const refactor = claim.refactor ?? isRefactorClaim(claim.text);
   const out: Report = structuredClone(report);
-  out.claim = { source: claim.source, text: claim.text, refactor, llm: null };
-  for (const f of out.functions) {
-    for (const b of f.behaviors) {
-      b.label = refactor ? 'unclaimed' : 'behavior-change';
-      b.labelSource = refactor ? 'refactor-claim' : 'none';
-      delete b.explanation;
-    }
-  }
-  out.summary = summarize(out.functions, out.skipped.length, out.summary.durationMs);
-  return out;
+  out.claim = { source: claim.source, text: claim.text, refactor: false, llm: null };
+  for (const f of out.functions) for (const b of f.behaviors) delete b.explanation;
+  return applyRuleLabels(out, claim.refactor ?? false);
 }

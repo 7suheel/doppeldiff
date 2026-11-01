@@ -118,7 +118,8 @@ describe('markdown safety', () => {
 });
 
 describe('exit codes', () => {
-  const report = (behaviors: number, unclaimed: number) => ({ summary: { behaviors, unclaimed } }) as Report;
+  const report = (behaviors: number, unclaimed: number) =>
+    ({ summary: { behaviors, unclaimed, unclaimedRealistic: unclaimed } }) as Report;
   it('fails on unclaimed changes by default semantics', () => {
     expect(exitCodeFor(report(2, 0), 'unclaimed')).toBe(0);
     expect(exitCodeFor(report(2, 1), 'unclaimed')).toBe(1);

@@ -2,7 +2,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
 import { matchClaims } from '../core/claims/match.js';
-import { selectProvider } from '../core/claims/providers.js';
+import { actionProvider } from './provider.js';
 import { relabel } from '../core/report/build.js';
 import { renderMarkdown, STICKY_MARKER } from '../core/report/markdown.js';
 import { Report } from '../core/report/model.js';
@@ -88,15 +88,13 @@ export async function comment(ctx: CommentContext): Promise<CommentOutcome> {
   const claimText = [pr.title, pr.body ?? ''].join('\n\n').trim() || null;
   report = relabel(report, { text: claimText, source: claimText ? 'pr' : 'none' });
 
-  const anthropicKey = io.getInput('anthropic-api-key');
-  const openaiKey = io.getInput('openai-api-key');
-  if ((anthropicKey || openaiKey) && report.summary.behaviors > 0 && claimText && !report.claim.refactor) {
-    if (anthropicKey) process.env.ANTHROPIC_API_KEY = anthropicKey;
-    if (openaiKey) process.env.OPENAI_API_KEY = openaiKey;
-    const provider = selectProvider({
-      provider: 'auto',
-      ...(io.getInput('llm-model') ? { model: io.getInput('llm-model') } : {}),
-    });
+  if (report.summary.behaviors > 0 && claimText && !report.claim.refactor) {
+    let provider = null;
+    try {
+      provider = actionProvider(io);
+    } catch (e) {
+      io.warning(`doppeldiff: LLM claim matching disabled: ${(e as Error).message}`);
+    }
     if (provider) {
       try {
         const diff = await api.getDiff(pr.number);

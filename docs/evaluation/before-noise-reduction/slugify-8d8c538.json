@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "8d8c538^",
+    "sha": "29e903d2a0fb4460e2af375aadabcdd3b54777fc"
+  },
+  "head": {
+    "ref": "8d8c538",
+    "sha": "8d8c538c53ddf5c1023c8b4769681bb53877746b"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: map Ę, Ī, Ķ, Ū to uppercase so case is preserved (#209)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 1,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 1021
+  },
+  "functions": [],
+  "skipped": [
+    {
+      "id": "slugify.js#*",
+      "file": "slugify.js",
+      "exportName": "*",
+      "kind": "module",
+      "reason": "changed, but no ESM/CommonJS exports were recognized (UMD/IIFE wrappers are not supported in v1)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1021,
+    "materializeMs": 51,
+    "dependenciesMs": 0,
+    "detectMs": 970,
+    "verifyMs": 0
+  }
+}

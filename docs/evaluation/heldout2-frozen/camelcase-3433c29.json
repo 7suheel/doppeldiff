@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "3433c29^",
+    "sha": "92d7f63e63aa57c4cadd714d653c6a9fabd8131e"
+  },
+  "head": {
+    "ref": "3433c29",
+    "sha": "3433c2958339b2ec3bd0f07bac7a32df5aa75b8f"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix `preserveConsecutiveUppercase` when `capitalizeAfterNumber` is false",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 2365
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(input: unknown, options: unknown)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 957,
+      "seed": 2354929897,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 0
+      },
+      "guards": ["!(typeof input === 'string' || Array.isArray(input))"],
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2365,
+    "materializeMs": 475,
+    "dependenciesMs": 1,
+    "detectMs": 896,
+    "verifyMs": 993
+  }
+}

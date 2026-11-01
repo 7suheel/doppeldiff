@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "581b2b5^",
+    "sha": "1925beb7c083528de763005ce91dfdfa312d0f45"
+  },
+  "head": {
+    "ref": "581b2b5",
+    "sha": "581b2b5b96d10fe75bda7ae03ee6afab64b6abcb"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix return value for un-parsable strings",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 2,
+    "changed": 2,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 2,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 2000,
+    "durationMs": 2135
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(value: string | number, options: undefined | { case: [string]; decimalPlaces: [number]; fixedDecimals: [boolean]; thousandsSeparator: [string]; unitSeparator: [string] })",
+      "status": "changed",
+      "targetReason": "uses changed `parse`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1258,
+      "seed": 2354929897,
+      "usage": {
+        "files": 1,
+        "callSites": 0,
+        "values": 6
+      },
+      "guards": ["typeof value === 'string'", "typeof value === 'number'"],
+      "behaviors": [
+        {
+          "id": "index.js#default/1",
+          "key": "returns NaN → returns null",
+          "title": "now returns null (previously NaN)",
+          "realism": "seen",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 435,
+          "variants": [
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["text", "undefined"],
+              "count": 212
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["text", "{…}"],
+              "count": 200
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["empty", "{…}"],
+              "count": 14
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["blank", "{…}"],
+              "count": 5
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["blank", "undefined"],
+              "count": 3
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["empty", "undefined"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\" \", undefined)",
+              "argsCode": "\" \", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"foobar\", undefined)",
+              "argsCode": "\"foobar\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"\", undefined)",
+              "argsCode": "\"\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "index.js#parse",
+      "file": "index.js",
+      "exportName": "parse",
+      "signature": "parse(val: string | number)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 78,
+      "seed": 1427712083,
+      "usage": {
+        "files": 3,
+        "callSites": 60,
+        "values": 67
+      },
+      "guards": ["typeof val === 'number' && !isNaN(val)", "typeof val !== 'string'"],
+      "behaviors": [
+        {
+          "id": "index.js#parse/1",
+          "key": "returns NaN → returns null",
+          "title": "now returns null (previously NaN)",
+          "realism": "seen",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 420,
+          "variants": [
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["text"],
+              "count": 414
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["blank"],
+              "count": 5
+            },
+            {
+              "transition": "returns NaN → returns null",
+              "features": ["empty"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "parse(\" \")",
+              "argsCode": "\" \"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": true
+            },
+            {
+              "call": "parse(\"foobar\")",
+              "argsCode": "\"foobar\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": false
+            },
+            {
+              "call": "parse(\"\")",
+              "argsCode": "\"\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "NaN",
+                "code": "NaN"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "null",
+                "code": "null"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2135,
+    "materializeMs": 60,
+    "dependenciesMs": 0,
+    "detectMs": 720,
+    "verifyMs": 1355
+  }
+}

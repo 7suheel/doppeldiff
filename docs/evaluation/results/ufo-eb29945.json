@@ -28,14 +28,16 @@
   "summary": {
     "verdict": "changes",
     "functions": 2,
-    "changed": 2,
-    "unchanged": 0,
+    "changed": 1,
+    "unchanged": 1,
     "skipped": 0,
     "nondeterministic": 0,
-    "behaviors": 2,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2149
+    "durationMs": 2098
   },
   "functions": [
     {
@@ -48,81 +50,83 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1008,
+      "durationMs": 937,
       "seed": 3870797363,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 24
+      },
       "behaviors": [
         {
           "id": "src/utils.ts#withBase/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 10,
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 3,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text", "text"],
-              "count": 8
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "blank"],
-              "count": 2
+              "count": 3
             }
           ],
           "examples": [
             {
-              "call": "withBase(\"a1\", \"a\")",
-              "argsCode": "\"a1\", \"a\"",
+              "call": "withBase(\"/admin/\", \"/a\")",
+              "argsCode": "\"/admin/\", \"/a\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a1\"",
-                "code": "\"a1\""
+                "display": "\"/admin/\"",
+                "code": "\"/admin/\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a/a1\"",
-                "code": "\"a/a1\""
+                "display": "\"/a/admin/\"",
+                "code": "\"/a/admin/\""
               },
               "minimal": true
             },
             {
-              "call": "withBase(\"  a\", \" \")",
-              "argsCode": "\"  a\", \" \"",
+              "call": "withBase(\"##\", \"#\")",
+              "argsCode": "\"##\", \"#\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"  a\"",
-                "code": "\"  a\""
+                "display": "\"##\"",
+                "code": "\"##\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\" /  a\"",
-                "code": "\" /  a\""
+                "display": "\"#/##\"",
+                "code": "\"#/##\""
               },
               "minimal": false
             },
             {
-              "call": "withBase(\"a&\", \"a\")",
-              "argsCode": "\"a&\", \"a\"",
+              "call": "withBase(\"/fo\", \"/f\")",
+              "argsCode": "\"/fo\", \"/f\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a&\"",
-                "code": "\"a&\""
+                "display": "\"/fo\"",
+                "code": "\"/fo\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a/a&\"",
-                "code": "\"a/a&\""
+                "display": "\"/f/fo\"",
+                "code": "\"/f/fo\""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `withBase`."
         }
       ]
     },
@@ -131,88 +135,19 @@
       "file": "src/utils.ts",
       "exportName": "withoutBase",
       "signature": "withoutBase(input: string, base: string)",
-      "status": "changed",
+      "status": "unchanged",
       "targetReason": "code changed",
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 66,
+      "durationMs": 99,
       "seed": 2778817679,
-      "behaviors": [
-        {
-          "id": "src/utils.ts#withoutBase/1",
-          "key": "returns string: value changed",
-          "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 2,
-          "variants": [
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "blank"],
-              "count": 1
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "text"],
-              "count": 1
-            }
-          ],
-          "examples": [
-            {
-              "call": "withoutBase(\"  a\", \" \")",
-              "argsCode": "\"  a\", \" \"",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"/ a\"",
-                "code": "\"/ a\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"  a\"",
-                "code": "\"  a\""
-              },
-              "minimal": true
-            },
-            {
-              "call": "withoutBase(\"-#\", \"-\")",
-              "argsCode": "\"-#\", \"-\"",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"/#\"",
-                "code": "\"/#\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"-#\"",
-                "code": "\"-#\""
-              },
-              "minimal": false
-            },
-            {
-              "call": "withoutBase(\"-,\", \"-\")",
-              "argsCode": "\"-,\", \"-\"",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"/,\"",
-                "code": "\"/,\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"-,\"",
-                "code": "\"-,\""
-              },
-              "minimal": false
-            }
-          ]
-        }
-      ]
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 24
+      },
+      "behaviors": []
     }
   ],
   "skipped": [],
@@ -222,10 +157,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2149,
-    "materializeMs": 68,
-    "dependenciesMs": 1,
-    "detectMs": 1005,
-    "verifyMs": 1074
+    "totalMs": 2098,
+    "materializeMs": 86,
+    "dependenciesMs": 0,
+    "detectMs": 954,
+    "verifyMs": 1058
   }
 }

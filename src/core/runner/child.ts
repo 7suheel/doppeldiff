@@ -9,7 +9,7 @@ import { encode } from './encode.js';
 import { installDeterminism, type Determinism } from './determinism.js';
 import { installNetGuard } from './netguard.js';
 import type { ChildMessage, ParentMessage, RunMessage } from './protocol.js';
-import { FN_TAG, isFnDescriptor } from './tags.js';
+import { FN_TAG, isFnDescriptor, isProtoDescriptor, isViewDescriptor, PROTO_TAG, VIEW_TAG } from './tags.js';
 
 const modules = new Map<string, Record<string, unknown>>();
 let determinism: Determinism | undefined;
@@ -36,12 +36,29 @@ function materialize(value: unknown, seen = new Set<unknown>()): unknown {
           return structuredClone(returns);
         };
   }
+  if (isProtoDescriptor(value)) {
+    const { proto, own } = value[PROTO_TAG];
+    return Object.assign(Object.create(materialize(proto, seen) as object) as object, materialize(own, seen));
+  }
+  if (isViewDescriptor(value)) {
+    const { ctor, buffer, byteOffset, length } = value[VIEW_TAG];
+    const Ctor = (
+      globalThis as unknown as Record<string, new (b: ArrayBuffer, o: number, l: number) => unknown>
+    )[ctor];
+    return Ctor ? new Ctor(buffer, byteOffset, length) : value;
+  }
   if (typeof value !== 'object' || value === null || seen.has(value)) return value;
   seen.add(value);
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i++) value[i] = materialize(value[i], seen);
   } else if (value instanceof Map) {
-    for (const [k, v] of value) value.set(k, materialize(v, seen));
+    const entries = [...value].map(([k, v]) => [materialize(k, seen), materialize(v, seen)] as const);
+    value.clear();
+    for (const [k, v] of entries) value.set(k, v);
+  } else if (value instanceof Set) {
+    const items = [...value].map((v) => materialize(v, seen));
+    value.clear();
+    for (const v of items) value.add(v);
   } else if (Object.getPrototypeOf(value) === Object.prototype) {
     const rec = value as Record<string, unknown>;
     for (const k of Object.keys(rec)) rec[k] = materialize(rec[k], seen);
@@ -67,7 +84,48 @@ function isThenable(v: unknown): v is PromiseLike<unknown> {
 const guardContext = vm.createContext({});
 const guardScript = new vm.Script('__dd_fn(...__dd_args)');
 
+/**
+ * Built-in prototypes and their own keys at startup. Code under test can pollute them on some inputs
+ * (`set({}, "__proto__.x", 1)`); without cleanup every later call in this process would see the pollution.
+ */
+const PROTOTYPES: object[] = [
+  Object.prototype,
+  Array.prototype,
+  Function.prototype,
+  String.prototype,
+  Number.prototype,
+  Boolean.prototype,
+  Map.prototype,
+  Set.prototype,
+  Date.prototype,
+  RegExp.prototype,
+  Promise.prototype,
+  Error.prototype,
+];
+const PROTOTYPE_KEYS = PROTOTYPES.map((p) => new Set<PropertyKey>(Reflect.ownKeys(p)));
+
+function restorePrototypes(): void {
+  PROTOTYPES.forEach((proto, i) => {
+    for (const key of Reflect.ownKeys(proto)) {
+      if (!PROTOTYPE_KEYS[i]!.has(key)) Reflect.deleteProperty(proto, key);
+    }
+  });
+}
+
 async function callOnce(
+  fn: (...a: unknown[]) => unknown,
+  input: unknown[],
+  timeoutMs: number,
+  guard: boolean,
+): Promise<Outcome> {
+  try {
+    return await callInner(fn, input, timeoutMs, guard);
+  } finally {
+    restorePrototypes();
+  }
+}
+
+async function callInner(
   fn: (...a: unknown[]) => unknown,
   input: unknown[],
   timeoutMs: number,
@@ -160,7 +218,8 @@ process.on('message', (raw) => {
             modules.set(msg.moduleId, mod);
             const def = mod.default as Record<string, unknown> | undefined;
             const names = new Set(Object.keys(mod));
-            if (def && typeof def === 'object') for (const k of Object.keys(def)) names.add(k);
+            if (def && (typeof def === 'object' || typeof def === 'function'))
+              for (const k of Object.keys(def)) names.add(k);
             send({ t: 'loaded', moduleId: msg.moduleId, ok: true, exports: [...names] });
           } catch (e) {
             const err = e as Error & { code?: string };

@@ -6,6 +6,7 @@ import { formatArgs } from '../format/format.js';
 import { stableKey } from '../util/stableKey.js';
 import { clusterKey, describeTransition, inputFeatures } from './cluster.js';
 import { humanize, inputComplexity } from './humanize.js';
+import type { Realism } from './realism.js';
 
 export interface PairOutcome {
   base: Outcome;
@@ -39,6 +40,14 @@ export interface ExploreOptions {
   selfCheck?: number;
   /** Max evaluations of the humanizing pass per witness. */
   humanizeBudget?: number;
+  /**
+   * Input domain: generated inputs outside it are skipped. Strict (config `where`) skips all of them; otherwise
+   * (guards inferred from the old version) 3 of 4 are skipped, so changed validation is still exercised.
+   */
+  inDomain?: (input: unknown[]) => boolean;
+  strictDomain?: boolean;
+  /** Realism of an input; witnesses are chosen most-realistic first. */
+  realism?: (input: unknown[]) => Realism;
   onProgress?: (p: { inputsRun: number; clusters: number }) => void;
 }
 
@@ -49,6 +58,8 @@ export interface Witness {
   diff: OutcomeDiff;
   /** True for the simplest example of the cluster (after shrinking and humanizing). */
   minimal: boolean;
+  /** How realistic the input is (see realism.ts). */
+  realism?: Realism;
 }
 
 export interface Cluster {
@@ -109,6 +120,24 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   const thresholds = options.thresholds ?? [0];
   const mrng = new fc.Random(xoroshiro128plus(seed));
 
+  const realismCache = new Map<string, number>();
+  const tierOf = (input: unknown[]): number => {
+    if (!options.realism) return 0;
+    const k = stableKey(input);
+    let t = realismCache.get(k);
+    if (t === undefined) {
+      t = options.realism(input).tier;
+      realismCache.set(k, t);
+    }
+    return t;
+  };
+  let outOfDomain = 0;
+  /** Domain filter for generated inputs (see `inDomain`). */
+  const wanted = (input: unknown[]): boolean => {
+    if (!options.inDomain || options.inDomain(input)) return true;
+    if (options.strictDomain) return false;
+    return outOfDomain++ % 4 === 0;
+  };
   const cache = new Map<string, PairOutcome>();
   /** Values that came from explicit examples have no shrink context. */
   const exampleValues = new WeakSet<fc.Value<unknown[]>>();
@@ -170,7 +199,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     if (existing) {
       existing.count++;
       existing.witnesses.push(witness);
-      existing.witnesses.sort((a, b) => size(a.input) - size(b.input));
+      existing.witnesses.sort((a, b) => tierOf(b.input) - tierOf(a.input) || size(a.input) - size(b.input));
       existing.witnesses.length = Math.min(existing.witnesses.length, maxWitnesses);
       return;
     }
@@ -199,7 +228,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   while (first.length < Math.min(selfCheck, runs) && stale < 100) {
     const v = arbitrary.generate(mrng, biasFor(runIndex++));
     const k = stableKey(v.value);
-    if (seen.has(k)) {
+    if (seen.has(k) || !wanted(v.value)) {
       stale++;
       continue;
     }
@@ -255,7 +284,9 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     let attempts = 0;
     while (batch.length < want && attempts < want * 4) {
       attempts++;
-      const v = pendingExamples.shift() ?? arbitrary.generate(mrng, biasFor(runIndex++));
+      const example = pendingExamples.shift();
+      const v = example ?? arbitrary.generate(mrng, biasFor(runIndex++));
+      if (!example && !wanted(v.value)) continue;
       const k = stableKey(v.value);
       if (seen.has(k)) continue;
       seen.add(k);
@@ -328,12 +359,31 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     }
     const ranked = [...finals.values()]
       .filter((input) => classify(input, cache.get(stableKey(input))!)?.key === cluster.key)
-      .sort((a, b) => inputComplexity(a) - inputComplexity(b))
+      .sort((a, b) => tierOf(b) - tierOf(a) || inputComplexity(a) - inputComplexity(b))
       .slice(0, maxWitnesses);
     cluster.witnesses = ranked.map((input, i) => {
       const r = cache.get(stableKey(input))!;
-      return { input, base: r.base, head: r.head, diff: classify(input, r)!.diff, minimal: i === 0 };
+      const w: Witness = {
+        input,
+        base: r.base,
+        head: r.head,
+        diff: classify(input, r)!.diff,
+        minimal: i === 0,
+      };
+      if (options.realism) w.realism = options.realism(input);
+      return w;
     });
+  }
+
+  // Score every witness (including clusters that could not be shrunk) and order them most realistic first.
+  if (options.realism) {
+    for (const cluster of clusters.values()) {
+      for (const w of cluster.witnesses) w.realism ??= options.realism(w.input);
+      cluster.witnesses.sort(
+        (a, b) => b.realism!.tier - a.realism!.tier || inputComplexity(a.input) - inputComplexity(b.input),
+      );
+      cluster.witnesses.forEach((w, i) => (w.minimal = i === 0));
+    }
   }
 
   // 4. Confirmation: re-run every reported witness once more (uncached) and drop clusters that do not reproduce.

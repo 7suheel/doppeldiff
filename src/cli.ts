@@ -19,7 +19,8 @@ export type FailOn = 'unclaimed' | 'any' | 'never';
 export function exitCodeFor(report: Report, failOn: FailOn): 0 | 1 {
   if (failOn === 'never') return 0;
   if (failOn === 'any') return report.summary.behaviors > 0 ? 1 : 0;
-  return report.summary.unclaimed > 0 ? 1 : 0;
+  // Unclaimed changes on unusual or edge-case-only inputs are reported but do not fail the run.
+  return report.summary.unclaimedRealistic > 0 ? 1 : 0;
 }
 
 const list = (v: unknown): string[] | undefined => {
@@ -70,8 +71,9 @@ interface CliFlags {
   quiet?: boolean;
   showConsole?: boolean;
   sandbox?: boolean;
-  llm?: 'auto' | 'anthropic' | 'openai' | 'off';
+  llm?: 'auto' | 'anthropic' | 'openai' | 'openai-compatible' | 'ollama' | 'off';
   llmModel?: string;
+  llmBaseUrl?: string;
   llmInputs?: boolean;
 }
 
@@ -107,9 +109,13 @@ export async function main(argv = process.argv): Promise<number> {
     .option('--keep-worktrees', 'Keep temporary git worktrees for debugging')
     .option(
       '--llm <provider>',
-      'Claim matching / input suggestions: auto (default, if an API key is set) | anthropic | openai | off',
+      'Optional LLM: off (default) | ollama | openai-compatible | anthropic | openai | auto',
     )
-    .option('--llm-model <id>', 'Model for the LLM layer (default claude-opus-5-5 / gpt-5.5)')
+    .option('--llm-model <id>', 'Model for the LLM layer (required for ollama / openai-compatible)')
+    .option(
+      '--llm-base-url <url>',
+      'OpenAI-compatible endpoint (default for ollama: http://localhost:11434/v1)',
+    )
     .option('--no-llm-inputs', 'Do not ask the LLM for edge-case inputs (claim matching only)')
     .option('--config <path>', 'Config file (default doppeldiff.config.{ts,mts,js,mjs})')
     .option('--cwd <dir>', 'Repository directory (default: current directory)')
@@ -170,6 +176,7 @@ async function runCli(flags: CliFlags): Promise<number> {
     provider = selectProvider({
       ...(flags.llm ? { provider: flags.llm } : {}),
       ...(flags.llmModel ? { model: String(flags.llmModel) } : {}),
+      ...(flags.llmBaseUrl ? { baseUrl: String(flags.llmBaseUrl) } : {}),
     });
   } catch (e) {
     err(pc.red(`doppeldiff: ${(e as Error).message}`));

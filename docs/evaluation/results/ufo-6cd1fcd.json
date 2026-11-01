@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 4000,
-    "durationMs": 2344
+    "durationMs": 2166
   },
   "functions": [
     {
@@ -48,76 +50,84 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1125,
+      "durationMs": 952,
       "seed": 1810207695,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 98
+      },
+      "guards": ["!respectQueryAndFragment"],
       "behaviors": [
         {
           "id": "src/utils.ts#withoutTrailingSlash/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 3,
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 34,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text", "true"],
-              "count": 3
+              "count": 34
             }
           ],
           "examples": [
             {
-              "call": "withoutTrailingSlash(\"_?/\", true)",
-              "argsCode": "\"_?/\", true",
+              "call": "withoutTrailingSlash(\"bar#abc/\", true)",
+              "argsCode": "\"bar#abc/\", true",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"/?/\"",
-                "code": "\"/?/\""
+                "display": "\"ba#abc/\"",
+                "code": "\"ba#abc/\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"_?/\"",
-                "code": "\"_?/\""
+                "display": "\"bar#abc/\"",
+                "code": "\"bar#abc/\""
               },
               "minimal": true
             },
             {
-              "call": "withoutTrailingSlash(\"-b?/\", true)",
-              "argsCode": "\"-b?/\", true",
+              "call": "withoutTrailingSlash(\"foo?123/\", true)",
+              "argsCode": "\"foo?123/\", true",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"-?/\"",
-                "code": "\"-?/\""
+                "display": "\"fo?123/\"",
+                "code": "\"fo?123/\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"-b?/\"",
-                "code": "\"-b?/\""
+                "display": "\"foo?123/\"",
+                "code": "\"foo?123/\""
               },
               "minimal": false
             },
             {
-              "call": "withoutTrailingSlash(\"_?=/\", true)",
-              "argsCode": "\"_?=/\", true",
+              "call": "withoutTrailingSlash(\"ol[#/\", true)",
+              "argsCode": "\"ol[#/\", true",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"/?=/\"",
-                "code": "\"/?=/\""
+                "display": "\"ol#/\"",
+                "code": "\"ol#/\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"_?=/\"",
-                "code": "\"_?=/\""
+                "display": "\"ol[#/\"",
+                "code": "\"ol[#/\""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `withoutTrailingSlash`."
         }
       ]
     },
@@ -133,6 +143,11 @@
       "failures": 0,
       "durationMs": 109,
       "seed": 3870797363,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 18
+      },
       "behaviors": []
     },
     {
@@ -145,8 +160,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 53,
+      "durationMs": 77,
       "seed": 2778817679,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 18
+      },
       "behaviors": []
     },
     {
@@ -159,8 +179,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 40,
+      "durationMs": 63,
       "seed": 2346989735,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 9
+      },
       "behaviors": []
     }
   ],
@@ -171,10 +196,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2344,
-    "materializeMs": 63,
-    "dependenciesMs": 1,
-    "detectMs": 952,
-    "verifyMs": 1328
+    "totalMs": 2166,
+    "materializeMs": 67,
+    "dependenciesMs": 0,
+    "detectMs": 871,
+    "verifyMs": 1228
   }
 }

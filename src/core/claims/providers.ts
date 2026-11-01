@@ -15,7 +15,7 @@ export interface StructuredRequest {
 }
 
 export interface LlmProvider {
-  readonly name: 'anthropic' | 'openai' | 'fake';
+  readonly name: 'anthropic' | 'openai' | 'openai-compatible' | 'fake';
   readonly model: string;
   /** Returns the raw JSON text produced by the model. */
   complete(req: StructuredRequest): Promise<string>;
@@ -96,23 +96,118 @@ export function openaiProvider(model: string = DEFAULT_MODELS.openai): LlmProvid
   };
 }
 
+export const OLLAMA_BASE_URL = 'http://localhost:11434/v1';
+
+/**
+ * Any OpenAI-compatible Chat Completions endpoint: Ollama, llama.cpp server, LM Studio, vLLM, or a hosted gateway.
+ * Uses plain fetch (no SDK). Free when it points at a local model.
+ */
+export function openaiCompatibleProvider(options: {
+  baseUrl: string;
+  model: string;
+  apiKey?: string;
+  fetchImpl?: typeof fetch;
+}): LlmProvider {
+  const url = `${options.baseUrl.replace(/\/+$/, '')}/chat/completions`;
+  const doFetch = options.fetchImpl ?? fetch;
+  return {
+    name: 'openai-compatible',
+    model: options.model,
+    async complete(req) {
+      const send = async (responseFormat: unknown, extraInstruction: string) => {
+        const res = await doFetch(url, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            ...(options.apiKey ? { authorization: `Bearer ${options.apiKey}` } : {}),
+          },
+          body: JSON.stringify({
+            model: options.model,
+            temperature: 0,
+            messages: [
+              { role: 'system', content: req.system + extraInstruction },
+              { role: 'user', content: req.user },
+            ],
+            response_format: responseFormat,
+          }),
+          signal: AbortSignal.timeout(300_000),
+        });
+        const body = (await res.json().catch(() => ({}))) as {
+          choices?: { message?: { content?: string | null } }[];
+          error?: { message?: string } | string;
+        };
+        return { ok: res.ok, status: res.status, body };
+      };
+      // Prefer strict JSON-schema output; fall back to plain JSON mode for servers without schema support.
+      let r = await send(
+        { type: 'json_schema', json_schema: { name: req.schemaName, schema: req.schema, strict: true } },
+        '',
+      );
+      if (!r.ok && r.status >= 400 && r.status < 500) {
+        r = await send(
+          { type: 'json_object' },
+          `\n\nAnswer with a single JSON object matching this JSON schema:\n${JSON.stringify(req.schema)}`,
+        );
+      }
+      if (!r.ok) {
+        const msg = typeof r.body.error === 'string' ? r.body.error : r.body.error?.message;
+        throw new Error(`LLM endpoint returned HTTP ${r.status}${msg ? `: ${msg.slice(0, 200)}` : ''}`);
+      }
+      const text = r.body.choices?.[0]?.message?.content;
+      if (!text) throw new Error('the model returned no text');
+      return text;
+    },
+  };
+}
+
+export type ProviderChoice = 'off' | 'auto' | 'anthropic' | 'openai' | 'openai-compatible' | 'ollama';
+
 export interface ProviderSelection {
-  /** 'auto' (default): Anthropic if ANTHROPIC_API_KEY is set, else OpenAI if OPENAI_API_KEY is set, else none. */
-  provider?: 'auto' | 'anthropic' | 'openai' | 'off';
+  /**
+   * Default 'off': the LLM layer is never used unless explicitly chosen. 'ollama' / 'openai-compatible' are
+   * free with a local model; 'anthropic' / 'openai' use your own (paid) key; 'auto' picks whichever key is set.
+   */
+  provider?: ProviderChoice;
   model?: string;
+  /** Base URL for 'openai-compatible' (default for 'ollama': http://localhost:11434/v1). */
+  baseUrl?: string;
   env?: NodeJS.ProcessEnv;
 }
 
-/** Pick a provider from flags and environment. Returns null when the LLM layer is off or no key is available. */
+/** Pick a provider from flags and environment. Returns null unless an LLM was explicitly enabled. */
 export function selectProvider(sel: ProviderSelection = {}): LlmProvider | null {
   const env = sel.env ?? process.env;
-  const choice = sel.provider ?? (env.DOPPELDIFF_LLM as ProviderSelection['provider']) ?? 'auto';
+  const choice = sel.provider ?? (env.DOPPELDIFF_LLM as ProviderChoice | undefined) ?? 'off';
   const model = sel.model ?? env.DOPPELDIFF_LLM_MODEL;
+  const baseUrl = sel.baseUrl ?? env.DOPPELDIFF_LLM_BASE_URL;
   const fallbacks = env.DOPPELDIFF_LLM_FALLBACKS !== '0';
-  if (choice === 'off') return null;
-  if (choice === 'anthropic') return anthropicProvider(model, { fallbacks });
-  if (choice === 'openai') return openaiProvider(model);
-  if (env.ANTHROPIC_API_KEY) return anthropicProvider(model, { fallbacks });
-  if (env.OPENAI_API_KEY) return openaiProvider(model);
-  return null;
+  switch (choice) {
+    case 'off':
+      return null;
+    case 'anthropic':
+      return anthropicProvider(model, { fallbacks });
+    case 'openai':
+      return openaiProvider(model);
+    case 'ollama':
+    case 'openai-compatible': {
+      const url = baseUrl ?? (choice === 'ollama' ? OLLAMA_BASE_URL : undefined);
+      if (!url)
+        throw new LlmUnavailableError(
+          '--llm openai-compatible needs --llm-base-url (or DOPPELDIFF_LLM_BASE_URL)',
+        );
+      if (!model)
+        throw new LlmUnavailableError(`--llm ${choice} needs --llm-model (e.g. qwen2.5:7b for Ollama)`);
+      return openaiCompatibleProvider({
+        baseUrl: url,
+        model,
+        ...(env.DOPPELDIFF_LLM_API_KEY ? { apiKey: env.DOPPELDIFF_LLM_API_KEY } : {}),
+      });
+    }
+    case 'auto':
+      if (env.ANTHROPIC_API_KEY) return anthropicProvider(model, { fallbacks });
+      if (env.OPENAI_API_KEY) return openaiProvider(model);
+      return null;
+    default:
+      throw new LlmUnavailableError(`unknown LLM provider "${String(choice)}"`);
+  }
 }

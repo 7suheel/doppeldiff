@@ -1,5 +1,5 @@
 import type { Enc } from '../compare/observed.js';
-import { FN_TAG, isFnDescriptor } from '../runner/tags.js';
+import { FN_TAG, isFnDescriptor, isProtoDescriptor, PROTO_TAG, viewBytes } from '../runner/tags.js';
 
 /**
  * JavaScript source for values, used in reports (copy-pasteable calls) and generated regression tests.
@@ -65,6 +65,19 @@ export function valueToCode(v: unknown): string | undefined {
         return items.some((i) => i === undefined) ? undefined : `new Set([${items.join(', ')}])`;
       }
       if (x instanceof RegExp) return String(x);
+      if (isProtoDescriptor(x)) {
+        const { proto, own } = x[PROTO_TAG];
+        const p = f(proto);
+        const o = f(own);
+        return p === undefined || o === undefined ? undefined : `Object.assign(Object.create(${p}), ${o})`;
+      }
+      if (x instanceof ArrayBuffer) return `new Uint8Array([${viewBytes(x).join(', ')}]).buffer`;
+      if (x instanceof DataView) {
+        return `new DataView(new Uint8Array([${viewBytes(new Uint8Array(x.buffer)).join(', ')}]).buffer, ${x.byteOffset}, ${x.byteLength})`;
+      }
+      if (ArrayBuffer.isView(x) && /^(?:Int|Uint|Float)\d+(?:Clamped)?Array$/.test(x.constructor.name)) {
+        return `new ${x.constructor.name}([${Array.from(x as unknown as ArrayLike<number>).join(', ')}])`;
+      }
       const proto = Object.getPrototypeOf(x) as unknown;
       if (proto !== Object.prototype && proto !== null) return undefined;
       const entries = Object.entries(x as Record<string, unknown>).map(([k, val]) => {

@@ -1,5 +1,5 @@
 import type { Enc, Outcome } from '../compare/observed.js';
-import { FN_TAG, isFnDescriptor } from '../runner/tags.js';
+import { FN_TAG, isFnDescriptor, isProtoDescriptor, PROTO_TAG, viewBytes } from '../runner/tags.js';
 
 const MAX_LEN = 120;
 
@@ -50,6 +50,16 @@ export function formatValue(v: unknown, max = MAX_LEN): string {
         return `new Map([${[...x].map(([k, val]) => `[${f(k)}, ${f(val)}]`).join(', ')}])`;
       if (x instanceof Set) return `new Set([${[...x].map(f).join(', ')}])`;
       if (x instanceof RegExp) return String(x);
+      if (isProtoDescriptor(x)) {
+        const { proto, own } = x[PROTO_TAG];
+        return `Object.assign(Object.create(${f(proto)}), ${f(own)})`;
+      }
+      if (x instanceof ArrayBuffer) return `new Uint8Array([${viewBytes(x).join(', ')}]).buffer`;
+      if (x instanceof DataView) {
+        return `new DataView(new Uint8Array([${viewBytes(new Uint8Array(x.buffer)).join(', ')}]).buffer, ${x.byteOffset}, ${x.byteLength})`;
+      }
+      if (ArrayBuffer.isView(x))
+        return `new ${x.constructor.name}([${Array.from(x as unknown as ArrayLike<number>).join(', ')}])`;
       const entries = Object.entries(x as Record<string, unknown>);
       if (entries.length === 0) return '{}';
       return `{ ${entries.map(([k, val]) => `${key(k)}: ${f(val)}`).join(', ')} }`;

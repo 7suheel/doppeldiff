@@ -1,6 +1,13 @@
 import { mineValues, type MinedValues } from '../arbitraries/mine.js';
 import { compileSignature } from '../arbitraries/compile.js';
-import { asFunctionLike, reachableLocalFunctions, usesThis, type LocateResult } from '../analyze/locate.js';
+import {
+  asFunctionLike,
+  reachableLocalFunctions,
+  referencedModuleValues,
+  usesThis,
+  type LocateResult,
+} from '../analyze/locate.js';
+import { regexDiffStrings } from '../arbitraries/regex.js';
 import { indexModule } from '../detect/toplevel.js';
 import type { SourceFile } from 'ts-morph';
 import type { Arbitrary } from 'fast-check';
@@ -13,6 +20,10 @@ import {
   type PairOutcome,
 } from '../explore/explore.js';
 import { signatureOf } from '../types/fromType.js';
+import { inferGuards } from '../analyze/guards.js';
+import type { Usage } from '../analyze/usage.js';
+import { inputRealism, realismContext } from '../explore/realism.js';
+import { Node } from 'ts-morph';
 import { signatureAccepts } from '../types/accepts.js';
 import { printSpec, signatureUnsupported, type SignatureSpec } from '../types/spec.js';
 import { fnv1a } from '../util/stableKey.js';
@@ -37,6 +48,10 @@ export interface VerifyFunctionOptions {
   deadline?: number;
   compare?: CompareOptions;
   examples?: unknown[][];
+  /** Usage of the function in the repository (call sites, test values). */
+  usage?: Usage;
+  /** Declared input domain (config `where`): inputs outside it are never generated or reported. */
+  where?: (args: unknown[]) => boolean;
   /** Custom argument generator (from the config file); replaces the type-derived one. */
   arbitrary?: Arbitrary<unknown[]>;
   /** Optional source of extra inputs (e.g. LLM edge-case suggestions); results are validated against the types. */
@@ -72,6 +87,10 @@ export interface FunctionResult {
   shrinkEvaluations: number;
   durationMs: number;
   mined?: { numbers: number; strings: number; thresholds: number[] };
+  /** How the function is used in the repository (call sites and tests). */
+  usage?: { files: number; callSites: number; values: number };
+  /** Guard conditions inferred from the old version (used to focus generation). */
+  guards?: string[];
   /** Number of suggested (LLM) inputs that passed type validation and were run first. */
   llmInputs?: number;
 }
@@ -168,18 +187,43 @@ export async function verifyFunction(
   }
 
   // 3. Inputs: type-driven arbitrary biased with values mined from both versions and reachable helpers.
-  const mined = mineValues([
-    baseLoc.node,
-    headLoc.node,
-    ...reachableLocalFunctions(baseLoc.node, 3),
-    ...reachableLocalFunctions(headLoc.node, 3),
-  ]);
+  const baseNodes = [baseLoc.node, ...reachableLocalFunctions(baseLoc.node, 3)];
+  const headNodes = [headLoc.node, ...reachableLocalFunctions(headLoc.node, 3)];
+  // Module-level constants the code reads (`const iso8601 = /.../`) count too.
+  baseNodes.push(...referencedModuleValues(baseNodes));
+  headNodes.push(...referencedModuleValues(headNodes));
+  const mined = mineValues([...baseNodes, ...headNodes]);
+  // Strings on which a changed regex disagrees between the versions.
+  mined.distinguishing = regexDiffStrings(mineValues(baseNodes).regexes, mineValues(headNodes).regexes);
+  // Values real callers and tests use come first: they bias generation and make findings more realistic.
+  const usage = options.usage;
+  if (usage) {
+    const finite = usage.numbers.filter((n) => Number.isFinite(n));
+    mined.numbers = [...new Set([...finite.slice(0, 60), ...mined.numbers])].slice(0, 260);
+    mined.strings = [...new Set([...usage.strings.slice(0, 60), ...mined.strings])].slice(0, 260);
+    mined.fragments = [
+      ...new Set([
+        ...mined.fragments,
+        ...usage.strings.filter((s) => s.length > 0 && s.length <= 12).slice(0, 30),
+      ]),
+    ];
+    base.usage = {
+      files: usage.files,
+      callSites: usage.tuples.length,
+      values: usage.numbers.length + usage.strings.length,
+    };
+  }
+  const guards = Node.isVariableDeclaration(baseLoc.node) ? undefined : inferGuards(baseLoc.node);
+  if (guards) base.guards = guards.conditions;
+  const realismCtx = realismContext(usage);
   base.mined = { numbers: mined.numbers.length, strings: mined.strings.length, thresholds: mined.thresholds };
   const arbitrary = options.arbitrary ?? compileSignature(headSig, { mined });
   if (!arbitrary) return skip('could not build an input generator for the signature');
 
   // Optional suggested inputs (validated against the signature by the suggester).
-  let examples = options.examples ?? [];
+  // Literal call sites from the repository run first (filtered by a declared domain, if any).
+  let examples = [...(usage?.tuples ?? []), ...(options.examples ?? [])];
+  if (options.where) examples = examples.filter((e) => safeWhere(options.where!, e));
   if (options.suggest) {
     try {
       const suggested = await options.suggest({
@@ -238,6 +282,12 @@ export async function verifyFunction(
     ...(options.compare ? { compare: options.compare } : {}),
     ...(examples.length ? { examples } : {}),
     ...(options.onProgress ? { onProgress: options.onProgress } : {}),
+    ...(options.where
+      ? { inDomain: (input: unknown[]) => safeWhere(options.where!, input), strictDomain: true }
+      : guards
+        ? { inDomain: (input: unknown[]) => guards.accepts(input) }
+        : {}),
+    realism: (input: unknown[]) => inputRealism(input, realismCtx),
   });
 
   const common = {
@@ -260,4 +310,12 @@ export async function verifyFunction(
     };
   }
   return { ...common, status: result.clusters.length > 0 ? 'changed' : 'unchanged' };
+}
+
+function safeWhere(where: (args: unknown[]) => boolean, input: unknown[]): boolean {
+  try {
+    return where(structuredClone(input)) !== false;
+  } catch {
+    return false;
+  }
 }

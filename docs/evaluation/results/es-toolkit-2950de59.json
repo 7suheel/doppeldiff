@@ -26,16 +26,18 @@
     "freeze": true
   },
   "summary": {
-    "verdict": "no-change",
+    "verdict": "changes",
     "functions": 2,
-    "changed": 0,
-    "unchanged": 2,
+    "changed": 1,
+    "unchanged": 1,
     "skipped": 0,
     "nondeterministic": 0,
-    "behaviors": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 5219
+    "durationMs": 4356
   },
   "functions": [
     {
@@ -43,14 +45,85 @@
       "file": "src/object/clone.ts",
       "exportName": "clone",
       "signature": "clone(obj: unknown)",
-      "status": "unchanged",
+      "status": "changed",
       "targetReason": "code changed",
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 969,
+      "durationMs": 875,
       "seed": 1439870593,
-      "behaviors": []
+      "usage": {
+        "files": 38,
+        "callSites": 4,
+        "values": 218
+      },
+      "guards": ["typeof obj === 'object'"],
+      "behaviors": [
+        {
+          "id": "src/object/clone.ts#clone/1",
+          "key": "returns typed: value changed",
+          "title": "return value changed",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 7,
+          "variants": [
+            {
+              "transition": "returns typed: value changed",
+              "features": ["binary"],
+              "count": 7
+            }
+          ],
+          "examples": [
+            {
+              "call": "clone(new DataView(new Uint8Array([0]).buffer, 0, 0))",
+              "argsCode": "new DataView(new Uint8Array([0]).buffer, 0, 0)",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView [0]"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView []"
+              },
+              "minimal": true
+            },
+            {
+              "call": "clone(new DataView(new Uint8Array([0, 0]).buffer, 1, 0))",
+              "argsCode": "new DataView(new Uint8Array([0, 0]).buffer, 1, 0)",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView [0, 0]"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView []"
+              },
+              "minimal": false
+            },
+            {
+              "call": "clone(new DataView(new Uint8Array([0, 234, 0]).buffer, 1, 1))",
+              "argsCode": "new DataView(new Uint8Array([0, 234, 0]).buffer, 1, 1)",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView [0, 234, 0]"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "DataView [234]"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `clone`."
+        }
+      ]
     },
     {
       "id": "src/object/toMerged.ts#toMerged",
@@ -62,8 +135,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 303,
+      "durationMs": 268,
       "seed": 3681003703,
+      "usage": {
+        "files": 5,
+        "callSites": 2,
+        "values": 30
+      },
       "behaviors": []
     }
   ],
@@ -74,10 +152,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 5219,
-    "materializeMs": 1265,
+    "totalMs": 4356,
+    "materializeMs": 1090,
     "dependenciesMs": 1,
-    "detectMs": 2680,
-    "verifyMs": 1272
+    "detectMs": 2009,
+    "verifyMs": 1256
   }
 }

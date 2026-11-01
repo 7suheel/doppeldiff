@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { formatArgs } from '../../src/core/format/format.js';
 import { run, type RunResult } from '../../src/core/run.js';
 import { gitIn, makeRepo } from '../helpers/repo.js';
 import { gitScenario } from '../helpers/scenarios.js';
@@ -340,5 +341,146 @@ describe('CommonJS end to end', () => {
     expect(f.signature).toBe('price(p: number, member: boolean)');
     expect(f.status).toBe('changed');
     for (const c of f.clusters) expect(c.witnesses[0]!.input[1]).toBe(true);
+  });
+});
+
+describe('input domains', () => {
+  it('honours a declared `where` domain from the config', async () => {
+    const repo = makeRepo(
+      { 'src/id.ts': 'export function cmp(a: number, b: number) { return a < b ? -1 : a > b ? 1 : 0; }' },
+      {
+        'src/id.ts':
+          'export function cmp(a: number, b: number) { return a < 0 || b < 0 ? 0 : a < b ? -1 : a > b ? 1 : 0; }',
+      },
+    );
+    cleanups.push(repo.cleanup);
+    const free = await run({ cwd: repo.root, runs: 300 });
+    expect(free.functions[0]!.status).toBe('changed');
+    const domain = await run({
+      cwd: repo.root,
+      runs: 300,
+      functions: { cmp: { where: ([a, b]) => (a as number) >= 0 && (b as number) >= 0 } },
+    });
+    expect(domain.functions[0]!.status).toBe('unchanged');
+  });
+});
+
+describe('generator coverage', () => {
+  it('finds a fix in a module-level regex constant (strings the two regexes disagree on)', async () => {
+    const re = (days: string) =>
+      `const ORDINAL = /^\\d{4}-(0\\d\\d|[12]\\d\\d|3([0-5]\\d|${days}))$/;\nexport function isOrdinal(s: string) { return ORDINAL.test(s); }\n`;
+    const repo = makeRepo({ 'src/o.ts': re('6[1-6]') }, { 'src/o.ts': re('6[0-6]') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 300, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    expect(f.clusters[0]!.witnesses[0]!.input[0]).toMatch(/-360$/);
+  });
+
+  it('passes DataViews with their offset and length to the code under test', async () => {
+    const clone = (args: string) =>
+      `export function clone<T>(obj: T): T {\n  if (obj instanceof DataView) return new DataView(${args}) as T;\n  return obj;\n}\n`;
+    const repo = makeRepo(
+      { 'src/c.ts': clone('obj.buffer.slice(0)') },
+      { 'src/c.ts': clone('obj.buffer.slice(0), obj.byteOffset, obj.byteLength') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 1000, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    expect(formatArgs(f.clusters[0]!.witnesses[0]!.input)).toContain('new DataView(');
+    // Deterministic: the bytes outside the window come from the generated buffer, not from the IPC message.
+    expect(f.nondeterministic).toBeUndefined();
+  });
+
+  it('passes objects with inherited enumerable properties (for...in vs Object.keys)', async () => {
+    const keys = (loop: string) =>
+      `export function keys(o: any): string[] {\n  const out: string[] = [];\n  ${loop}\n  return out;\n}\n`;
+    const repo = makeRepo(
+      { 'src/k.ts': keys('for (const k in o) out.push(k);') },
+      { 'src/k.ts': keys('for (const k of Object.keys(Object(o))) out.push(k);') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 1000, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    const calls = f.clusters.flatMap((c) => c.witnesses.map((w) => formatArgs(w.input)));
+    expect(calls.some((c) => c.includes('Object.create('))).toBe(true);
+  });
+});
+
+describe('detection and runtime edge cases', () => {
+  it('recognizes `module.exports = fn; module.exports.parse = parse` before hoisted declarations', async () => {
+    const lib = (ret: string) =>
+      `module.exports = bytes;\nmodule.exports.parse = parse;\nfunction bytes(v) { return parse(v); }\nfunction parse(v) { const n = parseFloat(v); ${ret} }\n`;
+    const repo = makeRepo(
+      { 'index.js': lib('return n;') },
+      { 'index.js': lib('return isNaN(n) ? null : n;') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    const byId = Object.fromEntries(r.functions.map((f) => [f.id, f.status]));
+    expect(byId['index.js#parse']).toBe('changed');
+    expect(byId['index.js#default']).toBe('changed');
+  });
+
+  it('keeps the clock frozen for `new date.constructor()`', async () => {
+    const stamp = (tail: string) =>
+      `export function stamp(d: Date): number {\n  return new (d.constructor as DateConstructor)().getTime()${tail};\n}\n`;
+    const repo = makeRepo({ 'src/s.ts': stamp('') }, { 'src/s.ts': stamp(' + 0') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 100, seed: 1 });
+    expect(r.functions[0]!.status).toBe('unchanged');
+  });
+
+  it('treats a JSDoc `{Object}` parameter as any object', async () => {
+    const fmt = (body: string) =>
+      `/**\n * @param {number} n\n * @param {Object} opts\n */\nexport function fmt(n, opts) {\n  ${body}\n}\n`;
+    const repo = makeRepo(
+      { 'src/f.js': fmt('return String(n);') },
+      { 'src/f.js': fmt('return n < 0 ? "-" : String(n);') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    expect(r.functions[0]!.status).toBe('changed');
+  });
+
+  it('follows impact across files through unchanged functions that use changed ones', async () => {
+    const helpers = (sign: string) =>
+      `export function round(n: number) { return Math.round(n${sign}); }\nexport function decorate(n: number) { return round(n) + ' B'; }\n`;
+    const repo = makeRepo(
+      {
+        'src/helpers.ts': helpers(''),
+        'src/main.ts':
+          "import { decorate } from './helpers';\nexport function size(n: number) { return decorate(n); }\n",
+      },
+      { 'src/helpers.ts': helpers(' + 0.5') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 200, seed: 1 });
+    const size = r.functions.find((f) => f.id === 'src/main.ts#size')!;
+    expect(size.targetReason).toContain('which uses changed `round`');
+    expect(size.status).toBe('changed');
+  });
+});
+
+describe('runner robustness', () => {
+  it('undoes prototype pollution between calls', async () => {
+    const poll = (tail: string) =>
+      `export function poll(k: string): unknown {\n  const before = ({} as any).polluted;\n  (Object.prototype as any).polluted = k;\n  return before${tail};\n}\n`;
+    const repo = makeRepo({ 'src/p.ts': poll('') }, { 'src/p.ts': poll(' ?? undefined') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 100, seed: 1 });
+    expect(r.functions[0]!.status).toBe('unchanged');
+  });
+
+  it('encodes huge sparse arrays without hanging', async () => {
+    const sparse = (v: string) =>
+      `export function sparse(n: number): unknown[] {\n  const a: unknown[] = [];\n  a[4294967294] = ${v};\n  return a;\n}\n`;
+    const repo = makeRepo({ 'src/s.ts': sparse('1') }, { 'src/s.ts': sparse('2') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 50, seed: 1 });
+    expect(r.functions[0]!.status).toBe('changed');
+    expect(r.functions[0]!.durationMs).toBeLessThan(20_000);
   });
 });

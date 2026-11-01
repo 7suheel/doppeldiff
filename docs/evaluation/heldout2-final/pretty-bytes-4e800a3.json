@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "4e800a3^",
+    "sha": "1d517bb3671b2777dfa501b3415c2a950f767484"
+  },
+  "head": {
+    "ref": "4e800a3",
+    "sha": "4e800a3dd8b1f2e860a6b8bdc2b19adb97d080e7"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix formatting edge cases and validate options",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 1,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 2985
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(number: unknown, options: unknown)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 2225,
+      "seed": 2354929897,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 0
+      },
+      "guards": ["typeof number !== 'bigint' && !Number.isFinite(number)"],
+      "behaviors": [
+        {
+          "id": "index.js#default/1",
+          "key": "throws RangeError → throws TypeError",
+          "title": "now throws TypeError instead of RangeError",
+          "realism": "ordinary",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 1,
+          "variants": [
+            {
+              "transition": "throws RangeError → throws TypeError",
+              "features": ["<-1", "{…}"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(-2, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"a\", \"76N\": 0 })",
+              "argsCode": "-2, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"a\", \"76N\": 0 }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: maximumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "maximumFractionDigits value is out of range."
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Expected maximumFractionDigits to be an integer between 0 and 100, got string: a",
+                "errorClass": "TypeError",
+                "message": "Expected maximumFractionDigits to be an integer between 0 and 100, got string: a"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(-1.0000000000000013, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"mbit\", \"76N\": -394 })",
+              "argsCode": "-1.0000000000000013, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"mbit\", \"76N\": -394 }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: maximumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "maximumFractionDigits value is out of range."
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Expected maximumFractionDigits to be an integer between 0 and 100, got string: mbit",
+                "errorClass": "TypeError",
+                "message": "Expected maximumFractionDigits to be an integer between 0 and 100, got string: mbit"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(-1.2602361012407357e+298, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"mbit\", \"76N\": -394 })",
+              "argsCode": "-1.2602361012407357e+298, { toLocaleString: null, mantissa: undefined, maximumFractionDigits: \"mbit\", \"76N\": -394 }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: maximumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "maximumFractionDigits value is out of range."
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Expected maximumFractionDigits to be an integer between 0 and 100, got string: mbit",
+                "errorClass": "TypeError",
+                "message": "Expected maximumFractionDigits to be an integer between 0 and 100, got string: mbit"
+              },
+              "minimal": false
+            }
+          ]
+        },
+        {
+          "id": "index.js#default/2",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "edge",
+          "realismNote": "tiny number",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 55,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "text"],
+              "count": 11
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "[…]"],
+              "count": 5
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "text"],
+              "count": 4
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", ">100"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "[…]"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["<-1", "text"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "(1,100)"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "undefined"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "(-1,0)"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": [">100", "text"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "nonempty"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "(0,0.000001)"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "<-1"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "null"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "false"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "blank"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "neg"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["<-1", ">100"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["<-1", "(0,0.000001)"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "empty"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "<-1"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(-1,0)", "inherited{…}"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["(0,0.000001)", "{}"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(-5e-324, [0])",
+              "argsCode": "-5e-324, [0]",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-5e-324 B\"",
+                "code": "\"-5e-324 B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000…",
+                "code": "\"-0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005 B\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(5e-324, undefined)",
+              "argsCode": "5e-324, undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"5e-324 B\"",
+                "code": "\"5e-324 B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000…",
+                "code": "\"0.000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000005 B\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(3.27985e-317, \"\")",
+              "argsCode": "3.27985e-317, \"\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"3.28e-317 B\"",
+                "code": "\"3.28e-317 B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0.00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000…",
+                "code": "\"0.0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000328 B\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2985,
+    "materializeMs": 51,
+    "dependenciesMs": 0,
+    "detectMs": 675,
+    "verifyMs": 2259
+  }
+}

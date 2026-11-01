@@ -24,5 +24,3 @@ jobs:
         with:
           persist-credentials: false
       - uses: ./
-        with:
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

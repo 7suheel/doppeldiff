@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "7dd6f8f^",
+    "sha": "8877f41873e37a30258d3935feaf1d2679321735"
+  },
+  "head": {
+    "ref": "7dd6f8f",
+    "sha": "7dd6f8f7bd63ae8bffca0968144508228dc61729"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix stringify name across empty text tokens (#456)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 1,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 0,
+    "durationMs": 475
+  },
+  "functions": [
+    {
+      "id": "src/index.ts#stringify",
+      "file": "src/index.ts",
+      "exportName": "stringify",
+      "signature": "stringify(data: <unsupported: class instance `TokenData`>)",
+      "status": "skipped",
+      "reason": "unsupported parameter type: parameter `data`: class instance `TokenData` (provide `args` in doppeldiff.config.ts)",
+      "targetReason": "uses changed `stringifyTokens`",
+      "inputsRun": 0,
+      "failures": 0,
+      "durationMs": 84,
+      "seed": 1839717764,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 475,
+    "materializeMs": 60,
+    "dependenciesMs": 1,
+    "detectMs": 310,
+    "verifyMs": 104
+  }
+}

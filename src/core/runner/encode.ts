@@ -1,4 +1,5 @@
 import type { Enc } from '../compare/observed.js';
+import { viewBytes } from './tags.js';
 
 /**
  * Encode an arbitrary runtime value into the canonical `Enc` representation.
@@ -74,7 +75,20 @@ export function encode(value: unknown, limits: EncodeLimits = DEFAULT_LIMITS): E
     const tag = toStringTag(obj);
     if (Array.isArray(obj)) {
       const items: Enc[] = [];
-      for (let i = 0; i < obj.length; i++) items.push(readProp(obj, String(i), depth));
+      // Huge sparse array (`a[4294967294] = x`): describe its populated entries instead of walking the holes.
+      const populated = obj.length > limits.maxNodes ? Object.keys(obj) : undefined;
+      if (populated && populated.length < limits.maxNodes) {
+        const entries = populated.slice(0, 20).map((k) => `${k}: ${JSON.stringify(readProp(obj, k, depth))}`);
+        return { t: 'truncated', reason: `sparse array of length ${obj.length} {${entries.join(', ')}}` };
+      }
+      for (let i = 0; i < obj.length; i++) {
+        // A sparse array can be billions of elements long (`a[4294967294] = x`): stop at the node limit.
+        if (nodes > limits.maxNodes) {
+          items.push({ t: 'truncated', reason: `array of length ${obj.length}` });
+          break;
+        }
+        items.push(readProp(obj, String(i), depth));
+      }
       return { t: 'array', items };
     }
     if (tag === 'Date') return { t: 'date', v: Date.prototype.getTime.call(obj) };
@@ -95,7 +109,11 @@ export function encode(value: unknown, limits: EncodeLimits = DEFAULT_LIMITS): E
       return { t: 'set', items };
     }
     if (tag === 'Promise') return { t: 'promise' };
-    if (ArrayBuffer.isView(obj) && !(obj instanceof DataView)) {
+    if (tag === 'DataView' || tag === 'ArrayBuffer' || tag === 'SharedArrayBuffer') {
+      // Bytes of the visible window: a DataView over the wrong offset/length shows different bytes.
+      return { t: 'typed', ctor: tag, items: viewBytes(obj as ArrayBuffer | DataView) };
+    }
+    if (ArrayBuffer.isView(obj)) {
       const arr = obj as unknown as ArrayLike<number | bigint>;
       return {
         t: 'typed',

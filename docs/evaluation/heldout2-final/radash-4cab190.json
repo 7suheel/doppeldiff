@@ -1,0 +1,429 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "4cab190^",
+    "sha": "069b26cdd7d62e6ac16a0ad3baa1c9abcca420bc"
+  },
+  "head": {
+    "ref": "4cab190",
+    "sha": "4cab1900d08e0997abc4f17aec3cbfe18958d766"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: set and construct handling strings starting with numbers (#455)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 4,
+    "changed": 4,
+    "unchanged": 0,
+    "skipped": 2,
+    "nondeterministic": 0,
+    "behaviors": 4,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 4000,
+    "durationMs": 2148
+  },
+  "functions": [
+    {
+      "id": "cdn/radash.esm.js#construct",
+      "file": "cdn/radash.esm.js",
+      "exportName": "construct",
+      "signature": "construct(obj: unknown)",
+      "status": "changed",
+      "targetReason": "uses changed `set`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 530,
+      "seed": 1044542413,
+      "usage": {
+        "files": 6,
+        "callSites": 2,
+        "values": 98
+      },
+      "guards": ["!obj"],
+      "behaviors": [
+        {
+          "id": "cdn/radash.esm.js#construct/1",
+          "key": "returns object: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 1,
+          "variants": [
+            {
+              "transition": "returns object: value changed",
+              "features": ["{…}"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "construct({ \"!]0 \": 0 })",
+              "argsCode": "{ \"!]0 \": 0 }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"!\": [] }",
+                "code": "{ \"!\": [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"!\": { \"0 \": 0 } }",
+                "code": "{ \"!\": { \"0 \": 0 } }"
+              },
+              "minimal": true
+            },
+            {
+              "call": "construct({ \"dLWF fs*SB\": 0, \"LFN]8ya\": 0, \"<Pz:4|\": \"\", \" VzWTAbN\": undefined })",
+              "argsCode": "{ \"dLWF fs*SB\": 0, \"LFN]8ya\": 0, \"<Pz:4|\": \"\", \" VzWTAbN\": undefined }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"dLWF fs*SB\": 0, LFN: [], \"<Pz:4|\": \"\" }",
+                "code": "{ \"dLWF fs*SB\": 0, LFN: [], \"<Pz:4|\": \"\" }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"dLWF fs*SB\": 0, LFN: { \"8ya\": 0 }, \"<Pz:4|\": \"\" }",
+                "code": "{ \"dLWF fs*SB\": 0, LFN: { \"8ya\": 0 }, \"<Pz:4|\": \"\" }"
+              },
+              "minimal": false
+            },
+            {
+              "call": "construct({ \"dLWF fs*SB\": 4050611238202045, \"LFN]8ya\": 1.238347095589144e-43, \"<Pz:4|\": \"7zK'V~li\", \" VzWTAbN\": undefined })",
+              "argsCode": "{ \"dLWF fs*SB\": 4050611238202045, \"LFN]8ya\": 1.238347095589144e-43, \"<Pz:4|\": \"7zK'V~li\", \" VzWTAbN\": undefined }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"dLWF fs*SB\": 4050611238202045, LFN: [], \"<Pz:4|\": \"7zK'V~li\" }",
+                "code": "{ \"dLWF fs*SB\": 4050611238202045, LFN: [], \"<Pz:4|\": \"7zK'V~li\" }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"dLWF fs*SB\": 4050611238202045, LFN: { \"8ya\": 1.238347095589144e-43 }, \"<Pz:4|\": \"7zK'V~li\" }",
+                "code": "{ \"dLWF fs*SB\": 4050611238202045, LFN: { \"8ya\": 1.238347095589144e-43 }, \"<Pz:4|\": \"7zK'V~li\" }"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `construct`, `set`."
+        }
+      ]
+    },
+    {
+      "id": "cdn/radash.esm.js#set",
+      "file": "cdn/radash.esm.js",
+      "exportName": "set",
+      "signature": "set(initial: unknown, path: unknown, value: unknown)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 325,
+      "seed": 319641992,
+      "usage": {
+        "files": 10,
+        "callSites": 17,
+        "values": 171
+      },
+      "guards": ["!initial"],
+      "behaviors": [
+        {
+          "id": "cdn/radash.esm.js#set/1",
+          "key": "returns object: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 2,
+          "variants": [
+            {
+              "transition": "returns object: value changed",
+              "features": ["{}", "text", ">1"],
+              "count": 1
+            },
+            {
+              "transition": "returns object: value changed",
+              "features": ["{}", "text", "text"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "set({}, \"items.123abc.name\", \"a\")",
+              "argsCode": "{}, \"items.123abc.name\", \"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: [] }",
+                "code": "{ items: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: { \"123abc\": { name: \"a\" } } }",
+                "code": "{ items: { \"123abc\": { name: \"a\" } } }"
+              },
+              "minimal": true
+            },
+            {
+              "call": "set({}, \"fields.754a24c1-c15b-49a2-bf37-2dc5f2b3a823.max\", 100)",
+              "argsCode": "{}, \"fields.754a24c1-c15b-49a2-bf37-2dc5f2b3a823.max\", 100",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ fields: [] }",
+                "code": "{ fields: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ fields: { \"754a24c1-c15b-49a2-bf37-2dc5f2b3a823\": { max: 100 } } }",
+                "code": "{ fields: { \"754a24c1-c15b-49a2-bf37-2dc5f2b3a823\": { max: 100 } } }"
+              },
+              "minimal": false
+            },
+            {
+              "call": "set({}, \"items.123abc.name\", \"test\")",
+              "argsCode": "{}, \"items.123abc.name\", \"test\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: [] }",
+                "code": "{ items: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: { \"123abc\": { name: \"test\" } } }",
+                "code": "{ items: { \"123abc\": { name: \"test\" } } }"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `set`."
+        }
+      ]
+    },
+    {
+      "id": "src/object.ts#set",
+      "file": "src/object.ts",
+      "exportName": "set",
+      "signature": "set(initial: unknown, path: string, value: unknown)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 181,
+      "seed": 1696643510,
+      "usage": {
+        "files": 10,
+        "callSites": 17,
+        "values": 171
+      },
+      "guards": ["!initial", "!path || value === undefined"],
+      "behaviors": [
+        {
+          "id": "src/object.ts#set/1",
+          "key": "returns object: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 2,
+          "variants": [
+            {
+              "transition": "returns object: value changed",
+              "features": ["{}", "text", ">1"],
+              "count": 1
+            },
+            {
+              "transition": "returns object: value changed",
+              "features": ["{}", "text", "text"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "set({}, \"items.123abc.name\", \"test\")",
+              "argsCode": "{}, \"items.123abc.name\", \"test\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: [] }",
+                "code": "{ items: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ items: { \"123abc\": { name: \"test\" } } }",
+                "code": "{ items: { \"123abc\": { name: \"test\" } } }"
+              },
+              "minimal": true
+            },
+            {
+              "call": "set({}, \"fields.754a24c1-c15b-49a2-bf37-2dc5f2b3a823.max\", 100)",
+              "argsCode": "{}, \"fields.754a24c1-c15b-49a2-bf37-2dc5f2b3a823.max\", 100",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ fields: [] }",
+                "code": "{ fields: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ fields: { \"754a24c1-c15b-49a2-bf37-2dc5f2b3a823\": { max: 100 } } }",
+                "code": "{ fields: { \"754a24c1-c15b-49a2-bf37-2dc5f2b3a823\": { max: 100 } } }"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `set`."
+        }
+      ]
+    },
+    {
+      "id": "src/object.ts#construct",
+      "file": "src/object.ts",
+      "exportName": "construct",
+      "signature": "construct(obj: unknown)",
+      "status": "changed",
+      "targetReason": "uses changed `set`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 167,
+      "seed": 1436177815,
+      "usage": {
+        "files": 6,
+        "callSites": 2,
+        "values": 98
+      },
+      "guards": ["!obj"],
+      "behaviors": [
+        {
+          "id": "src/object.ts#construct/1",
+          "key": "returns object: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 3,
+          "variants": [
+            {
+              "transition": "returns object: value changed",
+              "features": ["{…}"],
+              "count": 3
+            }
+          ],
+          "examples": [
+            {
+              "call": "construct({ t: 0, \"U>OJD\": false, \"B[9|VV\": false })",
+              "argsCode": "{ t: 0, \"U>OJD\": false, \"B[9|VV\": false }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ t: 0, \"U>OJD\": false, B: [] }",
+                "code": "{ t: 0, \"U>OJD\": false, B: [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ t: 0, \"U>OJD\": false, B: { \"9|VV\": false } }",
+                "code": "{ t: 0, \"U>OJD\": false, B: { \"9|VV\": false } }"
+              },
+              "minimal": true
+            },
+            {
+              "call": "construct({ \"G/f'=G[\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y]R\": -42545504209489150247354260522530614612258127672296429602560635284978879553681n, \"a[0M/`H\": 0, \"1? Dz; x\": true })",
+              "argsCode": "{ \"G/f'=G[\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y]R\": -42545504209489150247354260522530614612258127672296429602560635284978879553681n, \"a[0M/`H\": 0, \"1? Dz; x\": true }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"G/f'=G\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y\": { R: -42545504209489150247354260522530614612258127672296429602560635284978879553681n }, a: [], \"1? Dz; x\": true }",
+                "code": "{ \"G/f'=G\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y\": { R: -42545504209489150247354260522530614612258127672296429602560635284978879553681n }, a: [], \"1? Dz; x\": true }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"G/f'=G\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y\": { R: -42545504209489150247354260522530614612258127672296429602560635284978879553681n }, a: { \"0M/`H\": 0 }, \"1? Dz; x\": true }",
+                "code": "{ \"G/f'=G\": 22168583485111494418120820624925651463078168097666583027714270384326589948390n, \"Sh9`r|Y\": { R: -42545504209489150247354260522530614612258127672296429602560635284978879553681n }, a: { \"0M/`H\": 0 }, \"1? Dz; x\": true }"
+              },
+              "minimal": false
+            },
+            {
+              "call": "construct({ \"![0 \": false })",
+              "argsCode": "{ \"![0 \": false }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"!\": [] }",
+                "code": "{ \"!\": [] }"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "{ \"!\": { \"0 \": false } }",
+                "code": "{ \"!\": { \"0 \": false } }"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `construct`, `set`."
+        }
+      ]
+    }
+  ],
+  "skipped": [
+    {
+      "id": "cdn/radash.js#*",
+      "file": "cdn/radash.js",
+      "exportName": "*",
+      "kind": "module",
+      "reason": "changed, but no ESM/CommonJS exports were recognized (UMD/IIFE wrappers are not supported in v1)"
+    },
+    {
+      "id": "cdn/radash.min.js#*",
+      "file": "cdn/radash.min.js",
+      "exportName": "*",
+      "kind": "module",
+      "reason": "changed, but no ESM/CommonJS exports were recognized (UMD/IIFE wrappers are not supported in v1)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2148,
+    "materializeMs": 58,
+    "dependenciesMs": 0,
+    "detectMs": 704,
+    "verifyMs": 1385
+  }
+}

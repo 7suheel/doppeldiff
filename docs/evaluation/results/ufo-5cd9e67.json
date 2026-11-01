@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2088
+    "durationMs": 2187
   },
   "functions": [
     {
@@ -48,15 +50,21 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1041,
+      "durationMs": 1196,
       "seed": 2778817679,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 30
+      },
       "behaviors": [
         {
           "id": "src/utils.ts#withoutBase/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
           "count": 2,
           "variants": [
             {
@@ -84,40 +92,41 @@
               "minimal": true
             },
             {
-              "call": "withoutBase(\"////////-o.FXJj\", \"//\")",
-              "argsCode": "\"////////-o.FXJj\", \"//\"",
+              "call": "withoutBase(\"/foo//\", \"/foo\")",
+              "argsCode": "\"/foo//\", \"/foo\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"///////-o.FXJj\"",
-                "code": "\"///////-o.FXJj\""
+                "display": "\"//\"",
+                "code": "\"//\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"/-o.FXJj\"",
-                "code": "\"/-o.FXJj\""
+                "display": "\"/\"",
+                "code": "\"/\""
               },
               "minimal": false
             },
             {
-              "call": "withoutBase(\"////////glY2ZuvzB3\", \"//\")",
-              "argsCode": "\"////////glY2ZuvzB3\", \"//\"",
+              "call": "withoutBase(\"/////\", \"////\")",
+              "argsCode": "\"/////\", \"////\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"///////glY2ZuvzB3\"",
-                "code": "\"///////glY2ZuvzB3\""
+                "display": "\"//\"",
+                "code": "\"//\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"/glY2ZuvzB3\"",
-                "code": "\"/glY2ZuvzB3\""
+                "display": "\"/\"",
+                "code": "\"/\""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `withoutBase`."
         }
       ]
     }
@@ -129,10 +138,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2088,
-    "materializeMs": 73,
-    "dependenciesMs": 1,
-    "detectMs": 973,
-    "verifyMs": 1041
+    "totalMs": 2187,
+    "materializeMs": 78,
+    "dependenciesMs": 0,
+    "detectMs": 898,
+    "verifyMs": 1211
   }
 }

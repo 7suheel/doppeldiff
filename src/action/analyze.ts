@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { selectProvider } from '../core/claims/providers.js';
+import { actionProvider } from './provider.js';
 import { buildReport } from '../core/report/build.js';
 import { renderMarkdown } from '../core/report/markdown.js';
 import type { Report } from '../core/report/model.js';
@@ -75,16 +75,12 @@ export async function analyze(ctx: AnalyzeContext): Promise<{ report: Report; ex
 
   const claimText = [pr.title, pr.body ?? ''].join('\n\n').trim();
   // Optional: same-repo workflows may pass an API key for LLM input suggestions. Fork PRs never get secrets.
-  const provider = selectProvider({
-    provider: io.getInput('anthropic-api-key') || io.getInput('openai-api-key') ? 'auto' : 'off',
-    ...(io.getInput('llm-model') ? { model: io.getInput('llm-model') } : {}),
-    env: {
-      ANTHROPIC_API_KEY: io.getInput('anthropic-api-key'),
-      OPENAI_API_KEY: io.getInput('openai-api-key'),
-    },
-  });
-  if (io.getInput('anthropic-api-key')) process.env.ANTHROPIC_API_KEY = io.getInput('anthropic-api-key');
-  if (io.getInput('openai-api-key')) process.env.OPENAI_API_KEY = io.getInput('openai-api-key');
+  let provider = null;
+  try {
+    provider = actionProvider(io);
+  } catch (e) {
+    io.warning(`LLM input suggestions disabled: ${(e as Error).message}`);
+  }
 
   const budget = Number(io.getInput('time-budget') || '60');
   const result = await run({

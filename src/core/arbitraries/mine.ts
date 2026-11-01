@@ -15,6 +15,8 @@ export interface MinedValues {
   fragments: string[];
   /** Regular expressions in the code: inputs in the format the code parses. */
   regexes: MinedRegex[];
+  /** Strings that a changed regex classifies differently in the two versions (see `regexDiffStrings`). */
+  distinguishing?: string[];
 }
 
 export const NUMBER_BOUNDARIES: readonly number[] = [

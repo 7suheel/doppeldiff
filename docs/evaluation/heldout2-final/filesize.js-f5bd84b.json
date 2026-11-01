@@ -1,0 +1,1198 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "f5bd84b^",
+    "sha": "7a485b5833d0f80c244b6f63908cace9dcb8f791"
+  },
+  "head": {
+    "ref": "f5bd84b",
+    "sha": "f5bd84b81bcc4502f9e0c0e75ef839e71e50390c"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: apply locale formatting when precision is set (#376)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 5,
+    "changed": 2,
+    "unchanged": 3,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 6,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 5000,
+    "durationMs": 7195
+  },
+  "functions": [
+    {
+      "id": "src/helpers.js#handleZeroValue",
+      "file": "src/helpers.js",
+      "exportName": "handleZeroValue",
+      "signature": "handleZeroValue(precision: number, actualStandard: string, bits: boolean, symbols: unknown, full: boolean, fullforms: unknown[], output: string, spacer: string, pad: boolean, round: number, symbol: undefined | string, locale?: undefined | string | boolean, localeOptions?: undefined | unknown, separator?: undefined | string)",
+      "status": "unchanged",
+      "targetReason": "uses changed `applyNumberFormatting`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1121,
+      "seed": 1243138757,
+      "usage": {
+        "files": 7,
+        "callSites": 14,
+        "values": 43
+      },
+      "behaviors": []
+    },
+    {
+      "id": "src/helpers.js#applyNumberFormatting",
+      "file": "src/helpers.js",
+      "exportName": "applyNumberFormatting",
+      "signature": "applyNumberFormatting(value: string | number, locale: string | boolean, localeOptions: unknown, separator: string, pad: boolean, round: number, roundingFunc: unknown)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1464,
+      "seed": 1028428758,
+      "usage": {
+        "files": 6,
+        "callSites": 0,
+        "values": 43
+      },
+      "behaviors": [
+        {
+          "id": "src/helpers.js#applyNumberFormatting/1",
+          "key": "returns string → throws RangeError",
+          "title": "now throws RangeError (previously returned a string)",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 33,
+          "variants": [
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "text", "false", "<0", ">0"],
+              "count": 6
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "false", "<0", "text"],
+              "count": 4
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "text", "true", ">0", "{…}"],
+              "count": 3
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "true", ">0", "empty[]"],
+              "count": 2
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "<0", "text", "false", ">0", "text"],
+              "count": 2
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "text", "false", ">0", "{…}"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "text", "true", "<0", "<0"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "blank", "true", ">0", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "true", "<0", "-Inf"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "empty[]", "text", "true", ">0", ">0"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "false", "<0", "{…}"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "text", "true", ">0", "binary"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "true", ">0", "true"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "true", "<0", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "text", "empty", "true", ">0", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "[…]", "text", "false", ">0", "nonempty"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "true", "+Inf", "binary"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "blank", "text", "true", ">0", "[…]"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "<0", "text", "false", ">0", "null"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", ">0", "text", "false", "<0", "nonempty"],
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text", "[…]", "text", "true", ">0", "text"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "applyNumberFormatting(\"a\", \"a\", 1, \"a\", true, 1, [])",
+              "argsCode": "\"a\", \"a\", 1, \"a\", true, 1, []",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a\"",
+                "code": "\"a\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": true
+            },
+            {
+              "call": "applyNumberFormatting(\"1\", \"a\", 8, \"1\", true, 1, [])",
+              "argsCode": "\"1\", \"a\", 8, \"1\", true, 1, []",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1\"",
+                "code": "\"1\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            },
+            {
+              "call": "applyNumberFormatting(\"1\", \"Pl\", 8, \"1\", true, 528, [])",
+              "argsCode": "\"1\", \"Pl\", 8, \"1\", true, 528, []",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1\"",
+                "code": "\"1\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: minimumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "minimumFractionDigits value is out of range."
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        },
+        {
+          "id": "src/helpers.js#applyNumberFormatting/2",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 3,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text", "text", "text", "false", ">0", "[…]"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text", "text", "text", "false", ">0", "Date"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text", "[…]", "empty", "false", ">0", ">0"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "applyNumberFormatting(\"a\", \"si\", \"a\", \"a\", false, 1, new Date(\"1970-01-01T00:00:00.000Z\"))",
+              "argsCode": "\"a\", \"si\", \"a\", \"a\", false, 1, new Date(\"1970-01-01T00:00:00.000Z\")",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a\"",
+                "code": "\"a\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"NaN\"",
+                "code": "\"NaN\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "applyNumberFormatting(\"number\", \"si\", [undefined], \"\", false, 1, 1000000000000)",
+              "argsCode": "\"number\", \"si\", [undefined], \"\", false, 1, 1000000000000",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"number\"",
+                "code": "\"number\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"NaN\"",
+                "code": "\"NaN\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "applyNumberFormatting(\"si\", \"si\", \"kB\", \"si\", false, 4.652597721e-314, [undefined, new Date(\"-016962-01-08T05:23:24.233Z\"), true])",
+              "argsCode": "\"si\", \"si\", \"kB\", \"si\", false, 4.652597721e-314, [undefined, new Date(\"-016962-01-08T05:23:24.233Z\"), true]",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"si\"",
+                "code": "\"si\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"NaN\"",
+                "code": "\"NaN\""
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        }
+      ]
+    },
+    {
+      "id": "src/helpers.js#decorateResult",
+      "file": "src/helpers.js",
+      "exportName": "decorateResult",
+      "signature": "decorateResult(result: unknown[], neg: boolean, symbols: unknown, locale: string | boolean, localeOptions: unknown, separator: string, pad: boolean, round: number, full: boolean, fullforms: unknown[], actualStandard: string, e: number, bits: boolean, roundingFunc: unknown)",
+      "status": "changed",
+      "targetReason": "uses changed `applyNumberFormatting`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 3097,
+      "seed": 2253021542,
+      "usage": {
+        "files": 7,
+        "callSites": 0,
+        "values": 43
+      },
+      "behaviors": [
+        {
+          "id": "src/helpers.js#decorateResult/1",
+          "key": "returns undefined → throws RangeError",
+          "title": "now throws RangeError (previously returned undefined)",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 11,
+          "variants": [
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "<0",
+                "text",
+                "(0,1)",
+                "empty",
+                "false",
+                "(0,1)",
+                "false",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "text",
+                "text",
+                "text",
+                "true",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "{…}",
+                "text",
+                "[…]",
+                "text",
+                "true",
+                "(0,1)",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "true",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "text",
+                "[…]",
+                "text",
+                "false",
+                "<0",
+                "false",
+                "[…]",
+                "empty",
+                "<0",
+                "false",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                ">1",
+                "text",
+                "=0",
+                "text",
+                "false",
+                "<0",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "text",
+                "text",
+                ">1",
+                "text",
+                "true",
+                ">1",
+                "false",
+                "empty[]",
+                "blank",
+                "<0",
+                "false",
+                "[…]"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "[…]",
+                "text",
+                "[…]",
+                "text",
+                "true",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "true"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "nonempty",
+                "text",
+                "binary",
+                "text",
+                "false",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "text",
+                "text",
+                "text",
+                "text",
+                "true",
+                "<0",
+                "false",
+                "[…]",
+                "text",
+                "(0,1)",
+                "true",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "{…}",
+                "text",
+                "binary",
+                "text",
+                "true",
+                "<0",
+                "false",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "binary"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "text",
+                "<0",
+                "text",
+                "false",
+                "<0",
+                "false",
+                "[…]",
+                "text",
+                "-Inf",
+                "false",
+                "<0"
+              ],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "decorateResult([\"\"], true, [false], \"a\", [\"\"], \"a\", true, 2, false, [0], \"a\", -1, false, true)",
+              "argsCode": "[\"\"], true, [false], \"a\", [\"\"], \"a\", true, 2, false, [0], \"a\", -1, false, true",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": true
+            },
+            {
+              "call": "decorateResult([\"1.2345\"], true, 1234.567, \"string\", \"object\", \"string\", true, 1024, false, [[]], \"!\", 2.5, false, \"\\ud800\")",
+              "argsCode": "[\"1.2345\"], true, 1234.567, \"string\", \"object\", \"string\", true, 1024, false, [[]], \"!\", 2.5, false, \"\\ud800\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: minimumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "minimumFractionDigits value is out of range."
+              },
+              "minimal": false
+            },
+            {
+              "call": "decorateResult([\"a\"], false, 3, \"a\", 0, \"a\", false, -1, false, [false], \"a\", 2, false, \"a\")",
+              "argsCode": "[\"a\"], false, 3, \"a\", 0, \"a\", false, -1, false, [false], \"a\", 2, false, \"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        },
+        {
+          "id": "src/helpers.js#decorateResult/2",
+          "key": "throws TypeError → throws RangeError",
+          "title": "now throws RangeError instead of TypeError",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 11,
+          "variants": [
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "<0",
+                "text",
+                "binary",
+                "text",
+                "false",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "<0",
+                "true",
+                "=0"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "[…]",
+                "text",
+                "null",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "true"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "empty",
+                "text",
+                "blank",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "empty[]",
+                "text",
+                "<0",
+                "true",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "<0",
+                "text",
+                "text",
+                "text",
+                "true",
+                "=1",
+                "true",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "Date"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "<0",
+                "text",
+                "{…}",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "empty[]",
+                "text",
+                "<0",
+                "false",
+                "empty"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "<0",
+                "text",
+                ">1",
+                "text",
+                "false",
+                "=1",
+                "true",
+                "[…]",
+                "text",
+                "(0,1)",
+                "false",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "text",
+                "text",
+                "text",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "(0,1)",
+                "true",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "text",
+                "binary",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "(0,1)",
+                "false",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "[…]",
+                "text",
+                "text",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "(0,1)",
+                "true",
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "text",
+                "text",
+                "{…}",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "null"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                "text",
+                "text",
+                ">1",
+                "text",
+                "true",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "binary"
+              ],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "decorateResult([\"a\"], false, [undefined], \"a\", null, \"a\", false, 2, true, [0], \"a\", -4, false, true)",
+              "argsCode": "[\"a\"], false, [undefined], \"a\", null, \"a\", false, 2, true, [0], \"a\", -4, false, true",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '-4')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '-4')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": true
+            },
+            {
+              "call": "decorateResult([\"\"], true, \"a\", \"a\", { \"\": 0 }, \"a\", true, -1, true, [0], \"a\", -1, false, null)",
+              "argsCode": "[\"\"], true, \"a\", \"a\", { \"\": 0 }, \"a\", true, -1, true, [0], \"a\", -1, false, null",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '-1')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '-1')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            },
+            {
+              "call": "decorateResult([\"a\"], false, -1, \"a\", 1000, \"a\", false, 1, true, [\"\"], \"a\", 0.01, false, \"a\")",
+              "argsCode": "[\"a\"], false, -1, \"a\", 1000, \"a\", false, 1, true, [\"\"], \"a\", 0.01, false, \"a\"",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.01')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        },
+        {
+          "id": "src/helpers.js#decorateResult/3",
+          "key": "throws TypeError: mutates argument 0 differently",
+          "title": "mutates argument 1 differently",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 1,
+          "variants": [
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "false",
+                "text",
+                "text",
+                "=0",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                "(0,1)",
+                "false",
+                "text"
+              ],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "decorateResult([\"a\"], false, \"a\", \"si\", 0, \"a\", false, 2, true, [\"\", \"\"], \"a\", 0.01, false, \"a\")",
+              "argsCode": "[\"a\"], false, \"a\", \"si\", 0, \"a\", false, 2, true, [\"\", \"\"], \"a\", 0.01, false, \"a\"",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.01')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.01')"
+              },
+              "minimal": true,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"a\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"si\"], false, \"!\", \"si\", 0, \"a\", false, 841.03, true, [\"﻿\\udfff\", \"s\"], \"➰🩨𒂀🗤⼾𑣊\", 0.9999999999999999, false, \"kB\")",
+              "argsCode": "[\"si\"], false, \"!\", \"si\", 0, \"a\", false, 841.03, true, [\"﻿\\udfff\", \"s\"], \"➰🩨𒂀🗤⼾𑣊\", 0.9999999999999999, false, \"kB\"",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.9999999999999999')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.9999999999999999')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.9999999999999999')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.9999999999999999')"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"si\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"n\"], false, \"a\", \"nu\", 0, \"a\", false, 2, true, [\"\", \"\"], \"a\", 0.01, false, \"a\")",
+              "argsCode": "[\"n\"], false, \"a\", \"nu\", 0, \"a\", false, 2, true, [\"\", \"\"], \"a\", 0.01, false, \"a\"",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.01')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '0.01')"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"n\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        },
+        {
+          "id": "src/helpers.js#decorateResult/4",
+          "key": "returns undefined: mutates argument 0 differently",
+          "title": "mutates argument 1 differently",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 1,
+          "variants": [
+            {
+              "transition": "returns undefined: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                "binary",
+                "text",
+                ">1",
+                "text",
+                "false",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                "text"
+              ],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "decorateResult([\"\"], true, new DataView(new Uint8Array([]).buffer, 0, 0), \"si\", 2, \"a\", false, 2, false, [0], \"a\", -1, false, \"a\")",
+              "argsCode": "[\"\"], true, new DataView(new Uint8Array([]).buffer, 0, 0), \"si\", 2, \"a\", false, 2, false, [0], \"a\", -1, false, \"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "minimal": true,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"-\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"\"], true, new DataView(new Uint8Array([]).buffer, 0, 0), \"si\", 1e+30, \"si\", false, 1234.56, false, [0], \"!\", -62.03, false, \"[-x/K2\")",
+              "argsCode": "[\"\"], true, new DataView(new Uint8Array([]).buffer, 0, 0), \"si\", 1e+30, \"si\", false, 1234.56, false, [0], \"!\", -62.03, false, \"[-x/K2\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"-\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"\", \"\", 0, \"\", false, 0, [\"\", \"\", 0, false], \"en-US\"], true, new DataView(new Uint8Array([0, 212, 106, 30, 26, 202, 47, 0]).buffer, 1, 6), \"si\", 1e+30, \"😀\", false, 1234.56, false, [-384, -176], \"o}xy,>a\", -508089.9, false, \"[-x/K2\")",
+              "argsCode": "[\"\", \"\", 0, \"\", false, 0, [\"\", \"\", 0, false], \"en-US\"], true, new DataView(new Uint8Array([0, 212, 106, 30, 26, 202, 47, 0]).buffer, 1, 6), \"si\", 1e+30, \"😀\", false, 1234.56, false, [-384, -176], \"o}xy,>a\", -508089.9, false, \"[-x/K2\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"-\", \"\", 0, \"\", false, 0, [\"\", \"\", 0, false], \"en-US\"]",
+                "new": "[\"NaN\", \"\", 0, \"\", false, 0, [\"\", \"\", 0, false], \"en-US\"]",
+                "newCode": "[\"NaN\", \"\", 0, \"\", false, 0, [\"\", \"\", 0, false], \"en-US\"]"
+              }
+            }
+          ],
+          "explanation": "The PR mentions \"formatting\" (`applyNumberFormatting`)."
+        }
+      ]
+    },
+    {
+      "id": "src/filesize.js#filesize",
+      "file": "src/filesize.js",
+      "exportName": "filesize",
+      "signature": "filesize(arg: string | number | bigint, arg1?: undefined | { bits?: boolean; pad?: boolean; base?: number; round?: number; locale?: string | boolean; localeOptions?: unknown; separator?: string; spacer?: string; symbols?: unknown; standard?: string; output?: string; fullform?: boolean; fullforms?: unknown[]; exponent?: number; roundingMethod?: string; precision?: number })",
+      "status": "unchanged",
+      "targetReason": "uses `handleZeroValue` from src/helpers.js, which uses changed `applyNumberFormatting`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 196,
+      "seed": 435064967,
+      "usage": {
+        "files": 15,
+        "callSites": 60,
+        "values": 169
+      },
+      "behaviors": []
+    },
+    {
+      "id": "src/filesize.js#partial",
+      "file": "src/filesize.js",
+      "exportName": "partial",
+      "signature": "partial(arg0?: undefined | { bits?: boolean; pad?: boolean; base?: number; round?: number; locale?: string | boolean; localeOptions?: unknown; separator?: string; spacer?: string; symbols?: unknown; standard?: string; output?: string; fullform?: boolean; fullforms?: unknown[]; exponent?: number; roundingMethod?: string; precision?: number })",
+      "status": "unchanged",
+      "targetReason": "uses `handleZeroValue` from src/helpers.js, which uses changed `applyNumberFormatting`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 199,
+      "seed": 3163464905,
+      "usage": {
+        "files": 11,
+        "callSites": 36,
+        "values": 166
+      },
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 7195,
+    "materializeMs": 106,
+    "dependenciesMs": 0,
+    "detectMs": 816,
+    "verifyMs": 6272
+  }
+}

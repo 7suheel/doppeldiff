@@ -2,6 +2,23 @@
 import { pathToFileURL } from "node:url";
 import vm from "node:vm";
 
+// src/core/runner/tags.ts
+var FN_TAG = "__doppeldiff_fn__";
+function isFnDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, FN_TAG);
+}
+var PROTO_TAG = "__doppeldiff_proto__";
+function isProtoDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, PROTO_TAG);
+}
+function viewBytes(v) {
+  return ArrayBuffer.isView(v) ? Array.from(new Uint8Array(v.buffer, v.byteOffset, v.byteLength)) : Array.from(new Uint8Array(v));
+}
+var VIEW_TAG = "__doppeldiff_view__";
+function isViewDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, VIEW_TAG);
+}
+
 // src/core/runner/encode.ts
 var DEFAULT_LIMITS = { maxNodes: 2e4, maxDepth: 24 };
 var toStringTag = (v) => Object.prototype.toString.call(v).slice(8, -1);
@@ -60,7 +77,18 @@ function encode(value, limits = DEFAULT_LIMITS) {
     const tag = toStringTag(obj);
     if (Array.isArray(obj)) {
       const items = [];
-      for (let i = 0; i < obj.length; i++) items.push(readProp(obj, String(i), depth));
+      const populated = obj.length > limits.maxNodes ? Object.keys(obj) : void 0;
+      if (populated && populated.length < limits.maxNodes) {
+        const entries2 = populated.slice(0, 20).map((k) => `${k}: ${JSON.stringify(readProp(obj, k, depth))}`);
+        return { t: "truncated", reason: `sparse array of length ${obj.length} {${entries2.join(", ")}}` };
+      }
+      for (let i = 0; i < obj.length; i++) {
+        if (nodes > limits.maxNodes) {
+          items.push({ t: "truncated", reason: `array of length ${obj.length}` });
+          break;
+        }
+        items.push(readProp(obj, String(i), depth));
+      }
       return { t: "array", items };
     }
     if (tag === "Date") return { t: "date", v: Date.prototype.getTime.call(obj) };
@@ -81,7 +109,10 @@ function encode(value, limits = DEFAULT_LIMITS) {
       return { t: "set", items };
     }
     if (tag === "Promise") return { t: "promise" };
-    if (ArrayBuffer.isView(obj) && !(obj instanceof DataView)) {
+    if (tag === "DataView" || tag === "ArrayBuffer" || tag === "SharedArrayBuffer") {
+      return { t: "typed", ctor: tag, items: viewBytes(obj) };
+    }
+    if (ArrayBuffer.isView(obj)) {
       const arr = obj;
       return {
         t: "typed",
@@ -146,6 +177,11 @@ function installDeterminism(options) {
     return new RealDate(...args);
   }
   FakeDate.prototype = RealDate.prototype;
+  Object.defineProperty(RealDate.prototype, "constructor", {
+    value: FakeDate,
+    writable: true,
+    configurable: true
+  });
   FakeDate.now = () => now;
   FakeDate.parse = RealDate.parse;
   FakeDate.UTC = RealDate.UTC;
@@ -252,12 +288,6 @@ function installNetGuard() {
   syncBuiltinESMExports2();
 }
 
-// src/core/runner/tags.ts
-var FN_TAG = "__doppeldiff_fn__";
-function isFnDescriptor(v) {
-  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, FN_TAG);
-}
-
 // src/core/runner/child.ts
 var modules = /* @__PURE__ */ new Map();
 var determinism;
@@ -275,12 +305,27 @@ function materialize(value, seen = /* @__PURE__ */ new Set()) {
       return structuredClone(returns);
     };
   }
+  if (isProtoDescriptor(value)) {
+    const { proto, own } = value[PROTO_TAG];
+    return Object.assign(Object.create(materialize(proto, seen)), materialize(own, seen));
+  }
+  if (isViewDescriptor(value)) {
+    const { ctor, buffer, byteOffset, length } = value[VIEW_TAG];
+    const Ctor = globalThis[ctor];
+    return Ctor ? new Ctor(buffer, byteOffset, length) : value;
+  }
   if (typeof value !== "object" || value === null || seen.has(value)) return value;
   seen.add(value);
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i++) value[i] = materialize(value[i], seen);
   } else if (value instanceof Map) {
-    for (const [k, v] of value) value.set(k, materialize(v, seen));
+    const entries = [...value].map(([k, v]) => [materialize(k, seen), materialize(v, seen)]);
+    value.clear();
+    for (const [k, v] of entries) value.set(k, v);
+  } else if (value instanceof Set) {
+    const items = [...value].map((v) => materialize(v, seen));
+    value.clear();
+    for (const v of items) value.add(v);
   } else if (Object.getPrototypeOf(value) === Object.prototype) {
     const rec = value;
     for (const k of Object.keys(rec)) rec[k] = materialize(rec[k], seen);
@@ -298,7 +343,36 @@ function isThenable(v) {
 }
 var guardContext = vm.createContext({});
 var guardScript = new vm.Script("__dd_fn(...__dd_args)");
+var PROTOTYPES = [
+  Object.prototype,
+  Array.prototype,
+  Function.prototype,
+  String.prototype,
+  Number.prototype,
+  Boolean.prototype,
+  Map.prototype,
+  Set.prototype,
+  Date.prototype,
+  RegExp.prototype,
+  Promise.prototype,
+  Error.prototype
+];
+var PROTOTYPE_KEYS = PROTOTYPES.map((p) => new Set(Reflect.ownKeys(p)));
+function restorePrototypes() {
+  PROTOTYPES.forEach((proto, i) => {
+    for (const key of Reflect.ownKeys(proto)) {
+      if (!PROTOTYPE_KEYS[i].has(key)) Reflect.deleteProperty(proto, key);
+    }
+  });
+}
 async function callOnce(fn, input, timeoutMs, guard) {
+  try {
+    return await callInner(fn, input, timeoutMs, guard);
+  } finally {
+    restorePrototypes();
+  }
+}
+async function callInner(fn, input, timeoutMs, guard) {
   const args = materialize(structuredClone(input));
   determinism?.reset();
   let result;
@@ -381,7 +455,8 @@ process.on("message", (raw) => {
           modules.set(msg.moduleId, mod);
           const def = mod.default;
           const names = new Set(Object.keys(mod));
-          if (def && typeof def === "object") for (const k of Object.keys(def)) names.add(k);
+          if (def && (typeof def === "object" || typeof def === "function"))
+            for (const k of Object.keys(def)) names.add(k);
           send({ t: "loaded", moduleId: msg.moduleId, ok: true, exports: [...names] });
         } catch (e) {
           const err = e;

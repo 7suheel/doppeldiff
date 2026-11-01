@@ -39,6 +39,12 @@ export function installDeterminism(options: { now: number; seed: number }): Dete
     return new (RealDate as unknown as new (...a: unknown[]) => Date)(...args);
   }
   FakeDate.prototype = RealDate.prototype;
+  // `new value.constructor()` (clone helpers) must also see the frozen clock.
+  Object.defineProperty(RealDate.prototype, 'constructor', {
+    value: FakeDate,
+    writable: true,
+    configurable: true,
+  });
   FakeDate.now = () => now;
   FakeDate.parse = RealDate.parse;
   FakeDate.UTC = RealDate.UTC;

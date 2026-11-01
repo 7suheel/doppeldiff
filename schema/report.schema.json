@@ -210,7 +210,17 @@
           "minimum": -9007199254740991,
           "maximum": 9007199254740991
         },
+        "edgeCaseBehaviors": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
         "unclaimed": {
+          "type": "integer",
+          "minimum": -9007199254740991,
+          "maximum": 9007199254740991
+        },
+        "unclaimedRealistic": {
           "type": "integer",
           "minimum": -9007199254740991,
           "maximum": 9007199254740991
@@ -232,7 +242,9 @@
         "skipped",
         "nondeterministic",
         "behaviors",
+        "edgeCaseBehaviors",
         "unclaimed",
+        "unclaimedRealistic",
         "inputsRun",
         "durationMs"
       ],
@@ -304,6 +316,39 @@
             "minimum": -9007199254740991,
             "maximum": 9007199254740991
           },
+          "usage": {
+            "type": "object",
+            "properties": {
+              "files": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "callSites": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "values": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              }
+            },
+            "required": [
+              "files",
+              "callSites",
+              "values"
+            ],
+            "additionalProperties": false
+          },
+          "guards": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 300
+            }
+          },
           "llmInputs": {
             "type": "integer",
             "minimum": 0,
@@ -339,13 +384,26 @@
                   "type": "string",
                   "enum": [
                     "none",
-                    "refactor-claim",
+                    "rules",
                     "llm"
                   ]
                 },
                 "explanation": {
                   "type": "string",
                   "maxLength": 1000
+                },
+                "realism": {
+                  "type": "string",
+                  "enum": [
+                    "seen",
+                    "ordinary",
+                    "unusual",
+                    "edge"
+                  ]
+                },
+                "realismNote": {
+                  "type": "string",
+                  "maxLength": 300
                 },
                 "count": {
                   "type": "integer",
@@ -521,6 +579,7 @@
                 "title",
                 "label",
                 "labelSource",
+                "realism",
                 "count",
                 "variants",
                 "examples"

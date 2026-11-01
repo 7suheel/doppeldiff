@@ -124,6 +124,8 @@ export function detectChanges(options: DetectOptions): Detection {
 
   /** Changed top-level names per head file (absolute path). */
   const changedByFile = new Map<string, Set<string>>();
+  /** `file#name` of unchanged bindings that use a changed binding of the same file → that changed binding. */
+  const indirect = new Map<string, string>();
   const targetIds = new Set<string>();
 
   const pushTarget = (t: FunctionTarget) => {
@@ -183,7 +185,23 @@ export function detectChanges(options: DetectOptions): Detection {
     const changed = changedTopLevel(base, head);
     const sideEffectsChanged =
       JSON.stringify(base?.sideEffects ?? []) !== JSON.stringify(head?.sideEffects ?? []);
-    if (headFile) changedByFile.set(pathKey(headFile), changed);
+    if (headFile && head) {
+      // Importers are affected by changed bindings and by bindings that reach them (`decorateResult` calling a
+      // changed `applyNumberFormatting` in the same file), so both count for cross-module impact.
+      const affected = new Set(changed);
+      if (changed.size > 0) {
+        for (const [name, top] of head.decls) {
+          if (affected.has(name) || top.kind === 'import') continue;
+          const r = reach(head, top.node, depth);
+          const via = [...r.local.keys()].find((n) => changed.has(n));
+          if (via) {
+            affected.add(name);
+            indirect.set(`${pathKey(headFile)}#${name}`, via);
+          }
+        }
+      }
+      changedByFile.set(pathKey(headFile), affected);
+    } else if (headFile) changedByFile.set(pathKey(headFile), changed);
 
     // Removed exports.
     if (base) {
@@ -296,7 +314,11 @@ export function detectChanges(options: DetectOptions): Detection {
         for (const [, imp] of r.imported) {
           const key = pathKey(imp.file);
           if (changedByFile.get(key)?.has(imp.name)) {
-            reason = `uses changed \`${imp.name}\` from ${relativeTo(pathKey(options.headRoot), key)}`;
+            const from = relativeTo(pathKey(options.headRoot), key);
+            const via = indirect.get(`${key}#${imp.name}`);
+            reason = via
+              ? `uses \`${imp.name}\` from ${from}, which uses changed \`${via}\``
+              : `uses changed \`${imp.name}\` from ${from}`;
             break;
           }
         }
@@ -336,7 +358,7 @@ function relativeTo(root: string, abs: string): string {
 }
 
 /** Tracked (and, for the working tree, untracked non-ignored) files of the head version. */
-function listSourceFiles(repo: string, headSha?: string): string[] {
+export function listSourceFiles(repo: string, headSha?: string): string[] {
   const out = headSha
     ? git(['ls-tree', '-r', '--name-only', '-z', headSha], repo)
     : git(['ls-files', '--cached', '--others', '--exclude-standard', '-z'], repo);

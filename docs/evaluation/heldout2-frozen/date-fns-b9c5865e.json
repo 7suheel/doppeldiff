@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "b9c5865e^",
+    "sha": "39d1e14200cead9e4be5df88695b5e82082875ed"
+  },
+  "head": {
+    "ref": "b9c5865e",
+    "sha": "b9c5865edb7610c59e6b3694ed1e1691f4807688"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix Chinese locale month parsing (#4194)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 3,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 0,
+    "durationMs": 8993
+  },
+  "functions": [],
+  "skipped": [
+    {
+      "id": "pkgs/core/src/locale/zh-CN/_lib/match/index.ts#match",
+      "file": "pkgs/core/src/locale/zh-CN/_lib/match/index.ts",
+      "exportName": "match",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    },
+    {
+      "id": "pkgs/core/src/locale/zh-HK/_lib/match/index.ts#match",
+      "file": "pkgs/core/src/locale/zh-HK/_lib/match/index.ts",
+      "exportName": "match",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    },
+    {
+      "id": "pkgs/core/src/locale/zh-TW/_lib/match/index.ts#match",
+      "file": "pkgs/core/src/locale/zh-TW/_lib/match/index.ts",
+      "exportName": "match",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 8993,
+    "materializeMs": 3026,
+    "dependenciesMs": 0,
+    "detectMs": 5966,
+    "verifyMs": 1
+  }
+}

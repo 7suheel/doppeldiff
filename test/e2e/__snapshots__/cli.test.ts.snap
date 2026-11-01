@@ -1,25 +1,26 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CLI > honest fix: neutral behavior change, Markdown + JSON + tests, exit 0 1`] = `
+exports[`CLI > honest fix: claimed, realistic behavior change; Markdown + JSON + tests, exit 0 1`] = `
 "## 🔬 doppeldiff: behavioral diff
 
 **PR claims:** “Fix discount rounding for prices over $1000”
 
-> 🔍 **1 behavior change** in 1 function.
+> 🔍 **1 behavior change** on realistic inputs.
 
-### 🔍 Behavior change
+### ✅ Claimed change verified
 
-**\`applyDiscount\`** in \`src/pricing.ts\`: return value changed · 3 of 1,000 inputs
+**\`applyDiscount\`** in \`src/pricing.ts\`: return value changed · 12 of 1,000 inputs
+<br>The PR mentions "discount" (\\\`applyDiscount\\\`).
 
 | Call | Old | New |
 | --- | --- | --- |
+| \`applyDiscount(1000.07, 0.5)\` | \`500.03\` | \`500.04\` |
 | \`applyDiscount(2000, 0.07)\` | \`1859.99\` | \`1860\` |
-| \`applyDiscount(1000.01, 0.5)\` | \`500\` | \`500.01\` |
-| \`applyDiscount(827370.79, 0.5)\` | \`413685.39\` | \`413685.4\` |
+| \`applyDiscount(1000.01, 0.1)\` | \`900\` | \`900.01\` |
 
 📎 Regression tests (3 cases): \`tests/doppeldiff/applyDiscount.test.ts\`
 
 <sub>FOOTER</sub>
-<sub>Changes are not matched against the PR description. Add an LLM API key (optional) or state "no behavior change" for refactors.</sub>
+<sub>Claimed/unclaimed labels come from the PR text via [deterministic rules](https://github.com/7suheel/doppeldiff/blob/main/docs/CLAIMS.md) (no LLM, no API key).</sub>
 "
 `;

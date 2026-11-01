@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "5cd9e67^",
+    "sha": "a7b94e69ff6159de8ddfd4940c90db4708c0d67e"
+  },
+  "head": {
+    "ref": "5cd9e67",
+    "sha": "5cd9e676711af3f4e4b5398ddf6ca8d52c1c7e1f"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(withoutBase): collapse leading slashes (#335)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2088
+  },
+  "functions": [
+    {
+      "id": "src/utils.ts#withoutBase",
+      "file": "src/utils.ts",
+      "exportName": "withoutBase",
+      "signature": "withoutBase(input: string, base: string)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1041,
+      "seed": 2778817679,
+      "behaviors": [
+        {
+          "id": "src/utils.ts#withoutBase/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 2,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text"],
+              "count": 2
+            }
+          ],
+          "examples": [
+            {
+              "call": "withoutBase(\"///\", \"//\")",
+              "argsCode": "\"///\", \"//\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"//\"",
+                "code": "\"//\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/\"",
+                "code": "\"/\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "withoutBase(\"////////-o.FXJj\", \"//\")",
+              "argsCode": "\"////////-o.FXJj\", \"//\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"///////-o.FXJj\"",
+                "code": "\"///////-o.FXJj\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/-o.FXJj\"",
+                "code": "\"/-o.FXJj\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "withoutBase(\"////////glY2ZuvzB3\", \"//\")",
+              "argsCode": "\"////////glY2ZuvzB3\", \"//\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"///////glY2ZuvzB3\"",
+                "code": "\"///////glY2ZuvzB3\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/glY2ZuvzB3\"",
+                "code": "\"/glY2ZuvzB3\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2088,
+    "materializeMs": 73,
+    "dependenciesMs": 1,
+    "detectMs": 973,
+    "verifyMs": 1041
+  }
+}

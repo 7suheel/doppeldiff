@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "db70acb^",
+    "sha": "1d09eb71cc2f8488c03f730178f512d11846b14f"
+  },
+  "head": {
+    "ref": "db70acb",
+    "sha": "db70acb42f59ef8b1407d9efeac1ee3b4394e3ef"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix \"thousandsSeparator\" incorrecting formatting fractional part",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 0,
+    "durationMs": 1616
+  },
+  "functions": [],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1616,
+    "materializeMs": 841,
+    "dependenciesMs": 0,
+    "detectMs": 775,
+    "verifyMs": 0
+  }
+}

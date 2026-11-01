@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "c378bd1^",
+    "sha": "c3c9dac9c5da8102a8c62b1afbbb7efb9c64c31e"
+  },
+  "head": {
+    "ref": "c378bd1",
+    "sha": "c378bd1bc401045ed7d8e5e47b275d2159ce43d5"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: split number from letters in snake func (#311)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 1996
+  },
+  "functions": [
+    {
+      "id": "src/string.ts#snake",
+      "file": "src/string.ts",
+      "exportName": "snake",
+      "signature": "snake(str: string, options?: undefined | { splitOnNumber?: boolean })",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 478,
+      "seed": 3829826344,
+      "usage": {
+        "files": 6,
+        "callSites": 8,
+        "values": 26
+      },
+      "behaviors": [
+        {
+          "id": "src/string.ts#snake/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 164,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "undefined"],
+              "count": 111
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "{…}"],
+              "count": 36
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "{}"],
+              "count": 16
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "snake(\"hello-world12_19-bye\")",
+              "argsCode": "\"hello-world12_19-bye\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"hello_world12_19_bye\"",
+                "code": "\"hello_world12_19_bye\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"hello_world_12_19_bye\"",
+                "code": "\"hello_world_12_19_bye\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "snake(\"rY1\", undefined)",
+              "argsCode": "\"rY1\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"r_y1\"",
+                "code": "\"r_y1\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"r_y_1\"",
+                "code": "\"r_y_1\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "snake(\"oG2\", { splitOnNumber: true })",
+              "argsCode": "\"oG2\", { splitOnNumber: true }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"o_g2\"",
+                "code": "\"o_g2\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"o_g_2\"",
+                "code": "\"o_g_2\""
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `snake`."
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1996,
+    "materializeMs": 572,
+    "dependenciesMs": 1,
+    "detectMs": 895,
+    "verifyMs": 528
+  }
+}

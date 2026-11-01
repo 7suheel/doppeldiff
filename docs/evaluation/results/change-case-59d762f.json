@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 0,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2215
+    "durationMs": 2005
   },
   "functions": [
     {
@@ -48,8 +50,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1007,
+      "durationMs": 916,
       "seed": 60903051,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 177
+      },
       "behaviors": []
     }
   ],
@@ -60,10 +67,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2215,
-    "materializeMs": 65,
+    "totalMs": 2005,
+    "materializeMs": 58,
     "dependenciesMs": 0,
-    "detectMs": 1142,
-    "verifyMs": 1008
+    "detectMs": 1016,
+    "verifyMs": 931
   }
 }

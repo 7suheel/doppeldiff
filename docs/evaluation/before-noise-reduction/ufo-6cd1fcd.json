@@ -1,0 +1,180 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "6cd1fcd^",
+    "sha": "69e26f8983a6a67aa5bf8c50d9b9c06f17d32796"
+  },
+  "head": {
+    "ref": "6cd1fcd",
+    "sha": "6cd1fcd39d53f89e27b487f80f01c12fbee4ab88"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(withoutTrailingSlash): consider qurry param  (#219)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 4,
+    "changed": 1,
+    "unchanged": 3,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "unclaimed": 0,
+    "inputsRun": 4000,
+    "durationMs": 2344
+  },
+  "functions": [
+    {
+      "id": "src/utils.ts#withoutTrailingSlash",
+      "file": "src/utils.ts",
+      "exportName": "withoutTrailingSlash",
+      "signature": "withoutTrailingSlash(input?: string | undefined, respectQueryAndFragment?: undefined | boolean)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1125,
+      "seed": 1810207695,
+      "behaviors": [
+        {
+          "id": "src/utils.ts#withoutTrailingSlash/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 3,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true"],
+              "count": 3
+            }
+          ],
+          "examples": [
+            {
+              "call": "withoutTrailingSlash(\"_?/\", true)",
+              "argsCode": "\"_?/\", true",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/?/\"",
+                "code": "\"/?/\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"_?/\"",
+                "code": "\"_?/\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "withoutTrailingSlash(\"-b?/\", true)",
+              "argsCode": "\"-b?/\", true",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-?/\"",
+                "code": "\"-?/\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-b?/\"",
+                "code": "\"-b?/\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "withoutTrailingSlash(\"_?=/\", true)",
+              "argsCode": "\"_?=/\", true",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/?=/\"",
+                "code": "\"/?=/\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"_?=/\"",
+                "code": "\"_?=/\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src/utils.ts#withBase",
+      "file": "src/utils.ts",
+      "exportName": "withBase",
+      "signature": "withBase(input: string, base: string)",
+      "status": "unchanged",
+      "targetReason": "uses changed `withoutTrailingSlash`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 109,
+      "seed": 3870797363,
+      "behaviors": []
+    },
+    {
+      "id": "src/utils.ts#withoutBase",
+      "file": "src/utils.ts",
+      "exportName": "withoutBase",
+      "signature": "withoutBase(input: string, base: string)",
+      "status": "unchanged",
+      "targetReason": "uses changed `withoutTrailingSlash`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 53,
+      "seed": 2778817679,
+      "behaviors": []
+    },
+    {
+      "id": "src/utils.ts#isSamePath",
+      "file": "src/utils.ts",
+      "exportName": "isSamePath",
+      "signature": "isSamePath(p1: string, p2: string)",
+      "status": "unchanged",
+      "targetReason": "uses changed `withoutTrailingSlash`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 40,
+      "seed": 2346989735,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2344,
+    "materializeMs": 63,
+    "dependenciesMs": 1,
+    "detectMs": 952,
+    "verifyMs": 1328
+  }
+}

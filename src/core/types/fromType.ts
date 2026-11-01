@@ -8,7 +8,14 @@ import {
   type Type,
   type VariableDeclaration,
 } from 'ts-morph';
-import type { ArbSpec, ParamSpec, PropSpec, SignatureSpec } from './spec.js';
+import {
+  BINARY_CTORS,
+  type ArbSpec,
+  type BinaryCtor,
+  type ParamSpec,
+  type PropSpec,
+  type SignatureSpec,
+} from './spec.js';
 
 /** Function-like nodes we can test. */
 export type FunctionLikeNode = FunctionDeclaration | ArrowFunction | FunctionExpression;
@@ -167,6 +174,8 @@ function objectLike(type: Type, ctx: Ctx): ArbSpec {
   const name = symbolName(type);
   if (name && isFromDefaultLib(type)) {
     if (name === 'Date') return { kind: 'date' };
+    if ((BINARY_CTORS as readonly string[]).includes(name))
+      return { kind: 'binary', ctor: name as BinaryCtor };
     if (name === 'Map' || name === 'ReadonlyMap') {
       const [k, v] = type.getTypeArguments();
       return {
@@ -179,6 +188,8 @@ function objectLike(type: Type, ctx: Ctx): ArbSpec {
       const [t] = type.getTypeArguments();
       return { kind: 'set', items: t ? fromType(t, ctx) : { kind: 'anything' } };
     }
+    // JSDoc `{Object}` (the global Object interface): any object.
+    if (name === 'Object') return { kind: 'anything' };
     if (!HANDLED_BUILTINS.has(name) && name !== '__type' && name !== '__object') {
       return { kind: 'unsupported', reason: `built-in type \`${name}\`` };
     }

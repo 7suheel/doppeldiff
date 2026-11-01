@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 2,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2428
+    "durationMs": 2373
   },
   "functions": [
     {
@@ -48,47 +50,48 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1218,
+      "durationMs": 1314,
       "seed": 60903051,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 181
+      },
       "behaviors": [
         {
           "id": "packages/title-case/src/index.ts#titleCase/1",
           "key": "returns string → throws RangeError",
           "title": "now throws RangeError (previously returned a string)",
+          "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 73,
+          "count": 13,
           "variants": [
             {
               "transition": "returns string → throws RangeError",
-              "features": ["text", "{…}"],
-              "count": 26
-            },
-            {
-              "transition": "returns string → throws RangeError",
               "features": ["text", "text"],
-              "count": 20
+              "count": 7
             },
             {
               "transition": "returns string → throws RangeError",
-              "features": ["text", "[…]"],
-              "count": 20
-            },
-            {
-              "transition": "returns string → throws RangeError",
-              "features": ["text", "empty"],
+              "features": ["text", "{…}"],
               "count": 4
             },
             {
               "transition": "returns string → throws RangeError",
               "features": ["text", "blank"],
-              "count": 3
+              "count": 1
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "[…]"],
+              "count": 1
             }
           ],
           "examples": [
             {
-              "call": "titleCase(\"0\", \"\")",
-              "argsCode": "\"0\", \"\"",
+              "call": "titleCase(\"0\", [\"\"])",
+              "argsCode": "\"0\", [\"\"]",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -105,13 +108,13 @@
               "minimal": true
             },
             {
-              "call": "titleCase(\"1\", [\"\"])",
-              "argsCode": "\"1\", [\"\"]",
+              "call": "titleCase(\"9\", \"a\")",
+              "argsCode": "\"9\", \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"1\"",
-                "code": "\"1\""
+                "display": "\"9\"",
+                "code": "\"9\""
               },
               "new": {
                 "kind": "throw",
@@ -123,13 +126,13 @@
               "minimal": false
             },
             {
-              "call": "titleCase(\"0'\", \".\")",
-              "argsCode": "\"0'\", \".\"",
+              "call": "titleCase(\"&00.-\", \"  \")",
+              "argsCode": "\"&00.-\", \"  \"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"0'\"",
-                "code": "\"0'\""
+                "display": "\"&00.-\"",
+                "code": "\"&00.-\""
               },
               "new": {
                 "kind": "throw",
@@ -146,35 +149,36 @@
           "id": "packages/title-case/src/index.ts#titleCase/2",
           "key": "returns string: value changed",
           "title": "return value changed",
+          "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 12,
+          "count": 9,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text", "undefined"],
-              "count": 7
+              "count": 4
             },
             {
               "transition": "returns string: value changed",
               "features": ["text", "{…}"],
-              "count": 3
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "[…]"],
+              "count": 2
             },
             {
               "transition": "returns string: value changed",
               "features": ["text", "text"],
               "count": 1
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "empty[]"],
-              "count": 1
             }
           ],
           "examples": [
             {
-              "call": "titleCase(\"0a\", [])",
-              "argsCode": "\"0a\", []",
+              "call": "titleCase(\"0a\", undefined)",
+              "argsCode": "\"0a\", undefined",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -190,36 +194,36 @@
               "minimal": true
             },
             {
-              "call": "titleCase(\"5l\", undefined)",
-              "argsCode": "\"5l\", undefined",
+              "call": "titleCase(\"1s\", [\"vs\"])",
+              "argsCode": "\"1s\", [\"vs\"]",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"5L\"",
-                "code": "\"5L\""
+                "display": "\"1S\"",
+                "code": "\"1S\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"5l\"",
-                "code": "\"5l\""
+                "display": "\"1s\"",
+                "code": "\"1s\""
               },
               "minimal": false
             },
             {
-              "call": "titleCase(\"9a\", \"ST\")",
-              "argsCode": "\"9a\", \"ST\"",
+              "call": "titleCase(\"0ß\", { wordSeparators: new Set([]) })",
+              "argsCode": "\"0ß\", { wordSeparators: new Set([]) }",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"9A\"",
-                "code": "\"9A\""
+                "display": "\"0SS\"",
+                "code": "\"0SS\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"9a\"",
-                "code": "\"9a\""
+                "display": "\"0ß\"",
+                "code": "\"0ß\""
               },
               "minimal": false
             }
@@ -235,10 +239,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2428,
-    "materializeMs": 76,
+    "totalMs": 2373,
+    "materializeMs": 67,
     "dependenciesMs": 0,
-    "detectMs": 1134,
-    "verifyMs": 1218
+    "detectMs": 980,
+    "verifyMs": 1326
   }
 }

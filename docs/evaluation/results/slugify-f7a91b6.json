@@ -33,9 +33,11 @@
     "skipped": 1,
     "nondeterministic": 0,
     "behaviors": 0,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 0,
-    "durationMs": 959
+    "durationMs": 733
   },
   "functions": [],
   "skipped": [
@@ -53,10 +55,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 959,
-    "materializeMs": 75,
+    "totalMs": 733,
+    "materializeMs": 66,
     "dependenciesMs": 0,
-    "detectMs": 884,
-    "verifyMs": 0
+    "detectMs": 666,
+    "verifyMs": 1
   }
 }

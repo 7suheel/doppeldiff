@@ -20,6 +20,7 @@ export type ArbSpec =
   | { kind: 'object'; props: PropSpec[] }
   | { kind: 'record'; key: 'string' | 'number'; values: ArbSpec }
   | { kind: 'date' }
+  | { kind: 'binary'; ctor: BinaryCtor }
   | { kind: 'map'; key: ArbSpec; value: ArbSpec }
   | { kind: 'set'; items: ArbSpec }
   | { kind: 'function'; returns: ArbSpec; async: boolean }
@@ -27,6 +28,24 @@ export type ArbSpec =
   | { kind: 'ref'; id: string }
   | { kind: 'anything' }
   | { kind: 'unsupported'; reason: string };
+
+/** Binary built-ins: typed arrays, ArrayBuffer and DataView. */
+export const BINARY_CTORS = [
+  'Uint8Array',
+  'Uint8ClampedArray',
+  'Int8Array',
+  'Uint16Array',
+  'Int16Array',
+  'Uint32Array',
+  'Int32Array',
+  'Float32Array',
+  'Float64Array',
+  'BigInt64Array',
+  'BigUint64Array',
+  'ArrayBuffer',
+  'DataView',
+] as const;
+export type BinaryCtor = (typeof BINARY_CTORS)[number];
 
 export interface PropSpec {
   name: string;
@@ -121,6 +140,8 @@ export function printSpec(spec: ArbSpec): string {
       return `Record<${spec.key}, ${printSpec(spec.values)}>`;
     case 'date':
       return 'Date';
+    case 'binary':
+      return spec.ctor;
     case 'map':
       return `Map<${printSpec(spec.key)}, ${printSpec(spec.value)}>`;
     case 'set':

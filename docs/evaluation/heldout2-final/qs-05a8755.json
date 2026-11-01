@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "05a8755^",
+    "sha": "234d5051f5071efaa025a7ca9e4d34a56a460a1b"
+  },
+  "head": {
+    "ref": "05a8755",
+    "sha": "05a875552a31829825c3ebf8899f280011aa06be"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "[Fix] `parse`: decode percent-encoded dots case-insensitively",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 2309
+  },
+  "functions": [
+    {
+      "id": "lib/parse.js#default",
+      "file": "lib/parse.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, opts: unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `parseObject` (via parseKeys)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1207,
+      "seed": 1496740896,
+      "usage": {
+        "files": 5,
+        "callSites": 60,
+        "values": 416
+      },
+      "guards": ["str === '' || str === null || typeof str === 'undefined'"],
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2309,
+    "materializeMs": 174,
+    "dependenciesMs": 5,
+    "detectMs": 827,
+    "verifyMs": 1302
+  }
+}

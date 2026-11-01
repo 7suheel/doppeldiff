@@ -6,7 +6,8 @@ import fc from 'fast-check';
 import type { FunctionConfig } from '../config.js';
 import type { LlmProvider } from './claims/providers.js';
 import { suggestInputs } from './claims/suggest.js';
-import { detectChanges, type Detection, type ListedFunction } from './detect/detect.js';
+import { detectChanges, listSourceFiles, type Detection, type ListedFunction } from './detect/detect.js';
+import { collectUsage } from './analyze/usage.js';
 import { prepareDependencies, type DepsResult } from './git/deps.js';
 import { isWorkingTreeClean, mergeBase, repoRoot, resolveCommit, git } from './git/git.js';
 import { addWorktree, type Worktree } from './git/worktree.js';
@@ -213,6 +214,8 @@ export async function run(options: RunOptions): Promise<RunResult> {
       ...(options.showConsole !== undefined ? { showConsole: options.showConsole } : {}),
     });
     const functions: FunctionResult[] = [];
+    let fileList: string[] | undefined;
+    const repoFiles = () => (fileList ??= listSourceFiles(repo, headSha));
     const total = detection.targets.length;
     for (const [index, target] of detection.targets.entries()) {
       emit({ type: 'function-start', target, index, total });
@@ -222,9 +225,19 @@ export async function run(options: RunOptions): Promise<RunResult> {
         deadline = Date.now() + Math.max(500, remaining / (total - index));
       }
       const fcfg = options.functions?.[target.id] ?? options.functions?.[target.exportName];
+      const stem = target.id
+        .split('#')[0]!
+        .split('/')
+        .pop()!
+        .replace(/\.[^.]+$/, '');
+      const usage = collectUsage(headRoot, repoFiles(), [
+        target.exportName === 'default' ? stem : target.exportName,
+      ]);
       const result = await verifyFunction(session, target, {
         seed,
         runs: fcfg?.runs ?? runs,
+        usage,
+        ...(fcfg?.where ? { where: fcfg.where } : {}),
         ...(fcfg?.args ? { arbitrary: fcfg.args(fc) } : {}),
         ...(fcfg?.examples ? { examples: fcfg.examples } : {}),
         ...(options.suggestProvider

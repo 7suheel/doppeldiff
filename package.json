@@ -1,6 +1,6 @@
 {
   "name": "doppeldiff",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "See what your PR actually changed: runs the old and new version of every changed function on thousands of generated inputs and reports minimal counterexamples.",
   "license": "MIT",
   "repository": {

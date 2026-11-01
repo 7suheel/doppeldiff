@@ -48,6 +48,11 @@ function behaviorBlock(f: FunctionReport, b: Behavior, maxExamples: number): str
   const region = f.inputsRun > 0 ? ` · ${n(b.count)} of ${n(f.inputsRun)} inputs` : '';
   lines.push(`**${code(f.exportName, 80)}** in ${code(f.file, 120)}: ${escapeText(b.title)}${region}`);
   if (b.explanation) lines.push(`<br>${b.labelSource === 'llm' ? '🤖 ' : ''}${escapeText(b.explanation)}`);
+  if (b.realism === 'unusual') {
+    lines.push(
+      `<br>ℹ️ Only on inputs unlike those in the project's tests and call sites: ${escapeText(b.realismNote ?? 'unusual values')}.`,
+    );
+  }
   lines.push('');
   const examples = b.examples.slice(0, maxExamples);
   const hasMutation = examples.some((e) => e.mutation);
@@ -100,24 +105,70 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
         ? '> No existing exported function with changed behavior to compare.'
         : '> No changed exported functions found.',
     );
-  } else if (s.verdict === 'no-change') {
+  } else if (s.behaviors === 0 && s.edgeCaseBehaviors === 0) {
     lines.push(
       `> ✅ **No behavior change** detected in ${n(s.unchanged)} function${s.unchanged === 1 ? '' : 's'} across ${n(s.inputsRun)} generated inputs.`,
     );
+  } else if (s.behaviors === 0) {
+    lines.push(
+      `> ✅ **No behavior change on realistic inputs** across ${n(s.inputsRun)} generated inputs; ${s.edgeCaseBehaviors} difference${s.edgeCaseBehaviors === 1 ? '' : 's'} only on edge-case inputs (below).`,
+    );
   } else {
-    const parts = [
-      `**${s.behaviors} behavior change${s.behaviors === 1 ? '' : 's'}** in ${s.changed} function${s.changed === 1 ? '' : 's'}`,
-    ];
-    if (s.unclaimed > 0) parts.push(`**${s.unclaimed} not covered by the PR description**`);
-    lines.push(`> ${s.unclaimed > 0 ? '⚠️' : '🔍'} ${parts.join(', ')}.`);
+    const all = r.functions.flatMap((f) => f.behaviors).filter((b) => b.realism !== 'edge');
+    const realistic = all.filter((b) => b.realism === 'seen' || b.realism === 'ordinary').length;
+    const unusual = all.length - realistic;
+    const plural = (k: number, w: string) => `${k} ${w}${k === 1 ? '' : 's'}`;
+    const parts: string[] = [];
+    if (realistic > 0) {
+      parts.push(`**${plural(realistic, 'behavior change')}** on realistic inputs`);
+      if (s.unclaimedRealistic > 0)
+        parts.push(`**${s.unclaimedRealistic} not covered by the PR description**`);
+      if (unusual > 0) parts.push(`${unusual} more only on unusual inputs`);
+    } else {
+      parts.push(
+        `${plural(unusual, 'behavior change')} only on unusual inputs${s.unclaimed > 0 ? ` (${s.unclaimed} not covered by the PR description)` : ''}`,
+      );
+    }
+    if (s.edgeCaseBehaviors > 0) parts.push(`${s.edgeCaseBehaviors} only on edge-case inputs`);
+    const icon = s.unclaimedRealistic > 0 ? '⚠️' : realistic > 0 ? '🔍' : 'ℹ️';
+    lines.push(`> ${icon} ${parts.join(', ')}.`);
   }
 
+  const rank = { seen: 0, ordinary: 1, unusual: 2, edge: 3 } as const;
   for (const sec of SECTIONS) {
-    const blocks: string[] = [];
-    for (const f of r.functions)
-      for (const b of f.behaviors) if (b.label === sec.label) blocks.push(behaviorBlock(f, b, maxExamples));
-    if (blocks.length === 0) continue;
-    lines.push('', `### ${sec.heading}`, '', blocks.join('\n\n'));
+    const items = r.functions
+      .flatMap((f) =>
+        f.behaviors.filter((b) => b.label === sec.label && b.realism !== 'edge').map((b) => ({ f, b })),
+      )
+      .sort((x, y) => rank[x.b.realism] - rank[y.b.realism]);
+    if (items.length === 0) continue;
+    lines.push(
+      '',
+      `### ${sec.heading}`,
+      '',
+      items.map(({ f, b }) => behaviorBlock(f, b, maxExamples)).join('\n\n'),
+    );
+  }
+
+  const edge = r.functions.flatMap((f) =>
+    f.behaviors.filter((b) => b.realism === 'edge').map((b) => ({ f, b })),
+  );
+  if (edge.length > 0) {
+    const reasons = [...new Set(edge.map(({ b }) => b.realismNote).filter(Boolean))].slice(0, 4).join(', ');
+    const tag: Record<string, string> = {
+      unclaimed: '⚠️ unclaimed: ',
+      suspicious: '❓ suspicious: ',
+      claimed: '✅ claimed: ',
+      'behavior-change': '',
+    };
+    lines.push(
+      '',
+      `<details><summary>🧪 ${edge.length} behavior change${edge.length === 1 ? '' : 's'} only on edge-case inputs${reasons ? ` (${escapeText(reasons)})` : ''}</summary>`,
+      '',
+      edge.map(({ f, b }) => `${tag[b.label] ?? ''}${behaviorBlock(f, b, maxExamples)}`).join('\n\n'),
+      '',
+      '</details>',
+    );
   }
 
   const unchanged = r.functions.filter((f) => f.status === 'unchanged');
@@ -194,9 +245,12 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
     lines.push(
       `<sub>🤖 Claimed/unclaimed labels and explanations by ${escapeText(r.claim.llm.model)}, checked against the observed examples. The examples themselves come from running the code.</sub>`,
     );
-  } else if (!r.claim.refactor && s.behaviors > 0) {
+  } else if (s.behaviors > 0) {
+    const labeled = r.functions.some((f) => f.behaviors.some((b) => b.labelSource === 'rules'));
     lines.push(
-      `<sub>Changes are not matched against the PR description. Add an LLM API key (optional) or state "no behavior change" for refactors.</sub>`,
+      labeled
+        ? `<sub>Claimed/unclaimed labels come from the PR text via [deterministic rules](${PROJECT_URL}/blob/main/docs/CLAIMS.md) (no LLM, no API key).</sub>`
+        : `<sub>Not matched against the PR description: name the functions you meant to change, or say "no behavior change" for a refactor ([rules](${PROJECT_URL}/blob/main/docs/CLAIMS.md)).</sub>`,
     );
   }
   if (sticky) lines.push(STICKY_MARKER);

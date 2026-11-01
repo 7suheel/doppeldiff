@@ -13,6 +13,8 @@ and shows you, as concrete examples, every input where they behave differently.
 npx doppeldiff
 ```
 
+**No API key required. Free and fully local by default.**
+
 </div>
 
 ## The problem
@@ -76,19 +78,24 @@ Try it: `node examples/demo-shop/try.mjs ai-refactor` creates a scenario reposit
 
 ## Results on real commits
 
-We ran doppeldiff on 21 historical commits from ufo, validator.js, defu, es-toolkit, change-case, ms, slugify and
-semver. **The full write-up, misses included, is in [docs/EVALUATION.md](docs/EVALUATION.md).** In short:
+We ran doppeldiff on 39 historical commits from 17 libraries (ufo, validator.js, es-toolkit, date-fns, qs, radash,
+…). **The full write-up, misses included, is in [docs/EVALUATION.md](docs/EVALUATION.md).** In short:
 
-- It found **9 of 13** behavioral bug fixes, with minimal examples. One is `withoutBase("///", "//")`, the
-  protocol-relative URL that a ufo security fix was about. Another is `isByteLength("\ud800")`, which used to
-  throw `URIError`.
-- On the **held-out** commits, with the code frozen, it found **2 of 6**. Two more were found only after we added
-  regex-derived inputs, so we report them separately.
+- **Latest held-out set** (18 commits from 9 new libraries, picked by a fixed rule, code frozen before the run): it
+  found **3 of 13** verifiable bug fixes. The run also exposed tool bugs (a CommonJS export pattern, JSDoc
+  `{Object}`, cross-file impact). After fixing those, it finds 7 of 15; those numbers are no longer held out.
+- On the first 21 commits it finds **11 of 13** fixes, with minimal examples. One is `withoutBase("///", "//")`, the
+  protocol-relative URL that a ufo security fix was about. Another is `isISO8601("1690360")`, an ordinal date
+  that a regex change started accepting.
+- Most misses need two or three specific things at once (an option combination plus a particular shape of text),
+  or a real callback such as a sort comparator.
 - It surfaced things the commit title did not say: validator's "restrict allowed characters" also started
   accepting one- and two-character slugs.
-- It **could not verify 5 of 21 commits**: class methods, overloaded functions and UMD modules. Every report
-  lists these explicitly.
-- Each run took 1–6 seconds.
+- **Noise:** 91 % of the behaviors in the main list matter (79 % before the noise work). Differences that only
+  happen on inputs unlike the project's tests and call sites are collapsed and do not fail the check.
+- It **could not verify 8 of 39 commits**: class methods, overloaded functions, UMD modules, class-instance
+  parameters and exported non-function values. Every report lists these explicitly.
+- Each run took 0.5–8 seconds.
 
 ## Quick start
 
@@ -103,18 +110,18 @@ npx doppeldiff --write-tests                    # pin the examples in tests/dopp
 npx doppeldiff --json report.json --markdown report.md
 ```
 
-| Flag                                    | Default               |                                           |
-| --------------------------------------- | --------------------- | ----------------------------------------- |
-| `--base` / `--head`                     | `HEAD` / working tree | Revisions to compare (via merge base)     |
-| `--claim`, `--claim-file`, `--refactor` |                       | What the change claims to do              |
-| `--runs`                                | `1000`                | Max inputs per function                   |
-| `--timeout`                             | `250`                 | Per-call timeout (ms)                     |
-| `--budget`                              |                       | Total exploration time budget (s)         |
-| `--seed`                                | `1`                   | Every run is reproducible                 |
-| `--fail-on`                             | `unclaimed`           | Exit 1 on `unclaimed`, `any` or `never`   |
-| `--include` / `--exclude` / `--only`    |                       | Limit files or functions                  |
-| `--no-freeze`                           |                       | Do not freeze the clock / seed randomness |
-| `--llm`, `--llm-model`                  | `auto`                | Optional LLM layer (below)                |
+| Flag                                     | Default               |                                                  |
+| ---------------------------------------- | --------------------- | ------------------------------------------------ |
+| `--base` / `--head`                      | `HEAD` / working tree | Revisions to compare (via merge base)            |
+| `--claim`, `--claim-file`, `--refactor`  |                       | What the change claims to do                     |
+| `--runs`                                 | `1000`                | Max inputs per function                          |
+| `--timeout`                              | `250`                 | Per-call timeout (ms)                            |
+| `--budget`                               |                       | Total exploration time budget (s)                |
+| `--seed`                                 | `1`                   | Every run is reproducible                        |
+| `--fail-on`                              | `unclaimed`           | Exit 1 on `unclaimed`, `any` or `never`          |
+| `--include` / `--exclude` / `--only`     |                       | Limit files or functions                         |
+| `--no-freeze`                            |                       | Do not freeze the clock / seed randomness        |
+| `--llm`, `--llm-model`, `--llm-base-url` | `off`                 | Optional LLM (below); `ollama` is free and local |
 
 Node.js 22.13 or newer. Exit codes: `0` OK, `1` findings matching `--fail-on`, `2` tool error.
 
@@ -137,14 +144,22 @@ Two tools: `verify_change` (what did my edit change?) and `verify_refactor` (PAS
 counterexamples). An agent can check its own refactor before telling you it is done. Setup for Cursor and Codex
 is in [docs/MCP.md](docs/MCP.md).
 
-### Optional: claim matching with an LLM
+### Claim matching: free, no LLM
 
-With `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set, doppeldiff compares each behavior change with the PR
-description and labels it **claimed**, **unclaimed** or **suspicious**, with a one-sentence explanation. It can
-also suggest targeted edge-case inputs. The LLM only labels changes that the deterministic engine actually
-observed. Its output is checked against the evidence (no invented IDs, no values that do not appear in the
-examples), and without a key everything works the same, just without the labels. A PR description that says
-"no behavior change" is enough to flag every difference, no LLM needed.
+doppeldiff compares each behavior change with the PR title and description and labels it **claimed**,
+**unclaimed** or neutral, using [documented deterministic rules](docs/CLAIMS.md):
+
+- if the PR says it is a refactor, cleanup or performance change, or says "no behavior change", every difference
+  is unclaimed;
+- if the PR names a function, that function's changes are claimed.
+
+No LLM and no API key are involved.
+
+Optionally, you can let an LLM read the description instead. A local model via
+[Ollama](https://ollama.com) is free: `--llm ollama --llm-model qwen2.5:7b`. Any OpenAI-compatible server works,
+and so do Anthropic or OpenAI with your own key. The LLM is never used unless you ask for it. It only labels
+changes the engine actually observed, and its output is checked against the evidence. Details:
+[docs/CLAIMS.md](docs/CLAIMS.md).
 
 ### Configuration (optional)
 
@@ -156,9 +171,9 @@ export default defineConfig({
   exclude: ['src/legacy/**'],
   compare: { epsilon: 1e-9 },
   functions: {
-    // Declare the real input domain when generated inputs are too broad.
-    'src/semver.ts#compareIdentifiers': {
-      args: (fc) => fc.tuple(fc.nat(), fc.nat()),
+    // Declare the real input domain when inference from tests and call sites is not enough.
+    'src/internal/identifiers.ts#compareIdentifiers': {
+      where: ([a, b]) => [a, b].every((x) => typeof x === 'string' || (Number.isInteger(x) && x >= 0)),
     },
     parseConfig: { skip: 'reads files; covered by integration tests' },
   },
