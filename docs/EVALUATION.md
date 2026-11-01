@@ -138,5 +138,5 @@ with a wide margin on these examples; functions that loop for a long time on lar
 
 - **The LLM layer** (claim matching and input suggestions). There was no API key in the evaluation environment.
   Its plumbing is tested against mock servers, but the quality of its labels on real PRs is unmeasured.
-- **The GitHub Action on real GitHub** (artifacts, `workflow_run`, comments). Its logic is tested with fakes.
+- ~~The GitHub Action on real GitHub~~: verified on [7suheel/doppeldiff#1](https://github.com/7suheel/doppeldiff/pull/1) (the "AI refactor" scenario). The analyze job verified 3 functions at 10,000 inputs each in 3.4 s, and the comment workflow posted the sticky comment and updated it on the next push. That run also showed that GitHub rejects a workflow that triggers itself via `workflow_run`, so the setup is two files.
 - **Monorepos with pnpm or yarn workspaces** (only npm workspaces are tested).
