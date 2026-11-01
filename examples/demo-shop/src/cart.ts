@@ -13,23 +13,11 @@ export interface Coupon {
 }
 
 /** Total of a cart in currency units, after an optional fixed-amount coupon. */
-export function cartTotal(items: CartItem[], coupon?: Coupon): number {
-  let subtotal = 0;
-  for (const item of items) {
-    if (item.quantity <= 0) continue;
-    subtotal += item.unitPrice * item.quantity;
-  }
-  if (coupon && subtotal >= coupon.minimumSpend) {
-    subtotal = subtotal - Math.min(coupon.amountOff, subtotal);
-  }
-  return roundMoney(subtotal);
-}
+export const cartTotal = (items: CartItem[], coupon?: Coupon): number => {
+  const subtotal = items.reduce((sum, { unitPrice, quantity }) => sum + unitPrice * Math.max(quantity, 0), 0);
+  const discount = coupon && subtotal >= coupon.minimumSpend ? coupon.amountOff : 0;
+  return roundMoney(Math.max(subtotal - discount, 0));
+};
 
 /** Number of units in the cart. */
-export function itemCount(items: CartItem[]): number {
-  let count = 0;
-  for (const item of items) {
-    count += item.quantity;
-  }
-  return count;
-}
+export const itemCount = (items: CartItem[]): number => items.reduce((count, { quantity }) => count + quantity, 0);
