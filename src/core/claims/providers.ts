@@ -26,9 +26,10 @@ export const DEFAULT_MODELS = { anthropic: 'claude-opus-5-5', openai: 'gpt-5.5' 
 export class LlmUnavailableError extends Error {}
 export class LlmRefusalError extends Error {}
 
-async function importOptional<T>(name: string): Promise<T> {
+/** Literal dynamic imports so bundlers (the GitHub Action build) can include the optional SDKs. */
+async function importOptional<T>(name: string, load: () => Promise<unknown>): Promise<T> {
   try {
-    return (await import(name)) as T;
+    return (await load()) as T;
   } catch {
     throw new LlmUnavailableError(`the optional package "${name}" is not installed (npm i -D ${name})`);
   }
@@ -42,7 +43,10 @@ export function anthropicProvider(
     name: 'anthropic',
     model,
     async complete(req) {
-      const { default: Anthropic } = await importOptional<typeof AnthropicModule>('@anthropic-ai/sdk');
+      const { default: Anthropic } = await importOptional<typeof AnthropicModule>(
+        '@anthropic-ai/sdk',
+        () => import('@anthropic-ai/sdk'),
+      );
       const client = new Anthropic({ maxRetries: 2, timeout: 120_000 });
       const useFallbacks = options.fallbacks !== false;
       const response = await client.beta.messages.create({
@@ -76,7 +80,7 @@ export function openaiProvider(model: string = DEFAULT_MODELS.openai): LlmProvid
     name: 'openai',
     model,
     async complete(req) {
-      const { default: OpenAI } = await importOptional<typeof OpenAIModule>('openai');
+      const { default: OpenAI } = await importOptional<typeof OpenAIModule>('openai', () => import('openai'));
       const client = new OpenAI({ maxRetries: 2, timeout: 120_000 });
       const response = await client.responses.create({
         model,

@@ -177,3 +177,22 @@ export function buildReport(run: RunResult, claim: ClaimInput = { text: null, so
     timing: run.timing,
   };
 }
+
+/**
+ * Re-derive claim fields and deterministic labels for a report from a (trusted) claim text, discarding any
+ * labels it carried. Used by the GitHub Action's trusted job on the report produced by the untrusted job.
+ */
+export function relabel(report: Report, claim: ClaimInput): Report {
+  const refactor = claim.refactor ?? isRefactorClaim(claim.text);
+  const out: Report = structuredClone(report);
+  out.claim = { source: claim.source, text: claim.text, refactor, llm: null };
+  for (const f of out.functions) {
+    for (const b of f.behaviors) {
+      b.label = refactor ? 'unclaimed' : 'behavior-change';
+      b.labelSource = refactor ? 'refactor-claim' : 'none';
+      delete b.explanation;
+    }
+  }
+  out.summary = summarize(out.functions, out.skipped.length, out.summary.durationMs);
+  return out;
+}

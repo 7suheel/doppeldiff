@@ -119,11 +119,20 @@ export async function main(argv = process.argv): Promise<number> {
     .action(async (_args: string[], flags: CliFlags) => {
       process.exitCode = await runCli(flags);
     });
+  let mcp = false;
+  cli.command('mcp', 'Start the MCP server on stdio (tools: verify_change, verify_refactor)').action(() => {
+    mcp = true;
+  });
   cli.help();
   cli.version(toolVersion());
   cli.parse(argv, { run: false });
   if (cli.options.help || cli.options.version) return 0;
   await cli.runMatchedCommand();
+  if (mcp) {
+    const { startMcpServer } = await import('./mcp.js');
+    await startMcpServer();
+    return new Promise<number>(() => {}); // serve until the client disconnects
+  }
   return Number(process.exitCode ?? 0);
 }
 

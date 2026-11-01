@@ -1,0 +1,96 @@
+name: doppeldiff
+description: 'See what your PR actually changed: runs old and new versions of changed functions on generated inputs and posts the differences as one sticky comment.'
+author: doppeldiff
+branding:
+  icon: git-pull-request
+  color: purple
+
+inputs:
+  mode:
+    description: 'auto (default: analyze on pull_request, comment on workflow_run) | analyze | comment'
+    default: auto
+  github-token:
+    description: Token for reading artifacts and posting the comment.
+    default: ${{ github.token }}
+  runs:
+    description: Max generated inputs per function.
+    default: '10000'
+  time-budget:
+    description: Total exploration time budget in seconds (split across functions).
+    default: '60'
+  timeout:
+    description: Per-call timeout in milliseconds.
+    default: '250'
+  fail-on:
+    description: 'Fail the analyze job on: never (default) | unclaimed | any'
+    default: never
+  include:
+    description: Only analyze matching files (globs, comma or newline separated).
+    default: ''
+  exclude:
+    description: Skip matching files (globs, comma or newline separated).
+    default: ''
+  install:
+    description: Install dependencies (lifecycle scripts disabled) if node_modules is missing.
+    default: 'true'
+  anthropic-api-key:
+    description: Optional. Enables claim matching (comment job) or input suggestions (analyze job, same-repo only).
+    default: ''
+  openai-api-key:
+    description: Optional alternative to anthropic-api-key.
+    default: ''
+  llm-model:
+    description: Optional model override for the LLM layer.
+    default: ''
+  artifact-name:
+    description: Name of the report artifact passed from the analyze job to the comment job.
+    default: doppeldiff-report
+
+outputs:
+  verdict:
+    description: 'no-change | changes | unclaimed'
+    value: ${{ steps.run.outputs.verdict }}
+  behaviors:
+    description: Number of behavior changes found.
+    value: ${{ steps.run.outputs.behaviors }}
+  unclaimed:
+    description: Number of behavior changes not covered by the PR description.
+    value: ${{ steps.run.outputs.unclaimed }}
+  report-path:
+    description: Path of the JSON report (analyze mode).
+    value: ${{ steps.run.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - id: node
+      shell: bash
+      run: |
+        if node -e 'const [a,b]=process.versions.node.split(".").map(Number);process.exit(a>22||(a===22&&b>=13)?0:1)' 2>/dev/null; then
+          echo "setup=false" >> "$GITHUB_OUTPUT"
+        else
+          echo "setup=true" >> "$GITHUB_OUTPUT"
+        fi
+    - if: steps.node.outputs.setup == 'true'
+      uses: actions/setup-node@v4
+      with:
+        node-version: 22
+    - shell: bash
+      run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund --loglevel=error --prefix "$GITHUB_ACTION_PATH"
+    - id: run
+      shell: bash
+      run: node "$GITHUB_ACTION_PATH/action/dist/main.js"
+      env:
+        INPUT_MODE: ${{ inputs.mode }}
+        INPUT_GITHUB-TOKEN: ${{ inputs.github-token }}
+        INPUT_RUNS: ${{ inputs.runs }}
+        INPUT_TIME-BUDGET: ${{ inputs.time-budget }}
+        INPUT_TIMEOUT: ${{ inputs.timeout }}
+        INPUT_FAIL-ON: ${{ inputs.fail-on }}
+        INPUT_INCLUDE: ${{ inputs.include }}
+        INPUT_EXCLUDE: ${{ inputs.exclude }}
+        INPUT_INSTALL: ${{ inputs.install }}
+        INPUT_ANTHROPIC-API-KEY: ${{ inputs.anthropic-api-key }}
+        INPUT_OPENAI-API-KEY: ${{ inputs.openai-api-key }}
+        INPUT_LLM-MODEL: ${{ inputs.llm-model }}
+        INPUT_ARTIFACT-NAME: ${{ inputs.artifact-name }}

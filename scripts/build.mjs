@@ -26,3 +26,24 @@ await esbuild.build({
   entryPoints: { child: 'src/core/runner/child.ts' },
   outdir: 'dist',
 });
+
+// GitHub Action entry: bundles the Actions toolkit and the optional LLM SDKs; runtime dependencies stay
+// external and are installed by the composite action (`npm ci --omit=dev`). The output is committed.
+if (process.argv.includes('--action')) {
+  const { readFileSync, copyFileSync, mkdirSync } = await import('node:fs');
+  const pkg = JSON.parse(readFileSync('package.json', 'utf8'));
+  mkdirSync('action/dist', { recursive: true });
+  await esbuild.build({
+    ...common,
+    sourcemap: false,
+    minify: true,
+    entryPoints: { main: 'src/action/main.ts' },
+    outdir: 'action/dist',
+    external: Object.keys(pkg.dependencies ?? {}),
+    banner: {
+      js: "import { createRequire as __ddRequire } from 'node:module'; const require = __ddRequire(import.meta.url);",
+    },
+    legalComments: 'linked',
+  });
+  copyFileSync('dist/child.js', 'action/dist/child.js');
+}
