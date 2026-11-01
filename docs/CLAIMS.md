@@ -46,7 +46,11 @@ The rules are in [`src/core/claims/rules.ts`](../src/core/claims/rules.ts) and t
 | `fix: faster paths for compare` (semver)                                                        | no change (performance only) | both **unclaimed** ✅ (this rule was added after seeing this commit)               |
 | `Fix capitalizing words that start with numbers` (change-case), `Fixed negative decimals…` (ms) | change                       | neutral: the title does not name the function ➖                                   |
 
-Across the 21 evaluation commits, every label that the rules assign is correct by our reading. When the PR text does
+Across the 21 evaluation commits, every label that the rules assign is correct by our reading. On the second
+held-out set (18 commits, rules unchanged since before the run), the rules labeled 14 changed functions: 5
+**claimed** (radash `set`/`construct`/`snake`; filesize `applyNumberFormatting` via "formatting" and
+`decorateResult` via that helper) and 9 neutral, where the title does not name the function ("Fix return value for
+un-parsable strings" for bytes' `parse`). None was wrong. When the PR text does
 not name the function, the rules stay neutral instead of guessing. They also cannot notice that a fix changes _more_
 than its title says (validator's `isSlug` now also accepts 1–2 character slugs; that change is labeled claimed
 together with the rest of `isSlug`).

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2138
+    "durationMs": 1906
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1347,
+      "durationMs": 1189,
       "seed": 2354929897,
       "usage": {
         "files": 0,
@@ -170,8 +170,8 @@
           ],
           "examples": [
             {
-              "call": "default(\"-60.3\", new Map([]))",
-              "argsCode": "\"-60.3\", new Map([])",
+              "call": "default(\"-60.3\", [])",
+              "argsCode": "\"-60.3\", []",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -185,23 +185,6 @@
                 "code": "-60.3"
               },
               "minimal": true
-            },
-            {
-              "call": "default(\"-00.9\", new Map([[\"\", new Map([])]]))",
-              "argsCode": "\"-00.9\", new Map([[\"\", new Map([])]])",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "undefined",
-                "code": "undefined"
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "-0.9",
-                "code": "-0.9"
-              },
-              "minimal": false
             },
             {
               "call": "default(\"-00.2\", undefined)",
@@ -219,6 +202,23 @@
                 "code": "-0.2"
               },
               "minimal": false
+            },
+            {
+              "call": "default(\"-00.4\", -1650994986313776761387681871081335405129303303344510596685249360664067n)",
+              "argsCode": "\"-00.4\", -1650994986313776761387681871081335405129303303344510596685249360664067n",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "-0.4",
+                "code": "-0.4"
+              },
+              "minimal": false
             }
           ]
         }
@@ -232,10 +232,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2138,
-    "materializeMs": 59,
+    "totalMs": 1906,
+    "materializeMs": 65,
     "dependenciesMs": 1,
-    "detectMs": 724,
-    "verifyMs": 1354
+    "detectMs": 644,
+    "verifyMs": 1196
   }
 }

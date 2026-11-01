@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2003
+    "durationMs": 1841
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1251,
+      "durationMs": 1093,
       "seed": 2354929897,
       "usage": {
         "files": 0,
@@ -182,6 +182,23 @@
               "minimal": true
             },
             {
+              "call": "default(\"-3\", \"\")",
+              "argsCode": "\"-3\", \"\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "-3",
+                "code": "-3"
+              },
+              "minimal": false
+            },
+            {
               "call": "default(\"-0\", undefined)",
               "argsCode": "\"-0\", undefined",
               "old": {
@@ -197,23 +214,6 @@
                 "code": "-0"
               },
               "minimal": false
-            },
-            {
-              "call": "default(\"-4\", -103187186644611047586730116942583462820581456459031912292828085041505n)",
-              "argsCode": "\"-4\", -103187186644611047586730116942583462820581456459031912292828085041505n",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "undefined",
-                "code": "undefined"
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "-4",
-                "code": "-4"
-              },
-              "minimal": false
             }
           ]
         }
@@ -227,10 +227,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2003,
-    "materializeMs": 64,
+    "totalMs": 1841,
+    "materializeMs": 66,
     "dependenciesMs": 1,
-    "detectMs": 680,
-    "verifyMs": 1258
+    "detectMs": 673,
+    "verifyMs": 1101
   }
 }

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2794
+    "durationMs": 2373
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1588,
+      "durationMs": 1314,
       "seed": 60903051,
       "usage": {
         "files": 2,
@@ -194,23 +194,6 @@
               "minimal": true
             },
             {
-              "call": "titleCase(\"0ß\", { wordSeparators: new Set([]) })",
-              "argsCode": "\"0ß\", { wordSeparators: new Set([]) }",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"0SS\"",
-                "code": "\"0SS\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"0ß\"",
-                "code": "\"0ß\""
-              },
-              "minimal": false
-            },
-            {
               "call": "titleCase(\"1s\", [\"vs\"])",
               "argsCode": "\"1s\", [\"vs\"]",
               "old": {
@@ -226,6 +209,23 @@
                 "code": "\"1s\""
               },
               "minimal": false
+            },
+            {
+              "call": "titleCase(\"0ß\", { wordSeparators: new Set([]) })",
+              "argsCode": "\"0ß\", { wordSeparators: new Set([]) }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0SS\"",
+                "code": "\"0SS\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0ß\"",
+                "code": "\"0ß\""
+              },
+              "minimal": false
             }
           ]
         }
@@ -239,10 +239,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2794,
-    "materializeMs": 64,
+    "totalMs": 2373,
+    "materializeMs": 67,
     "dependenciesMs": 0,
-    "detectMs": 1126,
-    "verifyMs": 1603
+    "detectMs": 980,
+    "verifyMs": 1326
   }
 }

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2355
+    "durationMs": 2282
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 932,
+      "durationMs": 892,
       "seed": 1452732886,
       "usage": {
         "files": 4,
@@ -101,8 +101,8 @@
           ],
           "examples": [
             {
-              "call": "default(\"\\ud800\", new Set([null]))",
-              "argsCode": "\"\\ud800\", new Set([null])",
+              "call": "default(\"\\ud800\", { \"\": {} })",
+              "argsCode": "\"\\ud800\", { \"\": {} }",
               "old": {
                 "kind": "throw",
                 "async": false,
@@ -137,8 +137,8 @@
               "minimal": false
             },
             {
-              "call": "default(\"\\ud800\", { \"\": {} })",
-              "argsCode": "\"\\ud800\", { \"\": {} }",
+              "call": "default(\"\\ud800\", \"a\")",
+              "argsCode": "\"\\ud800\", \"a\"",
               "old": {
                 "kind": "throw",
                 "async": false,
@@ -149,8 +149,8 @@
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "true",
-                "code": "true"
+                "display": "false",
+                "code": "false"
               },
               "minimal": false
             }
@@ -169,7 +169,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 311,
+      "durationMs": 239,
       "seed": 4220680886,
       "usage": {
         "files": 6,
@@ -276,10 +276,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2355,
-    "materializeMs": 142,
+    "totalMs": 2282,
+    "materializeMs": 145,
     "dependenciesMs": 1,
-    "detectMs": 873,
-    "verifyMs": 1339
+    "detectMs": 908,
+    "verifyMs": 1228
   }
 }

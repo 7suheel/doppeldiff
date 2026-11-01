@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 5000,
-    "durationMs": 6535
+    "durationMs": 7025
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1000,
+      "durationMs": 1077,
       "seed": 1243138757,
       "usage": {
         "files": 7,
@@ -69,7 +69,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 965,
+      "durationMs": 1355,
       "seed": 1028428758,
       "usage": {
         "files": 6,
@@ -291,8 +291,8 @@
               "minimal": true
             },
             {
-              "call": "applyNumberFormatting(\"a\", true, new Date(\"1970-01-01T00:00:00.000Z\"), \"a\", true, 1000, \"a\")",
-              "argsCode": "\"a\", true, new Date(\"1970-01-01T00:00:00.000Z\"), \"a\", true, 1000, \"a\"",
+              "call": "applyNumberFormatting(\"a\", true, -1, \"a\", true, 200, [\"\", false])",
+              "argsCode": "\"a\", true, -1, \"a\", true, 200, [\"\", false]",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -340,7 +340,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 3055,
+      "durationMs": 2960,
       "seed": 2253021542,
       "usage": {
         "files": 7,
@@ -600,8 +600,8 @@
           ],
           "examples": [
             {
-              "call": "decorateResult([\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false })",
-              "argsCode": "[\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false }",
+              "call": "decorateResult([\"\"], true, \"a\", true, \"a\", \"a\", false, 0.01, false, [{}], \"a\", 2, true, \"a\")",
+              "argsCode": "[\"\"], true, \"a\", true, \"a\", \"a\", false, 0.01, false, [{}], \"a\", 2, true, \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -617,14 +617,14 @@
               "minimal": true,
               "mutation": {
                 "argIndex": 0,
-                "old": "[\"a\"]",
+                "old": "[\"-\"]",
                 "new": "[\"NaN\"]",
                 "newCode": "[\"NaN\"]"
               }
             },
             {
-              "call": "decorateResult([\"a\"], false, [0n], true, { fullform: new Date(\"1970-01-01T00:00:00.000Z\") }, \"a\", false, -1, false, [], \"a\", -2, false, undefined)",
-              "argsCode": "[\"a\"], false, [0n], true, { fullform: new Date(\"1970-01-01T00:00:00.000Z\") }, \"a\", false, -1, false, [], \"a\", -2, false, undefined",
+              "call": "decorateResult([\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false })",
+              "argsCode": "[\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false }",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -646,8 +646,8 @@
               }
             },
             {
-              "call": "decorateResult([\"\"], true, \"a\", true, -1, \"a\", true, 2, false, [new Set([])], \"a\", 2, false, 2)",
-              "argsCode": "[\"\"], true, \"a\", true, -1, \"a\", true, 2, false, [new Set([])], \"a\", 2, false, 2",
+              "call": "decorateResult([\"\"], true, \"a\", true, \" \", \"a\", true, -1, false, [0], \"a\", -1, false, \"a\")",
+              "argsCode": "[\"\"], true, \"a\", true, \" \", \"a\", true, -1, false, [0], \"a\", -1, false, \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -1148,7 +1148,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 193,
+      "durationMs": 241,
       "seed": 435064967,
       "usage": {
         "files": 15,
@@ -1167,7 +1167,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 231,
+      "durationMs": 232,
       "seed": 3163464905,
       "usage": {
         "files": 11,
@@ -1184,10 +1184,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 6535,
-    "materializeMs": 114,
+    "totalMs": 7025,
+    "materializeMs": 97,
     "dependenciesMs": 0,
-    "detectMs": 783,
-    "verifyMs": 5638
+    "detectMs": 858,
+    "verifyMs": 6070
   }
 }

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 4000,
-    "durationMs": 2333
+    "durationMs": 2166
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1094,
+      "durationMs": 952,
       "seed": 1810207695,
       "usage": {
         "files": 3,
@@ -141,7 +141,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 94,
+      "durationMs": 109,
       "seed": 3870797363,
       "usage": {
         "files": 2,
@@ -160,7 +160,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 55,
+      "durationMs": 77,
       "seed": 2778817679,
       "usage": {
         "files": 2,
@@ -179,7 +179,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 47,
+      "durationMs": 63,
       "seed": 2346989735,
       "usage": {
         "files": 2,
@@ -196,10 +196,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2333,
-    "materializeMs": 94,
-    "dependenciesMs": 1,
-    "detectMs": 913,
-    "verifyMs": 1325
+    "totalMs": 2166,
+    "materializeMs": 67,
+    "dependenciesMs": 0,
+    "detectMs": 871,
+    "verifyMs": 1228
   }
 }

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 0,
-    "durationMs": 560
+    "durationMs": 475
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "targetReason": "uses changed `stringifyTokens`",
       "inputsRun": 0,
       "failures": 0,
-      "durationMs": 111,
+      "durationMs": 84,
       "seed": 1839717764,
       "behaviors": []
     }
@@ -62,10 +62,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 560,
-    "materializeMs": 70,
+    "totalMs": 475,
+    "materializeMs": 60,
     "dependenciesMs": 1,
-    "detectMs": 354,
-    "verifyMs": 135
+    "detectMs": 310,
+    "verifyMs": 104
   }
 }

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2189
+    "durationMs": 2201
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1044,
+      "durationMs": 1089,
       "seed": 2354929897,
       "usage": {
         "files": 1,
@@ -145,7 +145,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 276,
+      "durationMs": 292,
       "seed": 4139566119,
       "usage": {
         "files": 2,
@@ -243,10 +243,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2189,
-    "materializeMs": 70,
+    "totalMs": 2201,
+    "materializeMs": 60,
     "dependenciesMs": 0,
-    "detectMs": 785,
-    "verifyMs": 1334
+    "detectMs": 741,
+    "verifyMs": 1399
   }
 }

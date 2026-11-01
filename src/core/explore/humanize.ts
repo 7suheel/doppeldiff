@@ -81,10 +81,11 @@ export function inputComplexity(input: unknown[]): number {
   );
 }
 
-/** Binary data and objects with inherited properties: harder to read than plain values, so ranked later. */
+/** Binary data, objects with inherited properties, Maps, Sets and Dates: harder to read than plain values. */
 function exoticObjects(v: unknown, depth = 0): number {
   if (typeof v !== 'object' || v === null || depth > 6) return 0;
   if (v instanceof ArrayBuffer || ArrayBuffer.isView(v) || isProtoDescriptor(v)) return 1;
+  if (v instanceof Map || v instanceof Set || v instanceof Date) return 0.5;
   if (Array.isArray(v)) return v.reduce((n: number, x) => n + exoticObjects(x, depth + 1), 0);
   if (Object.getPrototypeOf(v) !== Object.prototype) return 0;
   return Object.values(v).reduce((n: number, x) => n + exoticObjects(x, depth + 1), 0);

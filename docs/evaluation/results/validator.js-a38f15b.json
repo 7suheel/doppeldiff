@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2072
+    "durationMs": 2143
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 938,
+      "durationMs": 1000,
       "seed": 3610445638,
       "usage": {
         "files": 3,
@@ -143,10 +143,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2072,
-    "materializeMs": 138,
+    "totalMs": 2143,
+    "materializeMs": 180,
     "dependenciesMs": 0,
-    "detectMs": 952,
-    "verifyMs": 982
+    "detectMs": 925,
+    "verifyMs": 1038
   }
 }

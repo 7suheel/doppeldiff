@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 0,
-    "durationMs": 2564
+    "durationMs": 2413
   },
   "functions": [],
   "skipped": [],
@@ -47,10 +47,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2564,
-    "materializeMs": 1024,
+    "totalMs": 2413,
+    "materializeMs": 1026,
     "dependenciesMs": 0,
-    "detectMs": 1540,
+    "detectMs": 1387,
     "verifyMs": 0
   }
 }
