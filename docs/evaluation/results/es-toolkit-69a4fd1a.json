@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 5611
+    "durationMs": 4171
   },
   "functions": [
     {
@@ -48,76 +50,83 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1131,
+      "durationMs": 825,
       "seed": 3357540574,
+      "usage": {
+        "files": 9,
+        "callSites": 40,
+        "values": 56
+      },
       "behaviors": [
         {
           "id": "src/compat/string/startCase.ts#startCase/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 3,
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 50,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text"],
-              "count": 3
+              "count": 50
             }
           ],
           "examples": [
             {
-              "call": "startCase(\"𐖗\")",
-              "argsCode": "\"𐖗\"",
+              "call": "startCase(\"αβγΔεζ\")",
+              "argsCode": "\"αβγΔεζ\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐖗\"",
-                "code": "\"𐖗\""
+                "display": "\"Αβγδεζ\"",
+                "code": "\"Αβγδεζ\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐕰\"",
-                "code": "\"𐕰\""
+                "display": "\"ΑβγΔεζ\"",
+                "code": "\"ΑβγΔεζ\""
               },
               "minimal": true
             },
             {
-              "call": "startCase(\"𐓬\")",
-              "argsCode": "\"𐓬\"",
+              "call": "startCase(\"𐐨𐐩 deseret\")",
+              "argsCode": "\"𐐨𐐩 deseret\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐓬\"",
-                "code": "\"𐓬\""
+                "display": "\"𐐨 𐐩 Deseret\"",
+                "code": "\"𐐨 𐐩 Deseret\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐓄\"",
-                "code": "\"𐓄\""
+                "display": "\"𐐀 𐐁 Deseret\"",
+                "code": "\"𐐀 𐐁 Deseret\""
               },
               "minimal": false
             },
             {
-              "call": "startCase(\"𐖶\")",
-              "argsCode": "\"𐖶\"",
+              "call": "startCase(\"ПриветМир\")",
+              "argsCode": "\"ПриветМир\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐖶\"",
-                "code": "\"𐖶\""
+                "display": "\"Приветмир\"",
+                "code": "\"Приветмир\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"𐖏\"",
-                "code": "\"𐖏\""
+                "display": "\"ПриветМир\"",
+                "code": "\"ПриветМир\""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `startCase`."
         }
       ]
     }
@@ -129,10 +138,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 5611,
-    "materializeMs": 1264,
-    "dependenciesMs": 1,
-    "detectMs": 3214,
-    "verifyMs": 1132
+    "totalMs": 4171,
+    "materializeMs": 1038,
+    "dependenciesMs": 0,
+    "detectMs": 2253,
+    "verifyMs": 880
   }
 }

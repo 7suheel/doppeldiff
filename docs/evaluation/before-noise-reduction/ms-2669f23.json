@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "2669f23^",
+    "sha": "fe0bae301a6c41f68a01595658a4f4f0dcba0e84"
+  },
+  "head": {
+    "ref": "2669f23",
+    "sha": "2669f23e99be0bb6b65d365151884de52434301c"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fixed negative decimals less than -10 don't work (#111)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 1904
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(val: string | number, options: undefined | <unsupported: built-in type `Object`>)",
+      "status": "changed",
+      "targetReason": "uses changed `parse`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 974,
+      "seed": 2354929897,
+      "behaviors": [
+        {
+          "id": "index.js#default/1",
+          "key": "returns undefined → returns number",
+          "title": "now returns a number (previously undefined)",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 3,
+          "variants": [
+            {
+              "transition": "returns undefined → returns positive number",
+              "features": ["text", "undefined"],
+              "count": 2
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "undefined"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"-00.2\", undefined)",
+              "argsCode": "\"-00.2\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "-0.2",
+                "code": "-0.2"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"6-00.0\", undefined)",
+              "argsCode": "\"6-00.0\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "6",
+                "code": "6"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"-096949976.251282\", undefined)",
+              "argsCode": "\"-096949976.251282\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "undefined",
+                "code": "undefined"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "-96949976.251282",
+                "code": "-96949976.251282"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1904,
+    "materializeMs": 69,
+    "dependenciesMs": 0,
+    "detectMs": 859,
+    "verifyMs": 976
+  }
+}

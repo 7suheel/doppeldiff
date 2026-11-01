@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "11ba022^",
+    "sha": "3942bfbbcaa72084bd4284846c83bd61ed7c8b29"
+  },
+  "head": {
+    "ref": "11ba022",
+    "sha": "11ba02213d4b1c6b02dd686041f75edc479c98e9"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: ignore inherited enumerable properties",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 5,
+    "changed": 0,
+    "unchanged": 5,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 5000,
+    "durationMs": 3470
+  },
+  "functions": [
+    {
+      "id": "src/defu.ts#createDefu",
+      "file": "src/defu.ts",
+      "exportName": "createDefu",
+      "signature": "createDefu(merger?: undefined | () => unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1108,
+      "seed": 3834644065,
+      "behaviors": []
+    },
+    {
+      "id": "src/defu.ts#defu",
+      "file": "src/defu.ts",
+      "exportName": "defu",
+      "signature": "defu(source: undefined | null | number | unknown[] | Record<string, unknown> | {  } | boolean, ...defaults: (undefined | null | number | unknown[] | {  } | Record<string, unknown> | boolean)[][])",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu` (via createDefu)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 426,
+      "seed": 2990958073,
+      "behaviors": []
+    },
+    {
+      "id": "src/defu.ts#default",
+      "file": "src/defu.ts",
+      "exportName": "default",
+      "signature": "default(source: undefined | null | number | unknown[] | Record<string, unknown> | {  } | boolean, ...defaults: (undefined | null | number | unknown[] | {  } | Record<string, unknown> | boolean)[][])",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu` (via createDefu)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 268,
+      "seed": 1488209232,
+      "behaviors": []
+    },
+    {
+      "id": "src/defu.ts#defuFn",
+      "file": "src/defu.ts",
+      "exportName": "defuFn",
+      "signature": "defuFn(source: Record<string, unknown>, ...defaults: (undefined | null | number | unknown[] | {  } | Record<string, unknown> | boolean)[][])",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu` (via createDefu)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 292,
+      "seed": 3873104889,
+      "behaviors": []
+    },
+    {
+      "id": "src/defu.ts#defuArrayFn",
+      "file": "src/defu.ts",
+      "exportName": "defuArrayFn",
+      "signature": "defuArrayFn(source: Record<string, unknown>, ...defaults: (undefined | null | number | unknown[] | {  } | Record<string, unknown> | boolean)[][])",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu` (via createDefu)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 261,
+      "seed": 127409958,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 3470,
+    "materializeMs": 72,
+    "dependenciesMs": 1,
+    "detectMs": 1042,
+    "verifyMs": 2355
+  }
+}

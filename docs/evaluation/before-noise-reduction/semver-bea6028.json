@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "bea6028^",
+    "sha": "76416081a8413383cf6e24c82cafa438bd076d41"
+  },
+  "head": {
+    "ref": "bea6028",
+    "sha": "bea6028694a75e840f48b288ac019e9644cfe6e8"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: increment dotted prerelease identifiers (#870)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 1,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 1183
+  },
+  "functions": [],
+  "skipped": [
+    {
+      "id": "classes/semver.js#default",
+      "file": "classes/semver.js",
+      "exportName": "default",
+      "kind": "class",
+      "reason": "class (class methods are out of scope in v1)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1183,
+    "materializeMs": 98,
+    "dependenciesMs": 0,
+    "detectMs": 1085,
+    "verifyMs": 0
+  }
+}

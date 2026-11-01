@@ -15,7 +15,7 @@
   "claim": {
     "source": "flag",
     "text": "fix: faster paths for compare (#813)",
-    "refactor": false,
+    "refactor": true,
     "llm": null
   },
   "settings": {
@@ -26,16 +26,18 @@
     "freeze": true
   },
   "summary": {
-    "verdict": "changes",
+    "verdict": "unclaimed",
     "functions": 2,
     "changed": 2,
     "unchanged": 0,
     "skipped": 3,
     "nondeterministic": 0,
     "behaviors": 2,
-    "unclaimed": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 2,
+    "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2105
+    "durationMs": 2345
   },
   "functions": [
     {
@@ -48,31 +50,43 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 856,
+      "durationMs": 924,
       "seed": 2523025703,
+      "usage": {
+        "files": 4,
+        "callSites": 2,
+        "values": 9
+      },
       "behaviors": [
         {
           "id": "internal/identifiers.js#compareIdentifiers/1",
           "key": "returns number: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 25,
+          "realism": "unusual",
+          "realismNote": "negative number (tests and call sites only use values >= 0)",
+          "label": "unclaimed",
+          "labelSource": "rules",
+          "count": 34,
           "variants": [
-            {
-              "transition": "returns positive number → returns negative number",
-              "features": ["<0", ">0"],
-              "count": 11
-            },
             {
               "transition": "returns negative number → returns positive number",
               "features": [">0", "<0"],
-              "count": 4
+              "count": 11
+            },
+            {
+              "transition": "returns positive number → returns negative number",
+              "features": ["<0", ">0"],
+              "count": 7
             },
             {
               "transition": "returns negative number → returns positive number",
               "features": [">0", ">0"],
-              "count": 3
+              "count": 6
+            },
+            {
+              "transition": "returns positive number → returns negative number",
+              "features": [">0", ">0"],
+              "count": 6
             },
             {
               "transition": "returns positive number → returns negative number",
@@ -81,29 +95,19 @@
             },
             {
               "transition": "returns negative number → returns positive number",
-              "features": ["=0", "<0"],
-              "count": 2
-            },
-            {
-              "transition": "returns positive number → returns negative number",
-              "features": [">0", ">0"],
-              "count": 1
-            },
-            {
-              "transition": "returns negative number → returns positive number",
               "features": [">0", "-Inf"],
               "count": 1
             },
             {
               "transition": "returns negative number → returns positive number",
-              "features": [">0", "NaN"],
+              "features": ["=0", "<0"],
               "count": 1
             }
           ],
           "examples": [
             {
-              "call": "compareIdentifiers(-1, 0)",
-              "argsCode": "-1, 0",
+              "call": "compareIdentifiers(-2, 0)",
+              "argsCode": "-2, 0",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -136,19 +140,19 @@
               "minimal": false
             },
             {
-              "call": "compareIdentifiers(-1, 1)",
-              "argsCode": "-1, 1",
+              "call": "compareIdentifiers(1, -1)",
+              "argsCode": "1, -1",
               "old": {
-                "kind": "return",
-                "async": false,
-                "display": "1",
-                "code": "1"
-              },
-              "new": {
                 "kind": "return",
                 "async": false,
                 "display": "-1",
                 "code": "-1"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "1",
+                "code": "1"
               },
               "minimal": false
             }
@@ -166,31 +170,33 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 202,
+      "durationMs": 196,
       "seed": 2799462753,
+      "usage": {
+        "files": 3,
+        "callSites": 2,
+        "values": 9
+      },
       "behaviors": [
         {
           "id": "internal/identifiers.js#rcompareIdentifiers/1",
           "key": "returns number: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 34,
+          "realism": "unusual",
+          "realismNote": "negative number (tests and call sites only use values >= 0)",
+          "label": "unclaimed",
+          "labelSource": "rules",
+          "count": 17,
           "variants": [
-            {
-              "transition": "returns positive number → returns negative number",
-              "features": [">0", "<0"],
-              "count": 11
-            },
             {
               "transition": "returns negative number → returns positive number",
               "features": ["<0", ">0"],
-              "count": 8
+              "count": 5
             },
             {
-              "transition": "returns negative number → returns positive number",
-              "features": [">0", ">0"],
-              "count": 8
+              "transition": "returns positive number → returns negative number",
+              "features": [">0", "<0"],
+              "count": 4
             },
             {
               "transition": "returns positive number → returns negative number",
@@ -199,43 +205,26 @@
             },
             {
               "transition": "returns negative number → returns positive number",
-              "features": ["-Inf", ">0"],
+              "features": [">0", ">0"],
+              "count": 2
+            },
+            {
+              "transition": "returns negative number → returns positive number",
+              "features": ["<0", "=0"],
               "count": 1
             },
             {
-              "transition": "returns positive number → returns negative number",
-              "features": [">0", "-Inf"],
+              "transition": "returns negative number → returns positive number",
+              "features": ["NaN", ">0"],
               "count": 1
             },
             {
               "transition": "returns positive number → returns negative number",
               "features": ["=0", "<0"],
               "count": 1
-            },
-            {
-              "transition": "returns negative number → returns positive number",
-              "features": ["<0", "=0"],
-              "count": 1
             }
           ],
           "examples": [
-            {
-              "call": "rcompareIdentifiers(0, -1)",
-              "argsCode": "0, -1",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "1",
-                "code": "1"
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "-1",
-                "code": "-1"
-              },
-              "minimal": true
-            },
             {
               "call": "rcompareIdentifiers(-1, 0)",
               "argsCode": "-1, 0",
@@ -251,11 +240,11 @@
                 "display": "1",
                 "code": "1"
               },
-              "minimal": false
+              "minimal": true
             },
             {
-              "call": "rcompareIdentifiers(1, -1)",
-              "argsCode": "1, -1",
+              "call": "rcompareIdentifiers(0, -1)",
+              "argsCode": "0, -1",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -267,6 +256,23 @@
                 "async": false,
                 "display": "-1",
                 "code": "-1"
+              },
+              "minimal": false
+            },
+            {
+              "call": "rcompareIdentifiers(-1, 1)",
+              "argsCode": "-1, 1",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "-1",
+                "code": "-1"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "1",
+                "code": "1"
               },
               "minimal": false
             }
@@ -304,10 +310,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2105,
-    "materializeMs": 122,
-    "dependenciesMs": 0,
-    "detectMs": 924,
-    "verifyMs": 1059
+    "totalMs": 2345,
+    "materializeMs": 98,
+    "dependenciesMs": 1,
+    "detectMs": 1104,
+    "verifyMs": 1142
   }
 }

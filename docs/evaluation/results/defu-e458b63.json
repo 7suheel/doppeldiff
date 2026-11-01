@@ -15,7 +15,7 @@
   "claim": {
     "source": "flag",
     "text": "refactor: make `isPlainObject` logic more readable",
-    "refactor": false,
+    "refactor": true,
     "llm": null
   },
   "settings": {
@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 0,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 6000,
-    "durationMs": 3636
+    "durationMs": 3559
   },
   "functions": [
     {
@@ -48,8 +50,14 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1116,
+      "durationMs": 980,
       "seed": 3007061362,
+      "usage": {
+        "files": 3,
+        "callSites": 6,
+        "values": 4
+      },
+      "guards": ["value === null || typeof value !== \"object\""],
       "behaviors": []
     },
     {
@@ -62,8 +70,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 137,
+      "durationMs": 202,
       "seed": 3834644065,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 33
+      },
       "behaviors": []
     },
     {
@@ -76,8 +89,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 358,
+      "durationMs": 453,
       "seed": 2990958073,
+      "usage": {
+        "files": 3,
+        "callSites": 9,
+        "values": 33
+      },
       "behaviors": []
     },
     {
@@ -90,8 +108,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 221,
+      "durationMs": 306,
       "seed": 1488209232,
+      "usage": {
+        "files": 3,
+        "callSites": 9,
+        "values": 33
+      },
       "behaviors": []
     },
     {
@@ -104,8 +127,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 281,
+      "durationMs": 402,
       "seed": 3873104889,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 33
+      },
       "behaviors": []
     },
     {
@@ -118,8 +146,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 272,
+      "durationMs": 313,
       "seed": 127409958,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 33
+      },
       "behaviors": []
     }
   ],
@@ -130,10 +163,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 3636,
-    "materializeMs": 82,
+    "totalMs": 3559,
+    "materializeMs": 77,
     "dependenciesMs": 0,
-    "detectMs": 1168,
-    "verifyMs": 2386
+    "detectMs": 785,
+    "verifyMs": 2697
   }
 }

@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 0,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 5000,
-    "durationMs": 3470
+    "durationMs": 3339
   },
   "functions": [
     {
@@ -48,8 +50,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1108,
+      "durationMs": 820,
       "seed": 3834644065,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 35
+      },
       "behaviors": []
     },
     {
@@ -62,8 +69,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 426,
+      "durationMs": 538,
       "seed": 2990958073,
+      "usage": {
+        "files": 3,
+        "callSites": 10,
+        "values": 35
+      },
       "behaviors": []
     },
     {
@@ -76,8 +88,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 268,
+      "durationMs": 338,
       "seed": 1488209232,
+      "usage": {
+        "files": 3,
+        "callSites": 10,
+        "values": 35
+      },
       "behaviors": []
     },
     {
@@ -90,8 +107,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 292,
+      "durationMs": 435,
       "seed": 3873104889,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 35
+      },
       "behaviors": []
     },
     {
@@ -104,8 +126,13 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 261,
+      "durationMs": 302,
       "seed": 127409958,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 35
+      },
       "behaviors": []
     }
   ],
@@ -116,10 +143,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 3470,
-    "materializeMs": 72,
-    "dependenciesMs": 1,
-    "detectMs": 1042,
-    "verifyMs": 2355
+    "totalMs": 3339,
+    "materializeMs": 76,
+    "dependenciesMs": 0,
+    "detectMs": 792,
+    "verifyMs": 2471
   }
 }

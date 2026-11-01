@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 2003
+    "durationMs": 2121
   },
   "functions": [
     {
@@ -48,21 +50,27 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 895,
+      "durationMs": 972,
       "seed": 3484163125,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 400
+      },
       "behaviors": [
         {
           "id": "src/lib/isSlug.js#default/1",
           "key": "returns boolean: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 49,
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 84,
           "variants": [
             {
               "transition": "returns boolean: value changed",
               "features": ["text"],
-              "count": 49
+              "count": 84
             }
           ],
           "examples": [
@@ -84,25 +92,25 @@
               "minimal": true
             },
             {
-              "call": "default(\"0\")",
-              "argsCode": "\"0\"",
+              "call": "default(\"isEmail\")",
+              "argsCode": "\"isEmail\"",
               "old": {
-                "kind": "return",
-                "async": false,
-                "display": "false",
-                "code": "false"
-              },
-              "new": {
                 "kind": "return",
                 "async": false,
                 "display": "true",
                 "code": "true"
               },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
               "minimal": false
             },
             {
-              "call": "default(\"1\")",
-              "argsCode": "\"1\"",
+              "call": "default(\"f\")",
+              "argsCode": "\"f\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -117,7 +125,8 @@
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `isSlug`, \"charset\" (`charsetRegex`)."
         }
       ]
     }
@@ -129,10 +138,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2003,
-    "materializeMs": 108,
+    "totalMs": 2121,
+    "materializeMs": 135,
     "dependenciesMs": 0,
-    "detectMs": 999,
-    "verifyMs": 896
+    "detectMs": 966,
+    "verifyMs": 1020
   }
 }

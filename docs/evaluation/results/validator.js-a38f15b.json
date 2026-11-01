@@ -26,16 +26,18 @@
     "freeze": true
   },
   "summary": {
-    "verdict": "no-change",
+    "verdict": "changes",
     "functions": 1,
-    "changed": 0,
-    "unchanged": 1,
+    "changed": 1,
+    "unchanged": 0,
     "skipped": 0,
     "nondeterministic": 0,
-    "behaviors": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 1915
+    "durationMs": 2269
   },
   "functions": [
     {
@@ -43,14 +45,95 @@
       "file": "src/lib/isISO8601.js",
       "exportName": "default",
       "signature": "default(str: unknown, options?: {  } | undefined)",
-      "status": "unchanged",
+      "status": "changed",
       "targetReason": "uses changed `iso8601StrictSeparator`",
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 858,
+      "durationMs": 908,
       "seed": 3610445638,
-      "behaviors": []
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 400
+      },
+      "behaviors": [
+        {
+          "id": "src/lib/isISO8601.js#default/1",
+          "key": "returns boolean: value changed",
+          "title": "return value changed",
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 24,
+          "variants": [
+            {
+              "transition": "returns boolean: value changed",
+              "features": ["text", "{}"],
+              "count": 13
+            },
+            {
+              "transition": "returns boolean: value changed",
+              "features": ["text", "undefined"],
+              "count": 11
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"1690360\", {})",
+              "argsCode": "\"1690360\", {}",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"1690360\", undefined)",
+              "argsCode": "\"1690360\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"4394360\", {})",
+              "argsCode": "\"4394360\", {}",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": false
+            }
+          ],
+          "explanation": "The PR mentions `isISO8601`."
+        }
+      ]
     }
   ],
   "skipped": [],
@@ -60,10 +143,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 1915,
-    "materializeMs": 87,
+    "totalMs": 2269,
+    "materializeMs": 140,
     "dependenciesMs": 1,
-    "detectMs": 968,
-    "verifyMs": 859
+    "detectMs": 1175,
+    "verifyMs": 953
   }
 }

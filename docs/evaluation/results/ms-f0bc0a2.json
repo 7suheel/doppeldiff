@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 1,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 1705
+    "durationMs": 1880
   },
   "functions": [
     {
@@ -48,37 +50,43 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 906,
+      "durationMs": 985,
       "seed": 2354929897,
+      "usage": {
+        "files": 0,
+        "callSites": 0,
+        "values": 0
+      },
       "behaviors": [
         {
           "id": "index.js#default/1",
           "key": "returns undefined → returns number",
           "title": "now returns a number (previously undefined)",
+          "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 24,
+          "count": 49,
           "variants": [
-            {
-              "transition": "returns undefined → returns positive number",
-              "features": ["text", "undefined"],
-              "count": 14
-            },
             {
               "transition": "returns undefined → returns negative number",
               "features": ["text", "undefined"],
-              "count": 9
+              "count": 33
             },
             {
-              "transition": "returns undefined → returns 0",
+              "transition": "returns undefined → returns positive number",
+              "features": ["text", "undefined"],
+              "count": 15
+            },
+            {
+              "transition": "returns undefined → returns -0",
               "features": ["text", "undefined"],
               "count": 1
             }
           ],
           "examples": [
             {
-              "call": "default(\"-6\", undefined)",
-              "argsCode": "\"-6\", undefined",
+              "call": "default(\"-1\", undefined)",
+              "argsCode": "\"-1\", undefined",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -88,14 +96,14 @@
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "-6",
-                "code": "-6"
+                "display": "-1",
+                "code": "-1"
               },
               "minimal": true
             },
             {
-              "call": "default(\"2-0\", undefined)",
-              "argsCode": "\"2-0\", undefined",
+              "call": "default(\"-0\", undefined)",
+              "argsCode": "\"-0\", undefined",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -105,14 +113,14 @@
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "2",
-                "code": "2"
+                "display": "-0",
+                "code": "-0"
               },
               "minimal": false
             },
             {
-              "call": "default(\"0-0\", undefined)",
-              "argsCode": "\"0-0\", undefined",
+              "call": "default(\"3-9\", undefined)",
+              "argsCode": "\"3-9\", undefined",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -122,8 +130,8 @@
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "0",
-                "code": "0"
+                "display": "3",
+                "code": "3"
               },
               "minimal": false
             }
@@ -139,10 +147,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 1705,
-    "materializeMs": 65,
+    "totalMs": 1880,
+    "materializeMs": 68,
     "dependenciesMs": 0,
-    "detectMs": 733,
-    "verifyMs": 907
+    "detectMs": 819,
+    "verifyMs": 993
   }
 }

@@ -19,7 +19,7 @@
     "llm": null
   },
   "settings": {
-    "seed": 1,
+    "seed": 6,
     "runs": 1000,
     "timeoutMs": 250,
     "timeBudgetMs": null,
@@ -33,9 +33,11 @@
     "skipped": 0,
     "nondeterministic": 0,
     "behaviors": 2,
+    "edgeCaseBehaviors": 0,
     "unclaimed": 0,
+    "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2149
+    "durationMs": 2083
   },
   "functions": [
     {
@@ -48,81 +50,83 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1008,
-      "seed": 3870797363,
+      "durationMs": 960,
+      "seed": 1684505386,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 24
+      },
       "behaviors": [
         {
           "id": "src/utils.ts#withBase/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 10,
+          "realism": "seen",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 4,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text", "text"],
-              "count": 8
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "blank"],
-              "count": 2
+              "count": 4
             }
           ],
           "examples": [
             {
-              "call": "withBase(\"a1\", \"a\")",
-              "argsCode": "\"a1\", \"a\"",
+              "call": "withBase(\"/admin/\", \"/a\")",
+              "argsCode": "\"/admin/\", \"/a\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a1\"",
-                "code": "\"a1\""
+                "display": "\"/admin/\"",
+                "code": "\"/admin/\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a/a1\"",
-                "code": "\"a/a1\""
+                "display": "\"/a/admin/\"",
+                "code": "\"/a/admin/\""
               },
               "minimal": true
             },
             {
-              "call": "withBase(\"  a\", \" \")",
-              "argsCode": "\"  a\", \" \"",
+              "call": "withBase(\"6Q\", \"6\")",
+              "argsCode": "\"6Q\", \"6\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"  a\"",
-                "code": "\"  a\""
+                "display": "\"6Q\"",
+                "code": "\"6Q\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\" /  a\"",
-                "code": "\" /  a\""
+                "display": "\"6/6Q\"",
+                "code": "\"6/6Q\""
               },
               "minimal": false
             },
             {
-              "call": "withBase(\"a&\", \"a\")",
-              "argsCode": "\"a&\", \"a\"",
+              "call": "withBase(\"/ad\", \"/a\")",
+              "argsCode": "\"/ad\", \"/a\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a&\"",
-                "code": "\"a&\""
+                "display": "\"/ad\"",
+                "code": "\"/ad\""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"a/a&\"",
-                "code": "\"a/a&\""
+                "display": "\"/a/ad\"",
+                "code": "\"/a/ad\""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `withBase`."
         }
       ]
     },
@@ -136,25 +140,26 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 66,
-      "seed": 2778817679,
+      "durationMs": 87,
+      "seed": 273935620,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 24
+      },
       "behaviors": [
         {
           "id": "src/utils.ts#withoutBase/1",
           "key": "returns string: value changed",
           "title": "return value changed",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 2,
+          "realism": "ordinary",
+          "label": "claimed",
+          "labelSource": "rules",
+          "count": 1,
           "variants": [
             {
               "transition": "returns string: value changed",
               "features": ["text", "blank"],
-              "count": 1
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "text"],
               "count": 1
             }
           ],
@@ -177,40 +182,24 @@
               "minimal": true
             },
             {
-              "call": "withoutBase(\"-#\", \"-\")",
-              "argsCode": "\"-#\", \"-\"",
+              "call": "withoutBase(\"  a  \", \"  \")",
+              "argsCode": "\"  a  \", \"  \"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\"/#\"",
-                "code": "\"/#\""
+                "display": "\"/a  \"",
+                "code": "\"/a  \""
               },
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "\"-#\"",
-                "code": "\"-#\""
-              },
-              "minimal": false
-            },
-            {
-              "call": "withoutBase(\"-,\", \"-\")",
-              "argsCode": "\"-,\", \"-\"",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"/,\"",
-                "code": "\"/,\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"-,\"",
-                "code": "\"-,\""
+                "display": "\"  a  \"",
+                "code": "\"  a  \""
               },
               "minimal": false
             }
-          ]
+          ],
+          "explanation": "The PR mentions `withoutBase`."
         }
       ]
     }
@@ -222,10 +211,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2149,
-    "materializeMs": 68,
+    "totalMs": 2083,
+    "materializeMs": 70,
     "dependenciesMs": 1,
-    "detectMs": 1005,
-    "verifyMs": 1074
+    "detectMs": 935,
+    "verifyMs": 1077
   }
 }
