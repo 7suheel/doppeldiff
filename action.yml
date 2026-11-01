@@ -72,9 +72,20 @@ runs:
           echo "setup=true" >> "$GITHUB_OUTPUT"
         fi
     - if: steps.node.outputs.setup == 'true'
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v7
       with:
         node-version: 22
+    # Comment mode: fetch the report of the triggering analyze run. Artifacts are handled by the official
+    # actions because composite `run:` steps do not receive the Actions runtime token.
+    - id: download
+      if: github.event_name == 'workflow_run' && inputs.mode != 'analyze'
+      continue-on-error: true
+      uses: actions/download-artifact@v8
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ runner.temp }}/doppeldiff-download
+        run-id: ${{ github.event.workflow_run.id }}
+        github-token: ${{ inputs.github-token }}
     - shell: bash
       run: npm ci --omit=dev --ignore-scripts --no-audit --no-fund --loglevel=error --prefix "$GITHUB_ACTION_PATH"
     - id: run
@@ -94,3 +105,12 @@ runs:
         INPUT_OPENAI-API-KEY: ${{ inputs.openai-api-key }}
         INPUT_LLM-MODEL: ${{ inputs.llm-model }}
         INPUT_ARTIFACT-NAME: ${{ inputs.artifact-name }}
+        INPUT_REPORT-DOWNLOAD-DIR: ${{ runner.temp }}/doppeldiff-download
+    # Analyze mode: hand the report to the comment workflow (also when fail-on failed the step).
+    - if: always() && steps.run.outputs.report-dir != ''
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}
+        path: ${{ steps.run.outputs.report-dir }}
+        retention-days: 7
+        if-no-files-found: error

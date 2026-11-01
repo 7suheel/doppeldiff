@@ -20,7 +20,7 @@ jobs:
       pull-requests: write
     steps:
       # Checks out the default branch (trusted), only to use the local action.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - uses: ./
