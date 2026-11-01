@@ -35,10 +35,15 @@ under `pull_request_target`.
 
 ## Same-repository pull requests
 
-Nothing extra is needed: the same file works. If you want LLM input suggestions (not just claim matching) and
-your repository only receives PRs from collaborators, you can pass `anthropic-api-key` to the `analyze` step
-too. Fork PRs never receive secrets under `pull_request`, so this cannot leak a key to strangers; the code under
-test also runs with a scrubbed environment and no network.
+Nothing extra is needed: the same files work. Claimed/unclaimed labels come from the PR title and description
+via [deterministic rules](CLAIMS.md), with no API key and no cost.
+
+An LLM is optional and off by default. GitHub's free hosted models were
+[retired in July 2026](https://github.blog/changelog/2026-07-30-github-models-is-now-retired/), so in Actions
+an LLM means either a server you host (`llm: openai-compatible`, `llm-base-url`, `llm-model`, optional
+`llm-api-key`) or a paid key (`anthropic-api-key` / `openai-api-key`). If you pass one to the `analyze` step
+(input suggestions), only do that in repositories where PRs come from collaborators. Fork PRs never receive
+secrets under `pull_request`, and the code under test runs with a scrubbed environment and no network.
 
 ## Notes and limitations
 
@@ -52,16 +57,17 @@ test also runs with a scrubbed environment and no network.
 
 ## Inputs
 
-| Input                                  | Default | Description                                                          |
-| -------------------------------------- | ------- | -------------------------------------------------------------------- |
-| `mode`                                 | `auto`  | `analyze` on `pull_request`, `comment` on `workflow_run`             |
-| `runs`                                 | `10000` | Max inputs per function                                              |
-| `time-budget`                          | `60`    | Total exploration budget (seconds)                                   |
-| `timeout`                              | `250`   | Per-call timeout (ms)                                                |
-| `fail-on`                              | `never` | Fail the analyze job on `unclaimed` or `any` behavior change         |
-| `include` / `exclude`                  |         | File globs                                                           |
-| `install`                              | `true`  | Install dependencies (scripts disabled) if `node_modules` is missing |
-| `anthropic-api-key` / `openai-api-key` |         | Optional LLM layer                                                   |
-| `llm-model`                            |         | Model override                                                       |
+| Input                                        | Default | Description                                                                  |
+| -------------------------------------------- | ------- | ---------------------------------------------------------------------------- |
+| `mode`                                       | `auto`  | `analyze` on `pull_request`, `comment` on `workflow_run`                     |
+| `runs`                                       | `10000` | Max inputs per function                                                      |
+| `time-budget`                                | `60`    | Total exploration budget (seconds)                                           |
+| `timeout`                                    | `250`   | Per-call timeout (ms)                                                        |
+| `fail-on`                                    | `never` | Fail the analyze job on `unclaimed` or `any` behavior change                 |
+| `include` / `exclude`                        |         | File globs                                                                   |
+| `install`                                    | `true`  | Install dependencies (scripts disabled) if `node_modules` is missing         |
+| `llm`                                        | `off`   | Optional LLM: `openai-compatible` (self-hosted, free), `anthropic`, `openai` |
+| `llm-base-url` / `llm-api-key` / `llm-model` |         | OpenAI-compatible endpoint settings / model override                         |
+| `anthropic-api-key` / `openai-api-key`       |         | Paid keys; passing one enables that provider                                 |
 
 Outputs: `verdict` (`no-change` / `changes` / `unclaimed`), `behaviors`, `unclaimed`, `report-path`.

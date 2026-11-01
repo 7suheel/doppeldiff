@@ -13,6 +13,8 @@ and shows you, as concrete examples, every input where they behave differently.
 npx doppeldiff
 ```
 
+**No API key required. Free and fully local by default.**
+
 </div>
 
 ## The problem
@@ -103,18 +105,18 @@ npx doppeldiff --write-tests                    # pin the examples in tests/dopp
 npx doppeldiff --json report.json --markdown report.md
 ```
 
-| Flag                                    | Default               |                                           |
-| --------------------------------------- | --------------------- | ----------------------------------------- |
-| `--base` / `--head`                     | `HEAD` / working tree | Revisions to compare (via merge base)     |
-| `--claim`, `--claim-file`, `--refactor` |                       | What the change claims to do              |
-| `--runs`                                | `1000`                | Max inputs per function                   |
-| `--timeout`                             | `250`                 | Per-call timeout (ms)                     |
-| `--budget`                              |                       | Total exploration time budget (s)         |
-| `--seed`                                | `1`                   | Every run is reproducible                 |
-| `--fail-on`                             | `unclaimed`           | Exit 1 on `unclaimed`, `any` or `never`   |
-| `--include` / `--exclude` / `--only`    |                       | Limit files or functions                  |
-| `--no-freeze`                           |                       | Do not freeze the clock / seed randomness |
-| `--llm`, `--llm-model`                  | `auto`                | Optional LLM layer (below)                |
+| Flag                                     | Default               |                                                  |
+| ---------------------------------------- | --------------------- | ------------------------------------------------ |
+| `--base` / `--head`                      | `HEAD` / working tree | Revisions to compare (via merge base)            |
+| `--claim`, `--claim-file`, `--refactor`  |                       | What the change claims to do                     |
+| `--runs`                                 | `1000`                | Max inputs per function                          |
+| `--timeout`                              | `250`                 | Per-call timeout (ms)                            |
+| `--budget`                               |                       | Total exploration time budget (s)                |
+| `--seed`                                 | `1`                   | Every run is reproducible                        |
+| `--fail-on`                              | `unclaimed`           | Exit 1 on `unclaimed`, `any` or `never`          |
+| `--include` / `--exclude` / `--only`     |                       | Limit files or functions                         |
+| `--no-freeze`                            |                       | Do not freeze the clock / seed randomness        |
+| `--llm`, `--llm-model`, `--llm-base-url` | `off`                 | Optional LLM (below); `ollama` is free and local |
 
 Node.js 22.13 or newer. Exit codes: `0` OK, `1` findings matching `--fail-on`, `2` tool error.
 
@@ -137,14 +139,22 @@ Two tools: `verify_change` (what did my edit change?) and `verify_refactor` (PAS
 counterexamples). An agent can check its own refactor before telling you it is done. Setup for Cursor and Codex
 is in [docs/MCP.md](docs/MCP.md).
 
-### Optional: claim matching with an LLM
+### Claim matching: free, no LLM
 
-With `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` set, doppeldiff compares each behavior change with the PR
-description and labels it **claimed**, **unclaimed** or **suspicious**, with a one-sentence explanation. It can
-also suggest targeted edge-case inputs. The LLM only labels changes that the deterministic engine actually
-observed. Its output is checked against the evidence (no invented IDs, no values that do not appear in the
-examples), and without a key everything works the same, just without the labels. A PR description that says
-"no behavior change" is enough to flag every difference, no LLM needed.
+doppeldiff compares each behavior change with the PR title and description and labels it **claimed**,
+**unclaimed** or neutral, using [documented deterministic rules](docs/CLAIMS.md):
+
+- if the PR says it is a refactor, cleanup or performance change, or says "no behavior change", every difference
+  is unclaimed;
+- if the PR names a function, that function's changes are claimed.
+
+No LLM and no API key are involved.
+
+Optionally, you can let an LLM read the description instead. A local model via
+[Ollama](https://ollama.com) is free: `--llm ollama --llm-model qwen2.5:7b`. Any OpenAI-compatible server works,
+and so do Anthropic or OpenAI with your own key. The LLM is never used unless you ask for it. It only labels
+changes the engine actually observed, and its output is checked against the evidence. Details:
+[docs/CLAIMS.md](docs/CLAIMS.md).
 
 ### Configuration (optional)
 

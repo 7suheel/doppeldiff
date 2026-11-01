@@ -194,9 +194,12 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
     lines.push(
       `<sub>🤖 Claimed/unclaimed labels and explanations by ${escapeText(r.claim.llm.model)}, checked against the observed examples. The examples themselves come from running the code.</sub>`,
     );
-  } else if (!r.claim.refactor && s.behaviors > 0) {
+  } else if (s.behaviors > 0) {
+    const labeled = r.functions.some((f) => f.behaviors.some((b) => b.labelSource === 'rules'));
     lines.push(
-      `<sub>Changes are not matched against the PR description. Add an LLM API key (optional) or state "no behavior change" for refactors.</sub>`,
+      labeled
+        ? `<sub>Claimed/unclaimed labels come from the PR text via [deterministic rules](${PROJECT_URL}/blob/main/docs/CLAIMS.md) (no LLM, no API key).</sub>`
+        : `<sub>Not matched against the PR description: name the functions you meant to change, or say "no behavior change" for a refactor ([rules](${PROJECT_URL}/blob/main/docs/CLAIMS.md)).</sub>`,
     );
   }
   if (sticky) lines.push(STICKY_MARKER);

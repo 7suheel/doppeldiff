@@ -33,8 +33,17 @@ inputs:
   install:
     description: Install dependencies (lifecycle scripts disabled) if node_modules is missing.
     default: 'true'
+  llm:
+    description: 'Optional LLM layer: off (default) | openai-compatible | anthropic | openai. Claim matching works without it.'
+    default: 'off'
+  llm-base-url:
+    description: Base URL of an OpenAI-compatible endpoint (for llm openai-compatible), e.g. a self-hosted model.
+    default: ''
+  llm-api-key:
+    description: Optional key for the OpenAI-compatible endpoint.
+    default: ''
   anthropic-api-key:
-    description: Optional. Enables claim matching (comment job) or input suggestions (analyze job, same-repo only).
+    description: Optional, paid. Enables LLM claim matching (comment job) or input suggestions (analyze job).
     default: ''
   openai-api-key:
     description: Optional alternative to anthropic-api-key.
@@ -104,6 +113,9 @@ runs:
         INPUT_ANTHROPIC-API-KEY: ${{ inputs.anthropic-api-key }}
         INPUT_OPENAI-API-KEY: ${{ inputs.openai-api-key }}
         INPUT_LLM-MODEL: ${{ inputs.llm-model }}
+        INPUT_LLM: ${{ inputs.llm }}
+        INPUT_LLM-BASE-URL: ${{ inputs.llm-base-url }}
+        INPUT_LLM-API-KEY: ${{ inputs.llm-api-key }}
         INPUT_ARTIFACT-NAME: ${{ inputs.artifact-name }}
         INPUT_REPORT-DOWNLOAD-DIR: ${{ runner.temp }}/doppeldiff-download
     # Analyze mode: hand the report to the comment workflow (also when fail-on failed the step).

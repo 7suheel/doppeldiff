@@ -315,15 +315,24 @@ describe('input suggestions', () => {
 });
 
 describe('provider selection', () => {
-  it('prefers Anthropic, then OpenAI, honours off and explicit choices', () => {
+  it('is off by default, even when API keys are present', () => {
     expect(selectProvider({ env: {} })).toBeNull();
-    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x', OPENAI_API_KEY: 'y' } })?.name).toBe('anthropic');
-    expect(selectProvider({ env: { OPENAI_API_KEY: 'y' } })?.name).toBe('openai');
-    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x', DOPPELDIFF_LLM: 'off' } })).toBeNull();
-    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x' }, model: 'claude-sonnet-5-5' })?.model).toBe(
+    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x', OPENAI_API_KEY: 'y' } })).toBeNull();
+  });
+  it('uses exactly what is chosen', () => {
+    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x', DOPPELDIFF_LLM: 'auto' } })?.name).toBe(
+      'anthropic',
+    );
+    expect(selectProvider({ env: { OPENAI_API_KEY: 'y' }, provider: 'auto' })?.name).toBe('openai');
+    expect(selectProvider({ env: {}, provider: 'anthropic', model: 'claude-sonnet-5-5' })?.model).toBe(
       'claude-sonnet-5-5',
     );
-    expect(selectProvider({ env: { ANTHROPIC_API_KEY: 'x' } })?.model).toBe('claude-opus-5-5');
+    const ollama = selectProvider({ env: {}, provider: 'ollama', model: 'qwen2.5:7b' });
+    expect(ollama).toMatchObject({ name: 'openai-compatible', model: 'qwen2.5:7b' });
+    expect(() => selectProvider({ env: {}, provider: 'ollama' })).toThrow(/--llm-model/);
+    expect(() => selectProvider({ env: {}, provider: 'openai-compatible', model: 'm' })).toThrow(
+      /--llm-base-url/,
+    );
   });
 });
 
@@ -445,5 +454,49 @@ describe('real SDK request shapes (local mock server, no network)', () => {
         });
       },
     );
+  });
+});
+
+describe('OpenAI-compatible endpoint (Ollama etc.)', () => {
+  it('sends a JSON-schema chat completion and falls back to JSON mode', async () => {
+    const { openaiCompatibleProvider } = await import('../../src/core/claims/providers.js');
+    const calls: { url: string; body: Record<string, unknown>; auth: string | null }[] = [];
+    let rejectSchema = false;
+    const fakeFetch = (async (url: string, init: RequestInit) => {
+      const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+      calls.push({ url, body, auth: new Headers(init.headers).get('authorization') });
+      const rf = body.response_format as { type: string };
+      if (rejectSchema && rf.type === 'json_schema') {
+        return new Response(JSON.stringify({ error: { message: 'unsupported' } }), { status: 400 });
+      }
+      return new Response(JSON.stringify({ choices: [{ message: { content: '{"ok":true}' } }] }), {
+        status: 200,
+      });
+    }) as unknown as typeof fetch;
+    const req = { system: 's', user: 'u', schema: { type: 'object' }, schemaName: 'n' };
+    const p = openaiCompatibleProvider({
+      baseUrl: 'http://localhost:11434/v1/',
+      model: 'qwen2.5:7b',
+      fetchImpl: fakeFetch,
+    });
+    expect(await p.complete(req)).toBe('{"ok":true}');
+    expect(calls[0]).toMatchObject({ url: 'http://localhost:11434/v1/chat/completions', auth: null });
+    expect(calls[0]!.body).toMatchObject({
+      model: 'qwen2.5:7b',
+      temperature: 0,
+      response_format: { type: 'json_schema', json_schema: { name: 'n', strict: true } },
+    });
+    rejectSchema = true;
+    const keyed = openaiCompatibleProvider({
+      baseUrl: 'http://x/v1',
+      model: 'm',
+      apiKey: 'k',
+      fetchImpl: fakeFetch,
+    });
+    expect(await keyed.complete(req)).toBe('{"ok":true}');
+    expect(calls.at(-1)).toMatchObject({
+      auth: 'Bearer k',
+      body: { response_format: { type: 'json_object' } },
+    });
   });
 });

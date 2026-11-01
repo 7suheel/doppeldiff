@@ -339,7 +339,7 @@
                   "type": "string",
                   "enum": [
                     "none",
-                    "refactor-claim",
+                    "rules",
                     "llm"
                   ]
                 },

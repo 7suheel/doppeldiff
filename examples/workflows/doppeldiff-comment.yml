@@ -19,6 +19,3 @@ jobs:
       pull-requests: write
     steps:
       - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
-        with:
-          # Optional: match behavior changes against the PR description.
-          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

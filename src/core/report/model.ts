@@ -47,7 +47,7 @@ export const Behavior = z.object({
   title: text(),
   label: BehaviorLabel,
   /** Where the label came from: no claim analysis, the deterministic refactor rule, or an LLM. */
-  labelSource: z.enum(['none', 'refactor-claim', 'llm']),
+  labelSource: z.enum(['none', 'rules', 'llm']),
   explanation: text(1000).optional(),
   count: z.number().int().nonnegative(),
   variants: z.array(z.object({ transition: text(), features: z.array(text(200)), count: z.number().int() })),

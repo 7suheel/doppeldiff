@@ -7,9 +7,10 @@ exports[`CLI > honest fix: neutral behavior change, Markdown + JSON + tests, exi
 
 > 🔍 **1 behavior change** in 1 function.
 
-### 🔍 Behavior change
+### ✅ Claimed change verified
 
 **\`applyDiscount\`** in \`src/pricing.ts\`: return value changed · 3 of 1,000 inputs
+<br>The PR mentions "discount" (\\\`applyDiscount\\\`).
 
 | Call | Old | New |
 | --- | --- | --- |
@@ -20,6 +21,6 @@ exports[`CLI > honest fix: neutral behavior change, Markdown + JSON + tests, exi
 📎 Regression tests (3 cases): \`tests/doppeldiff/applyDiscount.test.ts\`
 
 <sub>FOOTER</sub>
-<sub>Changes are not matched against the PR description. Add an LLM API key (optional) or state "no behavior change" for refactors.</sub>
+<sub>Claimed/unclaimed labels come from the PR text via [deterministic rules](https://github.com/7suheel/doppeldiff/blob/main/docs/CLAIMS.md) (no LLM, no API key).</sub>
 "
 `;

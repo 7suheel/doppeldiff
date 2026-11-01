@@ -60,6 +60,8 @@ describe('CLI', () => {
       changed: 1,
     });
     expect(report.functions[0]!.behaviors[0]!.examples[0]!.call).toBe('applyDiscount(2000, 0.07)');
+    // Keyless rules: "discount" in the claim names applyDiscount.
+    expect(report.functions[0]!.behaviors[0]).toMatchObject({ label: 'claimed', labelSource: 'rules' });
     expect(normalizeMarkdown(readFileSync(md, 'utf8'))).toMatchSnapshot();
     expect(readdirSync(join(honest.repo, 'tests', 'doppeldiff'))).toEqual(['applyDiscount.test.ts']);
   });

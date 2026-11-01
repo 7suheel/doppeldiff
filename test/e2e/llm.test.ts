@@ -108,6 +108,8 @@ describe('CLI with an Anthropic-compatible endpoint (mock server)', () => {
           '-',
           '--runs',
           '300',
+          '--llm',
+          'anthropic',
         ],
         {
           cwd: s.repo,
