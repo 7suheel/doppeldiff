@@ -45,8 +45,10 @@ export interface DepsOptions {
   cacheDir?: string;
 }
 
+/** Content hash of a text file, insensitive to CRLF vs LF (Windows checkouts convert line endings). */
 function hashFile(path: string): string {
-  return existsSync(path) ? createHash('sha256').update(readFileSync(path)).digest('hex') : 'missing';
+  if (!existsSync(path)) return 'missing';
+  return createHash('sha256').update(readFileSync(path, 'utf8').replace(/\r\n/g, '\n')).digest('hex');
 }
 
 /** Dependency-relevant fields of a package.json. */
