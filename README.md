@@ -17,6 +17,23 @@ npx doppeldiff
 
 </div>
 
+### What it looks like on a real pull request
+
+[Pull request #1](https://github.com/7suheel/doppeldiff/pull/1) is an AI-style refactor of a small shop's cart
+code. Its description says _"Pure refactor, no behavior change. All tests pass."_ They do. doppeldiff ran the old and new
+`cartTotal` on 10,000 generated carts and
+[commented](https://github.com/7suheel/doppeldiff/pull/1#issuecomment-6560143205):
+
+> ⚠️ **Unclaimed behavior change**: **`cartTotal`**: return value changed · 3,212 of 10,000 inputs
+>
+> | Call                                                                    | Old  | New |
+> | ----------------------------------------------------------------------- | ---- | --- |
+> | `cartTotal([{ sku: "", unitPrice: -1, quantity: 1 }], undefined)`       | `-1` | `0` |
+> | `cartTotal([{ sku: "", unitPrice: -0.01, quantity: 0.01 }], undefined)` | `-0` | `0` |
+
+The refactor clamps the total at zero, so a cart with a credit or refund line no longer adds up. No reviewer was
+asked to look for that, and no test covered it. The same comment flags a second unclaimed change, in `slugify`.
+
 ## The problem
 
 Writing code got cheap; verifying it did not. AI-written pull requests compile, pass CI and read well, yet quietly
