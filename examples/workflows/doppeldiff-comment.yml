@@ -18,4 +18,4 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
+      - uses: 7suheel/doppeldiff@v0.1.0

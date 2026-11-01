@@ -17,4 +17,4 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: 7suheel/doppeldiff@main # pin to a release tag once one exists
+      - uses: 7suheel/doppeldiff@v0.1.0
