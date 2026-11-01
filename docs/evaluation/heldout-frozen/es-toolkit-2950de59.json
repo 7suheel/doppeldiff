@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "2950de59^",
+    "sha": "d79f9bb6ce4f4014d9f2a06b5882ed8b93f65e46"
+  },
+  "head": {
+    "ref": "2950de59",
+    "sha": "2950de59cd0c7126fef66d5ad0a228b7c6a7b7b2"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix[clone]: preserve DataView offset and length (#2166)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 2,
+    "changed": 0,
+    "unchanged": 2,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 2000,
+    "durationMs": 17314
+  },
+  "functions": [
+    {
+      "id": "src/object/clone.ts#clone",
+      "file": "src/object/clone.ts",
+      "exportName": "clone",
+      "signature": "clone(obj: unknown)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1132,
+      "seed": 1439870593,
+      "behaviors": []
+    },
+    {
+      "id": "src/object/toMerged.ts#toMerged",
+      "file": "src/object/toMerged.ts",
+      "exportName": "toMerged",
+      "signature": "toMerged(target: Record<string, unknown>, source: Record<string, unknown>)",
+      "status": "unchanged",
+      "targetReason": "uses changed `clone` from src/object/clone.ts",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 339,
+      "seed": 3681003703,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 17314,
+    "materializeMs": 1319,
+    "dependenciesMs": 1,
+    "detectMs": 14523,
+    "verifyMs": 1471
+  }
+}

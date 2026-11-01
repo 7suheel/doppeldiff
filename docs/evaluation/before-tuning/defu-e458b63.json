@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "e458b63^",
+    "sha": "e5a48d39c4f9c49f85e5fa5040fc36a30c5a03c6"
+  },
+  "head": {
+    "ref": "e458b63",
+    "sha": "e458b63653f9d70d7ae99a8c0e96287d06e8c72e"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "refactor: make `isPlainObject` logic more readable",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 2,
+    "changed": 0,
+    "unchanged": 2,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 2000,
+    "durationMs": 2752
+  },
+  "functions": [
+    {
+      "id": "src/_utils.ts#isPlainObject",
+      "file": "src/_utils.ts",
+      "exportName": "isPlainObject",
+      "signature": "isPlainObject(value: unknown)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 846,
+      "seed": 3007061362,
+      "behaviors": []
+    },
+    {
+      "id": "src/defu.ts#createDefu",
+      "file": "src/defu.ts",
+      "exportName": "createDefu",
+      "signature": "createDefu(merger?: undefined | () => unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `isPlainObject` from src/_utils.ts",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 176,
+      "seed": 3834644065,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2752,
+    "materializeMs": 849,
+    "dependenciesMs": 0,
+    "detectMs": 880,
+    "verifyMs": 1023
+  }
+}

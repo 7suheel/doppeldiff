@@ -24,6 +24,8 @@ export const DEFAULT_EXCLUDE = [
   '**/__mocks__/**',
   '**/test/**',
   '**/tests/**',
+  '**/test.{js,ts,mjs,cjs}',
+  '**/tests.{js,ts,mjs,cjs}',
   '**/*.config.*',
   '**/.*/**',
 ];
@@ -130,6 +132,41 @@ export function detectChanges(options: DetectOptions): Detection {
     detection.targets.push(t);
   };
 
+  // Add every file analysis will need to the projects *before* querying the type checker: each addition
+  // invalidates the TypeScript program, and rebuilding it per file is quadratic on large repositories.
+  const preload = (side: Side, abs: string) => {
+    try {
+      if (existsSync(abs)) options.sourceFile(side, abs);
+    } catch {
+      /* reported when analyzed */
+    }
+  };
+  const changedStems = new Set<string>();
+  for (const f of files) {
+    if (f.headPath) {
+      preload('head', join(options.headRoot, f.headPath));
+      changedStems.add(basename(f.headPath).replace(/\.[^.]+$/, ''));
+      const name = nearestPackageName(join(options.headRoot, f.headPath), options.headRoot);
+      if (name) changedStems.add(name);
+    }
+    if (f.basePath) preload('base', join(options.baseRoot, f.basePath));
+  }
+  const changedHeadKeys = new Set(
+    files.filter((f) => f.headPath).map((f) => pathKey(join(options.headRoot, f.headPath!))),
+  );
+  const crossCandidates =
+    options.crossModule === false || files.length === 0
+      ? []
+      : listSourceFiles(options.repo, options.headSha)
+          .filter((p) => wanted(p))
+          .map((p) => ({ rel: p, abs: join(options.headRoot, p) }))
+          .filter(({ abs }) => existsSync(abs) && !changedHeadKeys.has(pathKey(abs)))
+          .filter(({ abs }) => {
+            const text = readFileSync(abs, 'utf8');
+            return [...changedStems].some((st) => text.includes(st));
+          });
+  for (const c of crossCandidates) preload('head', c.abs);
+
   for (const f of files) {
     const headFile = f.headPath ? join(options.headRoot, f.headPath) : undefined;
     const baseFile = f.basePath ? join(options.baseRoot, f.basePath) : undefined;
@@ -161,6 +198,20 @@ export function detectChanges(options: DetectOptions): Detection {
       }
     }
     if (!head) continue;
+
+    // A changed module with runtime code but no recognizable exports (UMD/IIFE wrappers, globals) must not be
+    // reported as "nothing changed": list it as not verified.
+    if (head.exports.size === 0 && (changed.size > 0 || sideEffectsChanged)) {
+      detection.skipped.push({
+        id: `${displayPath}#*`,
+        file: displayPath,
+        exportName: '*',
+        kind: 'module',
+        reason:
+          'changed, but no ESM/CommonJS exports were recognized (UMD/IIFE wrappers are not supported in v1)',
+      });
+      continue;
+    }
 
     for (const [exportName, topName] of head.exports) {
       const id = `${displayPath}#${exportName}`;
@@ -224,10 +275,7 @@ export function detectChanges(options: DetectOptions): Detection {
       const name = nearestPackageName(p, options.headRoot);
       if (name) stems.add(name);
     }
-    const candidates = listSourceFiles(options.repo, options.headSha)
-      .filter((p) => wanted(p))
-      .map((p) => ({ rel: p, abs: join(options.headRoot, p) }))
-      .filter(({ abs }) => existsSync(abs) && !changedByFile.has(pathKey(abs)));
+    const candidates = crossCandidates.filter(({ abs }) => !changedByFile.has(pathKey(abs)));
     for (const { rel, abs } of candidates) {
       const text = readFileSync(abs, 'utf8');
       if (![...stems].some((s) => text.includes(s))) continue;

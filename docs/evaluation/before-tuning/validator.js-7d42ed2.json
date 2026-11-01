@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "7d42ed2^",
+    "sha": "d563b1584cedb66a7ebea75e5ba8d8a8babc86a8"
+  },
+  "head": {
+    "ref": "7d42ed2",
+    "sha": "7d42ed2dcffc229ae7aaab87f77f612d04850096"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(isByteLength): handle unpaired UTF-16 surrogates (#2822)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 2,
+    "changed": 0,
+    "unchanged": 2,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 2000,
+    "durationMs": 2890
+  },
+  "functions": [
+    {
+      "id": "src/lib/isByteLength.js#default",
+      "file": "src/lib/isByteLength.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, options: unknown)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 821,
+      "seed": 1452732886,
+      "behaviors": []
+    },
+    {
+      "id": "src/lib/isEmail.js#default",
+      "file": "src/lib/isEmail.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, options: unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `isByteLength` from src/lib/isByteLength.js",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 204,
+      "seed": 4220680886,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2890,
+    "materializeMs": 910,
+    "dependenciesMs": 1,
+    "detectMs": 952,
+    "verifyMs": 1026
+  }
+}

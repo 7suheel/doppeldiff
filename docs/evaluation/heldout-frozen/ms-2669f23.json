@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "2669f23^",
+    "sha": "fe0bae301a6c41f68a01595658a4f4f0dcba0e84"
+  },
+  "head": {
+    "ref": "2669f23",
+    "sha": "2669f23e99be0bb6b65d365151884de52434301c"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fixed negative decimals less than -10 don't work (#111)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2438
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(val: string | number, options: undefined | <unsupported: built-in type `Object`>)",
+      "status": "unchanged",
+      "targetReason": "uses changed `parse`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 795,
+      "seed": 2354929897,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2438,
+    "materializeMs": 845,
+    "dependenciesMs": 0,
+    "detectMs": 797,
+    "verifyMs": 795
+  }
+}

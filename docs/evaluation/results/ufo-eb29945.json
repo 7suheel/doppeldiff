@@ -1,0 +1,231 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "eb29945^",
+    "sha": "5fb179d51384301ffb66b48e213863a27cadd1ff"
+  },
+  "head": {
+    "ref": "eb29945",
+    "sha": "eb29945470c8629309764f026a36e7f477a9a1ff"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(withBase, withoutBase): prevent false prefix matches (#313)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 2,
+    "changed": 2,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 2,
+    "unclaimed": 0,
+    "inputsRun": 2000,
+    "durationMs": 2149
+  },
+  "functions": [
+    {
+      "id": "src/utils.ts#withBase",
+      "file": "src/utils.ts",
+      "exportName": "withBase",
+      "signature": "withBase(input: string, base: string)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1008,
+      "seed": 3870797363,
+      "behaviors": [
+        {
+          "id": "src/utils.ts#withBase/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 10,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text"],
+              "count": 8
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "blank"],
+              "count": 2
+            }
+          ],
+          "examples": [
+            {
+              "call": "withBase(\"a1\", \"a\")",
+              "argsCode": "\"a1\", \"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a1\"",
+                "code": "\"a1\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a/a1\"",
+                "code": "\"a/a1\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "withBase(\"  a\", \" \")",
+              "argsCode": "\"  a\", \" \"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"  a\"",
+                "code": "\"  a\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\" /  a\"",
+                "code": "\" /  a\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "withBase(\"a&\", \"a\")",
+              "argsCode": "\"a&\", \"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a&\"",
+                "code": "\"a&\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a/a&\"",
+                "code": "\"a/a&\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src/utils.ts#withoutBase",
+      "file": "src/utils.ts",
+      "exportName": "withoutBase",
+      "signature": "withoutBase(input: string, base: string)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 66,
+      "seed": 2778817679,
+      "behaviors": [
+        {
+          "id": "src/utils.ts#withoutBase/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 2,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "blank"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "withoutBase(\"  a\", \" \")",
+              "argsCode": "\"  a\", \" \"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/ a\"",
+                "code": "\"/ a\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"  a\"",
+                "code": "\"  a\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "withoutBase(\"-#\", \"-\")",
+              "argsCode": "\"-#\", \"-\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/#\"",
+                "code": "\"/#\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-#\"",
+                "code": "\"-#\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "withoutBase(\"-,\", \"-\")",
+              "argsCode": "\"-,\", \"-\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"/,\"",
+                "code": "\"/,\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-,\"",
+                "code": "\"-,\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2149,
+    "materializeMs": 68,
+    "dependenciesMs": 1,
+    "detectMs": 1005,
+    "verifyMs": 1074
+  }
+}

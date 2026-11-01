@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "a38f15b^",
+    "sha": "3d2f4b336bf68feebf4d0d634ef11d84a69e7b9f"
+  },
+  "head": {
+    "ref": "a38f15b",
+    "sha": "a38f15be6931722d295d2c7ad1d13d35036078a5"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix isISO8601 rejecting valid ordinal day 360 (#2787)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2943
+  },
+  "functions": [
+    {
+      "id": "src/lib/isISO8601.js#default",
+      "file": "src/lib/isISO8601.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, options?: {  } | undefined)",
+      "status": "unchanged",
+      "targetReason": "uses changed `iso8601StrictSeparator`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 802,
+      "seed": 3610445638,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2943,
+    "materializeMs": 1134,
+    "dependenciesMs": 1,
+    "detectMs": 1006,
+    "verifyMs": 802
+  }
+}

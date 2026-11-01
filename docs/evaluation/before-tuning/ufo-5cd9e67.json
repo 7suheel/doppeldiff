@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "5cd9e67^",
+    "sha": "a7b94e69ff6159de8ddfd4940c90db4708c0d67e"
+  },
+  "head": {
+    "ref": "5cd9e67",
+    "sha": "5cd9e676711af3f4e4b5398ddf6ca8d52c1c7e1f"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(withoutBase): collapse leading slashes (#335)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2538
+  },
+  "functions": [
+    {
+      "id": "src/utils.ts#withoutBase",
+      "file": "src/utils.ts",
+      "exportName": "withoutBase",
+      "signature": "withoutBase(input: string, base: string)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 921,
+      "seed": 2778817679,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2538,
+    "materializeMs": 723,
+    "dependenciesMs": 1,
+    "detectMs": 892,
+    "verifyMs": 921
+  }
+}

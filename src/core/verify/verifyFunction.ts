@@ -12,7 +12,7 @@ import {
   type NondeterminismReport,
   type PairOutcome,
 } from '../explore/explore.js';
-import { signatureFromNode } from '../types/fromType.js';
+import { signatureOf } from '../types/fromType.js';
 import { signatureAccepts } from '../types/accepts.js';
 import { printSpec, signatureUnsupported, type SignatureSpec } from '../types/spec.js';
 import { fnv1a } from '../util/stableKey.js';
@@ -154,8 +154,8 @@ export async function verifyFunction(
     return skip('uses `this` (methods are out of scope in v1)');
 
   // 2. Signatures.
-  const headSig = signatureFromNode(headLoc.node);
-  const baseSig = signatureFromNode(baseLoc.node);
+  const headSig = signatureOf(headLoc.node);
+  const baseSig = signatureOf(baseLoc.node);
   const signature = printSignature(target.exportName, headSig);
   base.signature = signature;
   const unsupported = options.arbitrary ? undefined : signatureUnsupported(headSig);

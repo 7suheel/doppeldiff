@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "f7a91b6^",
+    "sha": "6004784074a3883b2463c0e8d742dd077a9e2995"
+  },
+  "head": {
+    "ref": "f7a91b6",
+    "sha": "f7a91b6823ffb40fe3a2f475d00fe913598b926c"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: remove replacement char from start and end in strict mode (#116)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 1573
+  },
+  "functions": [],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1573,
+    "materializeMs": 839,
+    "dependenciesMs": 0,
+    "detectMs": 734,
+    "verifyMs": 0
+  }
+}

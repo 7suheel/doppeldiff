@@ -2,6 +2,7 @@ import fc, { type Arbitrary } from 'fast-check';
 import type { ArbSpec, SignatureSpec } from '../types/spec.js';
 import { FN_TAG, type FnDescriptor } from '../runner/tags.js';
 import { emptyMined, type MinedValues } from './mine.js';
+import { regexArbitraries } from './regex.js';
 
 export interface CompileOptions {
   mined?: MinedValues;
@@ -23,6 +24,42 @@ interface Ctx {
   /** When true, references are not followed (used to build terminating base cases). */
   terminal: boolean;
 }
+
+/** UTF-16 edge cases that random code points almost never hit. */
+const UTF16_EDGES = [
+  '\uD800',
+  '\uDBFF',
+  '\uDC00',
+  '\uDFFF',
+  '\uD83D\uDE00',
+  '\u0301',
+  '\u200B',
+  '\uFEFF',
+  'a',
+  'é',
+];
+
+/** Structural fragments common in paths, URLs, queries and formats. */
+const STRUCTURAL_FRAGMENTS = [
+  '/',
+  '//',
+  '?',
+  '#',
+  '&',
+  '=',
+  ':',
+  '.',
+  '..',
+  '-',
+  '_',
+  ' ',
+  'a',
+  'b',
+  '1',
+  '%20',
+  '@',
+  ',',
+];
 
 const INTERESTING_CHARS = [
   ' ',
@@ -73,11 +110,32 @@ function numberArb(ctx: Ctx): Arbitrary<unknown> {
   return weighted(typeDriven, ctx.mined.numbers, ctx);
 }
 
+const regexCache = new WeakMap<object, Arbitrary<string>[]>();
+
 function stringArb(ctx: Ctx): Arbitrary<unknown> {
+  // Strings in the formats the code parses (its own regex literals), when there are any.
+  let fromRegexes = regexCache.get(ctx.mined.regexes);
+  if (!fromRegexes) {
+    fromRegexes = regexArbitraries(ctx.mined.regexes);
+    regexCache.set(ctx.mined.regexes, fromRegexes);
+  }
+  // Strings composed from a small shared pool of fragments (mined literals + structural characters): two
+  // independently generated arguments then often share prefixes/suffixes, as paths and URLs do in real calls.
+  const fragments = [...new Set([...ctx.mined.fragments, ...STRUCTURAL_FRAGMENTS])];
+  const composed = fc
+    .array(fc.constantFrom(...fragments), { minLength: 1, maxLength: 5 })
+    .map((xs) => xs.join(''));
   const typeDriven = fc.oneof(
-    fc.string({ maxLength: 16 }),
-    fc.string({ unit: fc.constantFrom(...INTERESTING_CHARS), maxLength: 12 }),
-    fc.string({ unit: 'grapheme', maxLength: 8 }),
+    { arbitrary: fc.string({ maxLength: 16 }), weight: 3 },
+    { arbitrary: fc.string({ unit: fc.constantFrom(...INTERESTING_CHARS), maxLength: 12 }), weight: 2 },
+    { arbitrary: composed, weight: 3 },
+    { arbitrary: fc.string({ unit: 'grapheme', maxLength: 8 }), weight: 1 },
+    // UTF-16 edge cases: lone high/low surrogates, a valid pair, combining marks, zero-width and BOM.
+    {
+      arbitrary: fc.string({ unit: fc.constantFrom(...UTF16_EDGES), minLength: 1, maxLength: 6 }),
+      weight: 1,
+    },
+    ...(fromRegexes.length > 0 ? [{ arbitrary: fc.oneof(...fromRegexes), weight: 3 }] : []),
   );
   return weighted(typeDriven, ctx.mined.strings, ctx);
 }
@@ -92,6 +150,22 @@ function dateArb(ctx: Ctx): Arbitrary<unknown> {
 }
 
 function anythingArb(ctx: Ctx): Arbitrary<unknown> {
+  // Untyped parameters (`any`, plain JS): objects use the property names the code reads as keys, and leaves
+  // reuse the number/string generators (with mined values).
+  const key =
+    ctx.mined.keys.length > 0
+      ? fc.oneof(fc.constantFrom(...ctx.mined.keys), fc.string({ maxLength: 6 }))
+      : fc.string({ maxLength: 6 });
+  const leaves = [numberArb(ctx), stringArb(ctx), fc.boolean(), fc.constant(undefined), fc.constant(null)];
+  const shaped = fc.anything({
+    maxDepth: 2,
+    maxKeys: 4,
+    key,
+    values: leaves,
+    withDate: true,
+    withMap: false,
+    withSet: false,
+  });
   const anything = fc.anything({
     maxDepth: 2,
     maxKeys: 4,
@@ -105,7 +179,13 @@ function anythingArb(ctx: Ctx): Arbitrary<unknown> {
     withBoxedValues: false,
     withObjectString: false,
   });
-  return weighted(anything, [...ctx.mined.numbers.slice(0, 20), ...ctx.mined.strings.slice(0, 20)], ctx);
+  const mixed = fc.oneof(
+    { arbitrary: anything, weight: 2 },
+    { arbitrary: shaped, weight: 3 },
+    { arbitrary: numberArb(ctx), weight: 2 },
+    { arbitrary: stringArb(ctx), weight: 2 },
+  );
+  return weighted(mixed, [...ctx.mined.numbers.slice(0, 20), ...ctx.mined.strings.slice(0, 20)], ctx);
 }
 
 function compile(spec: ArbSpec, ctx: Ctx): Arbitrary<unknown> | null {

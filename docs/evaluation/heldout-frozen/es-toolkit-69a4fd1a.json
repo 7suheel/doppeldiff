@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "69a4fd1a^",
+    "sha": "9bdad0f9174c6b82e7433f32677f8ca3f624f173"
+  },
+  "head": {
+    "ref": "69a4fd1a",
+    "sha": "69a4fd1a4390fe803ed90b0bad700513f64fd802"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix[startCase]: only uppercase the first letter of each word like lodash (#2160)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 17151
+  },
+  "functions": [
+    {
+      "id": "src/compat/string/startCase.ts#startCase",
+      "file": "src/compat/string/startCase.ts",
+      "exportName": "startCase",
+      "signature": "startCase(str?: undefined | string)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1108,
+      "seed": 3357540574,
+      "behaviors": [
+        {
+          "id": "src/compat/string/startCase.ts#startCase/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 3,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text"],
+              "count": 3
+            }
+          ],
+          "examples": [
+            {
+              "call": "startCase(\"𐖗\")",
+              "argsCode": "\"𐖗\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐖗\"",
+                "code": "\"𐖗\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐕰\"",
+                "code": "\"𐕰\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "startCase(\"𐓬\")",
+              "argsCode": "\"𐓬\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐓬\"",
+                "code": "\"𐓬\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐓄\"",
+                "code": "\"𐓄\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "startCase(\"𐖶\")",
+              "argsCode": "\"𐖶\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐖶\"",
+                "code": "\"𐖶\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"𐖏\"",
+                "code": "\"𐖏\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 17151,
+    "materializeMs": 1502,
+    "dependenciesMs": 1,
+    "detectMs": 14539,
+    "verifyMs": 1108
+  }
+}

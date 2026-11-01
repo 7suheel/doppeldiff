@@ -1,0 +1,98 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "11ba022^",
+    "sha": "3942bfbbcaa72084bd4284846c83bd61ed7c8b29"
+  },
+  "head": {
+    "ref": "11ba022",
+    "sha": "11ba02213d4b1c6b02dd686041f75edc479c98e9"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: ignore inherited enumerable properties",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 4,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2568
+  },
+  "functions": [
+    {
+      "id": "src/defu.ts#createDefu",
+      "file": "src/defu.ts",
+      "exportName": "createDefu",
+      "signature": "createDefu(merger?: undefined | () => unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `_defu`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 804,
+      "seed": 3834644065,
+      "behaviors": []
+    }
+  ],
+  "skipped": [
+    {
+      "id": "src/defu.ts#defu",
+      "file": "src/defu.ts",
+      "exportName": "defu",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    },
+    {
+      "id": "src/defu.ts#default",
+      "file": "src/defu.ts",
+      "exportName": "default",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    },
+    {
+      "id": "src/defu.ts#defuFn",
+      "file": "src/defu.ts",
+      "exportName": "defuFn",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    },
+    {
+      "id": "src/defu.ts#defuArrayFn",
+      "file": "src/defu.ts",
+      "exportName": "defuArrayFn",
+      "kind": "value",
+      "reason": "not a function (exported value)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2568,
+    "materializeMs": 892,
+    "dependenciesMs": 1,
+    "detectMs": 870,
+    "verifyMs": 805
+  }
+}

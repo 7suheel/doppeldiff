@@ -6,6 +6,7 @@ import {
   type FunctionExpression,
   type ParameterDeclaration,
   type Type,
+  type VariableDeclaration,
 } from 'ts-morph';
 import type { ArbSpec, ParamSpec, PropSpec, SignatureSpec } from './spec.js';
 
@@ -295,4 +296,33 @@ export function signatureFromNode(fn: FunctionLikeNode): SignatureSpec {
   const ret = fn.getReturnType();
   const async = fn.isAsync() || unwrapPromise(ret) !== undefined;
   return { params, async };
+}
+
+/** Signature spec for a callable value (no function node), from its type's single call signature. */
+export function signatureFromCallable(decl: VariableDeclaration): SignatureSpec {
+  const sig = decl.getType().getCallSignatures()[0]!;
+  const checker = decl.getProject().getTypeChecker();
+  const params: ParamSpec[] = sig.getParameters().map((sym, i) => {
+    const pdecl = sym.getValueDeclaration();
+    const isParam = pdecl !== undefined && Node.isParameterDeclaration(pdecl);
+    const rest = isParam && pdecl.isRestParameter();
+    const optional =
+      !rest &&
+      ((sym.getFlags() & ts.SymbolFlags.Optional) !== 0 ||
+        (isParam && (pdecl.isOptional() || pdecl.hasInitializer())));
+    let type = checker.getTypeOfSymbolAtLocation(sym, decl);
+    if (rest) type = type.getArrayElementType() ?? type;
+    let spec = specFromType(type, decl);
+    if (optional && spec.kind !== 'union') spec = { kind: 'union', options: [spec, { kind: 'undefined' }] };
+    else if (optional && spec.kind === 'union' && !spec.options.some((o) => o.kind === 'undefined')) {
+      spec = { kind: 'union', options: [...spec.options, { kind: 'undefined' }] };
+    }
+    return { name: sym.getName() || `arg${i}`, spec, optional, rest };
+  });
+  return { params, async: unwrapPromise(sig.getReturnType()) !== undefined };
+}
+
+/** Signature for whatever `locate` found: a function node or a callable value. */
+export function signatureOf(node: FunctionLikeNode | VariableDeclaration): SignatureSpec {
+  return Node.isVariableDeclaration(node) ? signatureFromCallable(node) : signatureFromNode(node);
 }

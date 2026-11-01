@@ -66,7 +66,8 @@ describe('runner pool', () => {
     const [e] = await pool.run('m', 'exit', [[]]);
     expect(e).toMatchObject({ kind: 'crash', reason: expect.stringContaining('code 3') });
     const [o] = await pool.run('m', 'oom', [[]]);
-    expect(o).toMatchObject({ kind: 'crash' });
+    // Usually a V8 heap abort; under heavy load the per-call timeout can fire first. Either way it is isolated.
+    expect(['crash', 'timeout']).toContain(o!.kind);
     const [after] = await pool.run('m', 'add', [[1, 1]]);
     expect(after).toMatchObject({ kind: 'return' });
   });

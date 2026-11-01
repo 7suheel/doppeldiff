@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "59d762f^",
+    "sha": "f7ece2c6b62dda7c47a0459660fb3dd93ea62375"
+  },
+  "head": {
+    "ref": "59d762f",
+    "sha": "59d762fafe5ff80322e8f5ff1595e96f723f1824"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix capitalization of acronym in sentence case",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2578
+  },
+  "functions": [
+    {
+      "id": "packages/title-case/src/index.ts#titleCase",
+      "file": "packages/title-case/src/index.ts",
+      "exportName": "titleCase",
+      "signature": "titleCase(input: string, options?: string | { locale?: string | string[]; sentenceCase?: boolean; sentenceTerminators?: Set<string>; smallWords?: Set<string>; titleTerminators?: Set<string>; wordSeparators?: Set<string> } | string[] | undefined)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 911,
+      "seed": 60903051,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2578,
+    "materializeMs": 491,
+    "dependenciesMs": 1,
+    "detectMs": 1175,
+    "verifyMs": 911
+  }
+}

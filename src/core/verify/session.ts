@@ -99,22 +99,29 @@ export class VerifySession {
     let p = this.projects.get(key);
     if (!p) {
       const tsconfig = join(pkg, 'tsconfig.json');
-      p = existsSync(tsconfig)
-        ? new Project({
-            tsConfigFilePath: tsconfig,
-            skipAddingFilesFromTsConfig: true,
-            compilerOptions: { allowJs: true, noEmit: true },
-          })
-        : new Project({
-            compilerOptions: {
-              strict: true,
-              allowJs: true,
-              checkJs: false,
-              target: ts.ScriptTarget.ES2022,
-              module: ts.ModuleKind.ESNext,
-              moduleResolution: ts.ModuleResolutionKind.Bundler,
-            },
-          });
+      const fallback = () =>
+        new Project({
+          compilerOptions: {
+            strict: true,
+            allowJs: true,
+            checkJs: false,
+            target: ts.ScriptTarget.ES2022,
+            module: ts.ModuleKind.ESNext,
+            moduleResolution: ts.ModuleResolutionKind.Bundler,
+          },
+        });
+      try {
+        p = existsSync(tsconfig)
+          ? new Project({
+              tsConfigFilePath: tsconfig,
+              skipAddingFilesFromTsConfig: true,
+              compilerOptions: { allowJs: true, noEmit: true },
+            })
+          : fallback();
+      } catch {
+        // e.g. `extends` pointing into a package that is not installed: analyze with strict defaults.
+        p = fallback();
+      }
       this.projects.set(key, p);
     }
     return p;
@@ -125,9 +132,9 @@ export class VerifySession {
     const project = this.project(side, file);
     const existing = project.getSourceFile(file);
     if (existing) return existing;
-    const sf = project.addSourceFileAtPath(file);
-    project.resolveSourceFileDependencies();
-    return sf;
+    // No resolveSourceFileDependencies(): the TypeScript program loads imported files for the type checker on
+    // its own, and re-resolving the whole project per file was O(files²) on large repositories.
+    return project.addSourceFileAtPath(file);
   }
 
   /** Bundle and load a module in the side's runner pool (memoized). */

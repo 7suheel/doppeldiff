@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "be30b1bd^",
+    "sha": "cf6fd187244808c73a48d1263262aa85d1bb6297"
+  },
+  "head": {
+    "ref": "be30b1bd",
+    "sha": "be30b1bd74c94d20946136f6a25c3edb5429f07a"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix[merge]: let a defined source replace nullable and primitive target types (#2155)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 2834
+  },
+  "functions": [],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2834,
+    "materializeMs": 1786,
+    "dependenciesMs": 0,
+    "detectMs": 1047,
+    "verifyMs": 0
+  }
+}

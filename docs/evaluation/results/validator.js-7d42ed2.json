@@ -1,0 +1,267 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "7d42ed2^",
+    "sha": "d563b1584cedb66a7ebea75e5ba8d8a8babc86a8"
+  },
+  "head": {
+    "ref": "7d42ed2",
+    "sha": "7d42ed2dcffc229ae7aaab87f77f612d04850096"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(isByteLength): handle unpaired UTF-16 surrogates (#2822)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 2,
+    "changed": 2,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 2,
+    "unclaimed": 0,
+    "inputsRun": 2000,
+    "durationMs": 2330
+  },
+  "functions": [
+    {
+      "id": "src/lib/isByteLength.js#default",
+      "file": "src/lib/isByteLength.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, options: unknown)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 852,
+      "seed": 1452732886,
+      "behaviors": [
+        {
+          "id": "src/lib/isByteLength.js#default/1",
+          "key": "throws URIError → returns boolean",
+          "title": "no longer throws URIError; now returns a boolean",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 10,
+          "variants": [
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "text"],
+              "count": 4
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "(0,127)"],
+              "count": 3
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "{…}"],
+              "count": 1
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "nonempty"],
+              "count": 1
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "undefined"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"\\ud800\", new Set([new Set([])]))",
+              "argsCode": "\"\\ud800\", new Set([new Set([])])",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"\\ud800\", undefined)",
+              "argsCode": "\"\\ud800\", undefined",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"\\ud800\", { \"\": {} })",
+              "argsCode": "\"\\ud800\", { \"\": {} }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src/lib/isEmail.js#default",
+      "file": "src/lib/isEmail.js",
+      "exportName": "default",
+      "signature": "default(str: unknown, options: unknown)",
+      "status": "changed",
+      "targetReason": "uses changed `isByteLength` from src/lib/isByteLength.js",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 254,
+      "seed": 4220680886,
+      "behaviors": [
+        {
+          "id": "src/lib/isEmail.js#default/1",
+          "key": "throws URIError → returns boolean",
+          "title": "no longer throws URIError; now returns a boolean",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 7,
+          "variants": [
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "text"],
+              "count": 3
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "Date"],
+              "count": 1
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "[…]"],
+              "count": 1
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", ">0"],
+              "count": 1
+            },
+            {
+              "transition": "throws URIError → returns boolean",
+              "features": ["text", "blank"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"\\ud800\", [undefined])",
+              "argsCode": "\"\\ud800\", [undefined]",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"\\ud800\", new Date(\"1970-01-01T00:00:00.000Z\"))",
+              "argsCode": "\"\\ud800\", new Date(\"1970-01-01T00:00:00.000Z\")",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"\\ud800\", 1)",
+              "argsCode": "\"\\ud800\", 1",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws URIError: URI malformed",
+                "errorClass": "URIError",
+                "message": "URI malformed"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2330,
+    "materializeMs": 83,
+    "dependenciesMs": 1,
+    "detectMs": 1140,
+    "verifyMs": 1106
+  }
+}

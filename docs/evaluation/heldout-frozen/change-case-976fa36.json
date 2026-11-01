@@ -1,0 +1,244 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "976fa36^",
+    "sha": "759c9a5430844fe5b0dcc004373eee8e1e85dc42"
+  },
+  "head": {
+    "ref": "976fa36",
+    "sha": "976fa360a5cd5f123dd73be7b818df9a74e35ab5"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix capitalizing words that start with numbers (#346)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 2,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 3001
+  },
+  "functions": [
+    {
+      "id": "packages/title-case/src/index.ts#titleCase",
+      "file": "packages/title-case/src/index.ts",
+      "exportName": "titleCase",
+      "signature": "titleCase(input: string, options?: string | { locale?: string | string[]; sentenceCase?: boolean; sentenceTerminators?: Set<string>; smallWords?: Set<string>; titleTerminators?: Set<string>; wordSeparators?: Set<string> } | string[] | undefined)",
+      "status": "changed",
+      "targetReason": "uses changed `ALPHANUMERIC_PATTERN`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1095,
+      "seed": 60903051,
+      "behaviors": [
+        {
+          "id": "packages/title-case/src/index.ts#titleCase/1",
+          "key": "returns string → throws RangeError",
+          "title": "now throws RangeError (previously returned a string)",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 73,
+          "variants": [
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "{…}"],
+              "count": 26
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "text"],
+              "count": 20
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "[…]"],
+              "count": 20
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "empty"],
+              "count": 4
+            },
+            {
+              "transition": "returns string → throws RangeError",
+              "features": ["text", "blank"],
+              "count": 3
+            }
+          ],
+          "examples": [
+            {
+              "call": "titleCase(\"0\", \"\")",
+              "argsCode": "\"0\", \"\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0\"",
+                "code": "\"0\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": true
+            },
+            {
+              "call": "titleCase(\"1\", [\"\"])",
+              "argsCode": "\"1\", [\"\"]",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1\"",
+                "code": "\"1\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            },
+            {
+              "call": "titleCase(\"0'\", \".\")",
+              "argsCode": "\"0'\", \".\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0'\"",
+                "code": "\"0'\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: Incorrect locale information provided",
+                "errorClass": "RangeError",
+                "message": "Incorrect locale information provided"
+              },
+              "minimal": false
+            }
+          ]
+        },
+        {
+          "id": "packages/title-case/src/index.ts#titleCase/2",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 12,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "undefined"],
+              "count": 7
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "{…}"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "empty[]"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "titleCase(\"0a\", [])",
+              "argsCode": "\"0a\", []",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0A\"",
+                "code": "\"0A\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0a\"",
+                "code": "\"0a\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "titleCase(\"5l\", undefined)",
+              "argsCode": "\"5l\", undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"5L\"",
+                "code": "\"5L\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"5l\"",
+                "code": "\"5l\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "titleCase(\"9a\", \"ST\")",
+              "argsCode": "\"9a\", \"ST\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"9A\"",
+                "code": "\"9A\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"9a\"",
+                "code": "\"9a\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 3001,
+    "materializeMs": 845,
+    "dependenciesMs": 1,
+    "detectMs": 1060,
+    "verifyMs": 1095
+  }
+}

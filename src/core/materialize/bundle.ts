@@ -81,22 +81,31 @@ export async function bundleModule(
   options: BundleOptions = {},
 ): Promise<BundleResult> {
   const tsconfig = existsSync(join(root, 'tsconfig.json')) ? join(root, 'tsconfig.json') : undefined;
-  const result = await esbuild.build({
-    entryPoints: [entry],
-    absWorkingDir: root,
-    bundle: true,
-    platform: 'node',
-    format: 'esm',
-    target: 'node22',
-    ...(options.workspace
-      ? { plugins: [workspacePlugin(options.workspace)] }
-      : { packages: 'external' as const }),
-    write: false,
-    metafile: true,
-    logLevel: 'silent',
-    banner: { js: REQUIRE_SHIM },
-    ...(tsconfig ? { tsconfig } : {}),
-  });
+  const build = (withTsconfig: boolean) =>
+    esbuild.build({
+      entryPoints: [entry],
+      absWorkingDir: root,
+      bundle: true,
+      platform: 'node',
+      format: 'esm',
+      target: 'node22',
+      ...(options.workspace
+        ? { plugins: [workspacePlugin(options.workspace)] }
+        : { packages: 'external' as const }),
+      write: false,
+      metafile: true,
+      logLevel: 'silent',
+      banner: { js: REQUIRE_SHIM },
+      ...(tsconfig && withTsconfig ? { tsconfig } : {}),
+    });
+  let result: Awaited<ReturnType<typeof build>>;
+  try {
+    result = await build(true);
+  } catch (e) {
+    // A tsconfig that cannot be loaded (e.g. `extends` from an uninstalled package): retry without it.
+    if (!tsconfig) throw e;
+    result = await build(false);
+  }
   const code = result.outputFiles[0]!.text;
   const externals = new Set<string>();
   for (const out of Object.values(result.metafile.outputs)) {

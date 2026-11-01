@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "941db7f^",
+    "sha": "2758f7029798df0361ace21143e7169eeb22df88"
+  },
+  "head": {
+    "ref": "941db7f",
+    "sha": "941db7fac5263cc7e0df0eba37253678f92989b0"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(isSlug): restrict allowed characters to valid slug charset (#2693)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "unclaimed": 0,
+    "inputsRun": 1000,
+    "durationMs": 2998
+  },
+  "functions": [
+    {
+      "id": "src/lib/isSlug.js#default",
+      "file": "src/lib/isSlug.js",
+      "exportName": "default",
+      "signature": "default(str: unknown)",
+      "status": "changed",
+      "targetReason": "uses changed `charsetRegex`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 859,
+      "seed": 3484163125,
+      "behaviors": [
+        {
+          "id": "src/lib/isSlug.js#default/1",
+          "key": "returns boolean: value changed",
+          "title": "return value changed",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 22,
+          "variants": [
+            {
+              "transition": "returns boolean: value changed",
+              "features": ["text"],
+              "count": 22
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"0\")",
+              "argsCode": "\"0\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"a\")",
+              "argsCode": "\"a\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"v\")",
+              "argsCode": "\"v\"",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "false",
+                "code": "false"
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "true",
+                "code": "true"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2998,
+    "materializeMs": 1075,
+    "dependenciesMs": 0,
+    "detectMs": 1063,
+    "verifyMs": 860
+  }
+}

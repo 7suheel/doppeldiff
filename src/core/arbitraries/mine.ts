@@ -1,4 +1,5 @@
 import { Node, SyntaxKind } from 'ts-morph';
+import type { MinedRegex } from './regex.js';
 
 /** Values mined from source code, used to bias generation towards interesting regions. */
 export interface MinedValues {
@@ -8,6 +9,12 @@ export interface MinedValues {
   thresholds: number[];
   /** String literals and simple variants. */
   strings: string[];
+  /** Property names the code reads (`options.min`, `obj["key"]`, destructured names): keys for untyped objects. */
+  keys: string[];
+  /** Short string literals as-is: fragments for composing structured strings (paths, URLs, formats). */
+  fragments: string[];
+  /** Regular expressions in the code: inputs in the format the code parses. */
+  regexes: MinedRegex[];
 }
 
 export const NUMBER_BOUNDARIES: readonly number[] = [
@@ -70,6 +77,8 @@ export function mineValues(nodes: Node[]): MinedValues {
   const literals = new Set<number>();
   const thresholds = new Set<number>();
   const strings = new Set<string>();
+  const keys = new Set<string>();
+  const regexes = new Map<string, MinedRegex>();
 
   for (const root of nodes) {
     root.forEachDescendant((node) => {
@@ -82,6 +91,27 @@ export function mineValues(nodes: Node[]): MinedValues {
         if (parent && (Node.isImportDeclaration(parent) || Node.isExportDeclaration(parent))) return;
         const v = node.getLiteralValue();
         if (v.length <= MAX_STRING_LITERAL) strings.add(v);
+      } else if (Node.isRegularExpressionLiteral(node)) {
+        const text = node.getText();
+        const end = text.lastIndexOf('/');
+        const r = { source: text.slice(1, end), flags: text.slice(end + 1) };
+        if (r.source.length <= 400) regexes.set(text, r);
+      } else if (Node.isNewExpression(node) && node.getExpression().getText() === 'RegExp') {
+        const [src, fl] = node.getArguments();
+        if (src && Node.isStringLiteral(src)) {
+          const r = {
+            source: src.getLiteralValue(),
+            flags: fl && Node.isStringLiteral(fl) ? fl.getLiteralValue() : '',
+          };
+          if (r.source.length <= 400) regexes.set(`${r.source}/${r.flags}`, r);
+        }
+      } else if (Node.isPropertyAccessExpression(node)) {
+        // Property names the code reads (`options.min`): keys for untyped objects.
+        const name = node.getName();
+        if (name.length <= 32 && !BUILTIN_MEMBERS.has(name)) keys.add(name);
+      } else if (Node.isBindingElement(node)) {
+        const prop = node.getPropertyNameNode()?.getText() ?? node.getName();
+        if (/^[A-Za-z_$][\w$]*$/.test(prop) && prop.length <= 32) keys.add(prop);
       } else if (
         Node.isBinaryExpression(node) &&
         COMPARISON_OPERATORS.has(node.getOperatorToken().getKind())
@@ -115,8 +145,103 @@ export function mineValues(nodes: Node[]): MinedValues {
     numbers: [...numbers].slice(0, MAX_MINED),
     thresholds: [...thresholds].sort((a, b) => a - b),
     strings: [...strs].slice(0, MAX_MINED),
+    keys: [...keys].slice(0, 40),
+    fragments: [...strings].filter((x) => x.length > 0 && x.length <= 12).slice(0, 60),
+    regexes: [...regexes.values()].slice(0, 20),
   };
 }
+
+/** Members of built-ins that say nothing about the shape of inputs. */
+const BUILTIN_MEMBERS = new Set([
+  'length',
+  'push',
+  'pop',
+  'shift',
+  'unshift',
+  'slice',
+  'splice',
+  'map',
+  'filter',
+  'reduce',
+  'forEach',
+  'some',
+  'every',
+  'find',
+  'findIndex',
+  'includes',
+  'indexOf',
+  'join',
+  'split',
+  'replace',
+  'replaceAll',
+  'trim',
+  'trimStart',
+  'trimEnd',
+  'toLowerCase',
+  'toUpperCase',
+  'startsWith',
+  'endsWith',
+  'charAt',
+  'charCodeAt',
+  'codePointAt',
+  'substring',
+  'substr',
+  'concat',
+  'match',
+  'test',
+  'exec',
+  'keys',
+  'values',
+  'entries',
+  'assign',
+  'freeze',
+  'isArray',
+  'isInteger',
+  'isNaN',
+  'isFinite',
+  'floor',
+  'ceil',
+  'round',
+  'abs',
+  'min',
+  'max',
+  'pow',
+  'sqrt',
+  'toString',
+  'toFixed',
+  'valueOf',
+  'call',
+  'apply',
+  'bind',
+  'prototype',
+  'hasOwnProperty',
+  'get',
+  'set',
+  'has',
+  'add',
+  'delete',
+  'size',
+  'then',
+  'catch',
+  'log',
+  'normalize',
+  'padStart',
+  'padEnd',
+  'repeat',
+  'sort',
+  'reverse',
+  'flat',
+  'flatMap',
+  'fill',
+  'from',
+  'of',
+  'parse',
+  'stringify',
+  'getTime',
+  'now',
+  'create',
+  'defineProperty',
+]);
 
 /** Smallest double strictly after `x` in the direction of `toward`. */
 export function nextAfter(x: number, toward: number): number {
@@ -132,5 +257,12 @@ export function nextAfter(x: number, toward: number): number {
 }
 
 export function emptyMined(): MinedValues {
-  return { numbers: [...NUMBER_BOUNDARIES], thresholds: [], strings: [...STRING_BOUNDARIES] };
+  return {
+    numbers: [...NUMBER_BOUNDARIES],
+    thresholds: [],
+    strings: [...STRING_BOUNDARIES],
+    keys: [],
+    fragments: [],
+    regexes: [],
+  };
 }

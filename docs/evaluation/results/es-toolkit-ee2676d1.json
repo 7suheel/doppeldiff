@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "ee2676d1^",
+    "sha": "9c0cac2ee6c0f807099723d7b226f3b65e976d5c"
+  },
+  "head": {
+    "ref": "ee2676d1",
+    "sha": "ee2676d1f56b06dd846401e8af2afb4b7e5c6264"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix(compat/findLast, compat/some): do not treat length as an element of array-likes (#2168)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 2,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 3913
+  },
+  "functions": [],
+  "skipped": [
+    {
+      "id": "src/compat/array/findLast.ts#findLast",
+      "file": "src/compat/array/findLast.ts",
+      "exportName": "findLast",
+      "kind": "function",
+      "reason": "overloaded function"
+    },
+    {
+      "id": "src/compat/array/some.ts#some",
+      "file": "src/compat/array/some.ts",
+      "exportName": "some",
+      "kind": "function",
+      "reason": "overloaded function"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 3913,
+    "materializeMs": 1128,
+    "dependenciesMs": 0,
+    "detectMs": 2785,
+    "verifyMs": 0
+  }
+}

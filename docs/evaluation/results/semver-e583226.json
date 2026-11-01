@@ -1,0 +1,62 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "e583226^",
+    "sha": "6b77aa84a648a4b54ea32a21e6db60ebd54d5040"
+  },
+  "head": {
+    "ref": "e583226",
+    "sha": "e583226b165edd6530502cf731eda334527af6fe"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: reject numeric segments after x-ranges",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 1,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "unclaimed": 0,
+    "inputsRun": 0,
+    "durationMs": 1187
+  },
+  "functions": [],
+  "skipped": [
+    {
+      "id": "classes/range.js#default",
+      "file": "classes/range.js",
+      "exportName": "default",
+      "kind": "class",
+      "reason": "class (class methods are out of scope in v1)"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1187,
+    "materializeMs": 127,
+    "dependenciesMs": 0,
+    "detectMs": 1060,
+    "verifyMs": 0
+  }
+}

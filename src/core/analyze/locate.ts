@@ -1,8 +1,9 @@
-import { Node, SyntaxKind, type SourceFile } from 'ts-morph';
+import { Node, SyntaxKind, type SourceFile, type VariableDeclaration } from 'ts-morph';
 import type { FunctionLikeNode } from '../types/fromType.js';
 
 export type LocateResult =
-  { ok: true; node: FunctionLikeNode; declaration: Node } | { ok: false; reason: string; missing?: boolean };
+  | { ok: true; node: FunctionLikeNode | VariableDeclaration; declaration: Node; callable?: boolean }
+  | { ok: false; reason: string; missing?: boolean };
 
 function unwrapExpression(node: Node | undefined): Node | undefined {
   let cur = node;
@@ -33,6 +34,16 @@ export function asFunctionLike(decl: Node): LocateResult {
       if (Node.isFunctionExpression(init) && init.isGenerator())
         return { ok: false, reason: 'generator function' };
       return { ok: true, node: init, declaration: decl };
+    }
+    // A value whose type is callable, e.g. `export const defu = createDefu()` or `export const f = memoize(g)`.
+    try {
+      const sigs = decl.getType().getCallSignatures();
+      if (sigs.length === 1 && decl.getType().getConstructSignatures().length === 0) {
+        return { ok: true, node: decl, declaration: decl, callable: true };
+      }
+      if (sigs.length > 1) return { ok: false, reason: 'callable value with overloaded signatures' };
+    } catch {
+      /* fall through */
     }
     return { ok: false, reason: 'not a function (exported value)' };
   }
@@ -69,8 +80,8 @@ export function findExportedFunction(sf: SourceFile, exportName: string): Locate
 }
 
 /** Uses of `this` or `arguments` inside a function body (not nested functions). */
-export function usesThis(fn: FunctionLikeNode): boolean {
-  if (Node.isArrowFunction(fn)) return false;
+export function usesThis(fn: FunctionLikeNode | VariableDeclaration): boolean {
+  if (Node.isArrowFunction(fn) || Node.isVariableDeclaration(fn)) return false;
   return fn
     .getDescendantsOfKind(SyntaxKind.ThisKeyword)
     .some((t) => t.getFirstAncestor((a) => Node.isFunctionLikeDeclaration(a)) === fn);
@@ -80,9 +91,9 @@ export function usesThis(fn: FunctionLikeNode): boolean {
  * Top-level functions in the same file reachable from `fn` through identifier references,
  * up to `depth` hops. Used for literal mining (and for transitive impact in change detection).
  */
-export function reachableLocalFunctions(fn: Node, depth: number): FunctionLikeNode[] {
+export function reachableLocalFunctions(fn: Node, depth: number): Node[] {
   const sf = fn.getSourceFile();
-  const result = new Set<FunctionLikeNode>();
+  const result = new Set<Node>();
   let frontier: Node[] = [fn];
   for (let d = 0; d < depth && frontier.length > 0; d++) {
     const next: Node[] = [];

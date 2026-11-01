@@ -24,15 +24,16 @@ regression test file. The core runs with no API key and is reproducible from a s
 
 Checked on 2026-11-01 (npm registry plus GitHub repository search):
 
-| Name            | npm        | GitHub                    | Notes                                                                                                                           |
-| --------------- | ---------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| `receipts`      | **taken**  | crowded (641 repos match) | npm package dates from 2017. Its current description is "Deterministic evidence for code changes", which overlaps conceptually. |
-| `receipts-cli`  | **taken**  | —                         | Active (created 2026-06, updated 2026-10-23): _"Verification gates for AI-written code"_. Direct positioning collision.         |
-| `@receipts/cli` | scope free | —                         | `npx receipts` would still resolve to the _other_ package. Confusing.                                                           |
-| `doppeldiff`    | free       | 0 repos                   |                                                                                                                                 |
-| `twinrun`       | free       | 6 repos                   |                                                                                                                                 |
-| `counterproof`  | free       | 6 repos                   |                                                                                                                                 |
-| `behaviordiff`  | free       | taken                     | `BehaviorDiff` was the earlier name of RealDiff (prior art, see §2), so avoid it.                                               |
+| Name            | npm        | GitHub                    | Notes                                                                                                                                                                |
+| --------------- | ---------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `receipts`      | **taken**  | crowded (641 repos match) | Unrelated, unmaintained app (2015–2017, "your receipts in one place"). _Correction (Phase 6): Phase 0 wrongly attributed `proofdiff`'s description to this package._ |
+| `receipts-cli`  | **taken**  | —                         | Active (created 2026-06, updated 2026-10-23): _"Verification gates for AI-written code"_. Direct positioning collision.                                              |
+| `@receipts/cli` | scope free | —                         | `npx receipts` would still resolve to the _other_ package. Confusing.                                                                                                |
+| `proofdiff`     | taken      | —                         | "Deterministic evidence for code changes: what changed, what verification ran, and what remains unverified." Static test-impact evidence; related prior art.         |
+| `doppeldiff`    | free       | 0 repos                   |                                                                                                                                                                      |
+| `twinrun`       | free       | 6 repos                   |                                                                                                                                                                      |
+| `counterproof`  | free       | 6 repos                   |                                                                                                                                                                      |
+| `behaviordiff`  | free       | taken                     | `BehaviorDiff` was the earlier name of RealDiff (prior art, see §2), so avoid it.                                                                                    |
 
 **Conclusion: do not ship as `receipts`, and do not use "receipts" as vocabulary either** (it would
 send people to a similarly-described package). Chosen name: **doppeldiff**. The PR comment header is

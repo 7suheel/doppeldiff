@@ -1,7 +1,7 @@
 import { Project } from 'ts-morph';
 import { describe, expect, it } from 'vitest';
 import { findExportedFunction } from '../../src/core/analyze/locate.js';
-import { signatureFromNode } from '../../src/core/types/fromType.js';
+import { signatureOf } from '../../src/core/types/fromType.js';
 import { accepts, signatureAccepts } from '../../src/core/types/accepts.js';
 import { printSpec, signatureUnsupported } from '../../src/core/types/spec.js';
 
@@ -12,7 +12,7 @@ function sigOf(code: string, name = 'f') {
   const sf = project.createSourceFile(`/m${fileCounter++}.ts`, code);
   const loc = findExportedFunction(sf, name);
   if (!loc.ok) throw new Error(loc.reason);
-  return signatureFromNode(loc.node);
+  return signatureOf(loc.node);
 }
 
 const params = (code: string, name = 'f') =>
@@ -171,5 +171,15 @@ describe('signature compatibility', () => {
         { kind: 'object', props: [{ name: 'a', spec: { kind: 'literal', value: 3 }, optional: false }] },
       ),
     ).toBe(true);
+  });
+});
+
+describe('callable values', () => {
+  it('derives a signature from the type of a callable export', () => {
+    expect(
+      params(
+        'function make() { return (a: number, b?: string, ...rest: boolean[]) => a; }\nexport const f = make();',
+      ),
+    ).toEqual(['a: number', 'b?: undefined | string', 'rest...: boolean']);
   });
 });
