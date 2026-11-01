@@ -78,19 +78,24 @@ Try it: `node examples/demo-shop/try.mjs ai-refactor` creates a scenario reposit
 
 ## Results on real commits
 
-We ran doppeldiff on 21 historical commits from ufo, validator.js, defu, es-toolkit, change-case, ms, slugify and
-semver. **The full write-up, misses included, is in [docs/EVALUATION.md](docs/EVALUATION.md).** In short:
+We ran doppeldiff on 39 historical commits from 17 libraries (ufo, validator.js, es-toolkit, date-fns, qs, radash,
+…). **The full write-up, misses included, is in [docs/EVALUATION.md](docs/EVALUATION.md).** In short:
 
-- It found **9 of 13** behavioral bug fixes, with minimal examples. One is `withoutBase("///", "//")`, the
-  protocol-relative URL that a ufo security fix was about. Another is `isByteLength("\ud800")`, which used to
-  throw `URIError`.
-- On the **held-out** commits, with the code frozen, it found **2 of 6**. Two more were found only after we added
-  regex-derived inputs, so we report them separately.
+- **Latest held-out set** (18 commits from 9 new libraries, picked by a fixed rule, code frozen before the run): it
+  found **3 of 13** verifiable bug fixes. The run also exposed tool bugs (a CommonJS export pattern, JSDoc
+  `{Object}`, cross-file impact). After fixing those, it finds 7 of 15; those numbers are no longer held out.
+- On the first 21 commits it finds **11 of 13** fixes, with minimal examples. One is `withoutBase("///", "//")`, the
+  protocol-relative URL that a ufo security fix was about. Another is `isISO8601("1690360")`, an ordinal date
+  that a regex change started accepting.
+- Most misses need two or three specific things at once (an option combination plus a particular shape of text),
+  or a real callback such as a sort comparator.
 - It surfaced things the commit title did not say: validator's "restrict allowed characters" also started
   accepting one- and two-character slugs.
-- It **could not verify 5 of 21 commits**: class methods, overloaded functions and UMD modules. Every report
-  lists these explicitly.
-- Each run took 1–6 seconds.
+- **Noise:** 91 % of the behaviors in the main list matter (79 % before the noise work). Differences that only
+  happen on inputs unlike the project's tests and call sites are collapsed and do not fail the check.
+- It **could not verify 8 of 39 commits**: class methods, overloaded functions, UMD modules, class-instance
+  parameters and exported non-function values. Every report lists these explicitly.
+- Each run took 0.5–8 seconds.
 
 ## Quick start
 
