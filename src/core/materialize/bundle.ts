@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto';
-import { existsSync, mkdirSync, realpathSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
 import { builtinModules } from 'node:module';
 import { tmpdir } from 'node:os';
 import { isAbsolute, join, relative, sep } from 'node:path';
@@ -41,15 +41,88 @@ function isInside(child: string, parent: string): boolean {
   return rel !== '' && !rel.startsWith('..') && !isAbsolute(rel);
 }
 
+/** Workspace globs from package.json `workspaces` (array or `{ packages }`) or pnpm-workspace.yaml. */
+function workspaceGlobs(repo: string): string[] {
+  const globs: string[] = [];
+  try {
+    const pkg = JSON.parse(readFileSync(join(repo, 'package.json'), 'utf8')) as { workspaces?: unknown };
+    const w = pkg.workspaces;
+    if (Array.isArray(w)) globs.push(...w.filter((x): x is string => typeof x === 'string'));
+    else if (w && typeof w === 'object' && Array.isArray((w as { packages?: unknown }).packages)) {
+      globs.push(
+        ...(w as { packages: unknown[] }).packages.filter((x): x is string => typeof x === 'string'),
+      );
+    }
+  } catch {
+    /* no root package.json */
+  }
+  try {
+    const yaml = readFileSync(join(repo, 'pnpm-workspace.yaml'), 'utf8');
+    for (const m of yaml.matchAll(/^\s*-\s*['"]?([^'"#\n]+?)['"]?\s*$/gm)) globs.push(m[1]!);
+  } catch {
+    /* not pnpm */
+  }
+  return globs.filter((g) => !g.startsWith('!'));
+}
+
+/** Workspace package name → directory, read from a version's own tree (supports `dir`, `dir/*`, `dir/**`). */
+export function workspacePackages(repo: string): Map<string, string> {
+  const out = new Map<string, string>();
+  const add = (dir: string) => {
+    try {
+      const name = (JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as { name?: unknown }).name;
+      if (typeof name === 'string') out.set(name, dir);
+    } catch {
+      /* not a package */
+    }
+  };
+  for (const glob of workspaceGlobs(repo)) {
+    const clean = glob.replace(/\/+$/, '');
+    const star = clean.search(/\*/);
+    if (star === -1) {
+      add(join(repo, clean));
+      continue;
+    }
+    const base = join(repo, clean.slice(0, star).replace(/\/+$/, ''));
+    try {
+      for (const e of readdirSync(base, { withFileTypes: true }))
+        if (e.isDirectory()) add(join(base, e.name));
+    } catch {
+      /* missing dir */
+    }
+  }
+  return out;
+}
+
+function packageNameOf(spec: string): string {
+  const parts = spec.split('/');
+  return spec.startsWith('@') ? parts.slice(0, 2).join('/') : parts[0]!;
+}
+
 function workspacePlugin(ws: NonNullable<BundleOptions['workspace']>): esbuild.Plugin {
   const sourceRepo = realpathSync(ws.sourceRepo);
   const versionRepo = realpathSync(ws.versionRepo);
+  // Workspace packages are resolved from this version's own tree, never through node_modules links
+  // (which point at the working copy and are junction chains on Windows).
+  const packages = workspacePackages(ws.versionRepo);
   return {
     name: 'doppeldiff-workspaces',
     setup(build) {
       build.onResolve({ filter: /^[^./]|^\.[^./]|^\.\.[^/]/ }, async (args) => {
         if (args.pluginData === 'doppeldiff-skip' || BUILTINS.has(args.path) || args.kind === 'entry-point')
           return undefined;
+        const name = packageNameOf(args.path);
+        const pkgDir = packages.get(name);
+        if (pkgDir) {
+          const sub = args.path.slice(name.length).replace(/^\//, '');
+          const target = sub ? join(pkgDir, sub) : pkgDir;
+          const w = await build.resolve(`./${relative(args.resolveDir, target).split(sep).join('/')}`, {
+            resolveDir: args.resolveDir,
+            kind: args.kind,
+            pluginData: 'doppeldiff-skip',
+          });
+          if (w.errors.length === 0 && w.path) return { path: w.path };
+        }
         const r = await build.resolve(args.path, {
           resolveDir: args.resolveDir,
           kind: args.kind,
