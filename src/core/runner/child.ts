@@ -9,7 +9,7 @@ import { encode } from './encode.js';
 import { installDeterminism, type Determinism } from './determinism.js';
 import { installNetGuard } from './netguard.js';
 import type { ChildMessage, ParentMessage, RunMessage } from './protocol.js';
-import { FN_TAG, isFnDescriptor } from './tags.js';
+import { FN_TAG, isFnDescriptor, isProtoDescriptor, isViewDescriptor, PROTO_TAG, VIEW_TAG } from './tags.js';
 
 const modules = new Map<string, Record<string, unknown>>();
 let determinism: Determinism | undefined;
@@ -36,12 +36,29 @@ function materialize(value: unknown, seen = new Set<unknown>()): unknown {
           return structuredClone(returns);
         };
   }
+  if (isProtoDescriptor(value)) {
+    const { proto, own } = value[PROTO_TAG];
+    return Object.assign(Object.create(materialize(proto, seen) as object) as object, materialize(own, seen));
+  }
+  if (isViewDescriptor(value)) {
+    const { ctor, buffer, byteOffset, length } = value[VIEW_TAG];
+    const Ctor = (
+      globalThis as unknown as Record<string, new (b: ArrayBuffer, o: number, l: number) => unknown>
+    )[ctor];
+    return Ctor ? new Ctor(buffer, byteOffset, length) : value;
+  }
   if (typeof value !== 'object' || value === null || seen.has(value)) return value;
   seen.add(value);
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i++) value[i] = materialize(value[i], seen);
   } else if (value instanceof Map) {
-    for (const [k, v] of value) value.set(k, materialize(v, seen));
+    const entries = [...value].map(([k, v]) => [materialize(k, seen), materialize(v, seen)] as const);
+    value.clear();
+    for (const [k, v] of entries) value.set(k, v);
+  } else if (value instanceof Set) {
+    const items = [...value].map((v) => materialize(v, seen));
+    value.clear();
+    for (const v of items) value.add(v);
   } else if (Object.getPrototypeOf(value) === Object.prototype) {
     const rec = value as Record<string, unknown>;
     for (const k of Object.keys(rec)) rec[k] = materialize(rec[k], seen);

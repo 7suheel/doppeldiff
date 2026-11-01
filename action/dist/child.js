@@ -2,6 +2,23 @@
 import { pathToFileURL } from "node:url";
 import vm from "node:vm";
 
+// src/core/runner/tags.ts
+var FN_TAG = "__doppeldiff_fn__";
+function isFnDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, FN_TAG);
+}
+var PROTO_TAG = "__doppeldiff_proto__";
+function isProtoDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, PROTO_TAG);
+}
+function viewBytes(v) {
+  return ArrayBuffer.isView(v) ? Array.from(new Uint8Array(v.buffer, v.byteOffset, v.byteLength)) : Array.from(new Uint8Array(v));
+}
+var VIEW_TAG = "__doppeldiff_view__";
+function isViewDescriptor(v) {
+  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, VIEW_TAG);
+}
+
 // src/core/runner/encode.ts
 var DEFAULT_LIMITS = { maxNodes: 2e4, maxDepth: 24 };
 var toStringTag = (v) => Object.prototype.toString.call(v).slice(8, -1);
@@ -81,7 +98,10 @@ function encode(value, limits = DEFAULT_LIMITS) {
       return { t: "set", items };
     }
     if (tag === "Promise") return { t: "promise" };
-    if (ArrayBuffer.isView(obj) && !(obj instanceof DataView)) {
+    if (tag === "DataView" || tag === "ArrayBuffer" || tag === "SharedArrayBuffer") {
+      return { t: "typed", ctor: tag, items: viewBytes(obj) };
+    }
+    if (ArrayBuffer.isView(obj)) {
       const arr = obj;
       return {
         t: "typed",
@@ -252,12 +272,6 @@ function installNetGuard() {
   syncBuiltinESMExports2();
 }
 
-// src/core/runner/tags.ts
-var FN_TAG = "__doppeldiff_fn__";
-function isFnDescriptor(v) {
-  return typeof v === "object" && v !== null && Object.prototype.hasOwnProperty.call(v, FN_TAG);
-}
-
 // src/core/runner/child.ts
 var modules = /* @__PURE__ */ new Map();
 var determinism;
@@ -275,12 +289,27 @@ function materialize(value, seen = /* @__PURE__ */ new Set()) {
       return structuredClone(returns);
     };
   }
+  if (isProtoDescriptor(value)) {
+    const { proto, own } = value[PROTO_TAG];
+    return Object.assign(Object.create(materialize(proto, seen)), materialize(own, seen));
+  }
+  if (isViewDescriptor(value)) {
+    const { ctor, buffer, byteOffset, length } = value[VIEW_TAG];
+    const Ctor = globalThis[ctor];
+    return Ctor ? new Ctor(buffer, byteOffset, length) : value;
+  }
   if (typeof value !== "object" || value === null || seen.has(value)) return value;
   seen.add(value);
   if (Array.isArray(value)) {
     for (let i = 0; i < value.length; i++) value[i] = materialize(value[i], seen);
   } else if (value instanceof Map) {
-    for (const [k, v] of value) value.set(k, materialize(v, seen));
+    const entries = [...value].map(([k, v]) => [materialize(k, seen), materialize(v, seen)]);
+    value.clear();
+    for (const [k, v] of entries) value.set(k, v);
+  } else if (value instanceof Set) {
+    const items = [...value].map((v) => materialize(v, seen));
+    value.clear();
+    for (const v of items) value.add(v);
   } else if (Object.getPrototypeOf(value) === Object.prototype) {
     const rec = value;
     for (const k of Object.keys(rec)) rec[k] = materialize(rec[k], seen);

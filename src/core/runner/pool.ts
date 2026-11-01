@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import type { Outcome } from '../compare/observed.js';
 import { nativeNetPermission } from './netguard.js';
 import type { ChildMessage, LoadedMessage, ParentMessage } from './protocol.js';
+import { toWire } from './tags.js';
 
 export interface PoolOptions {
   /** Number of runner processes (default: max(1, floor(cpus / 2))). */
@@ -232,7 +233,7 @@ class RunnerProcess {
             reqId,
             moduleId: job.moduleId,
             exportName: job.exportName,
-            inputs: segment,
+            inputs: segment.map((input) => input.map((a) => toWire(a))),
             timeoutMs,
             guard: this.guarded.has(guardKey),
           });

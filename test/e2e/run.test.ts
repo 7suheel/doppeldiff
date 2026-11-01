@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
+import { formatArgs } from '../../src/core/format/format.js';
 import { run, type RunResult } from '../../src/core/run.js';
 import { gitIn, makeRepo } from '../helpers/repo.js';
 import { gitScenario } from '../helpers/scenarios.js';
@@ -361,5 +362,49 @@ describe('input domains', () => {
       functions: { cmp: { where: ([a, b]) => (a as number) >= 0 && (b as number) >= 0 } },
     });
     expect(domain.functions[0]!.status).toBe('unchanged');
+  });
+});
+
+describe('generator coverage', () => {
+  it('finds a fix in a module-level regex constant (strings the two regexes disagree on)', async () => {
+    const re = (days: string) =>
+      `const ORDINAL = /^\\d{4}-(0\\d\\d|[12]\\d\\d|3([0-5]\\d|${days}))$/;\nexport function isOrdinal(s: string) { return ORDINAL.test(s); }\n`;
+    const repo = makeRepo({ 'src/o.ts': re('6[1-6]') }, { 'src/o.ts': re('6[0-6]') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 300, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    expect(f.clusters[0]!.witnesses[0]!.input[0]).toMatch(/-360$/);
+  });
+
+  it('passes DataViews with their offset and length to the code under test', async () => {
+    const clone = (args: string) =>
+      `export function clone<T>(obj: T): T {\n  if (obj instanceof DataView) return new DataView(${args}) as T;\n  return obj;\n}\n`;
+    const repo = makeRepo(
+      { 'src/c.ts': clone('obj.buffer.slice(0)') },
+      { 'src/c.ts': clone('obj.buffer.slice(0), obj.byteOffset, obj.byteLength') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 1000, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    expect(formatArgs(f.clusters[0]!.witnesses[0]!.input)).toContain('new DataView(');
+    // Deterministic: the bytes outside the window come from the generated buffer, not from the IPC message.
+    expect(f.nondeterministic).toBeUndefined();
+  });
+
+  it('passes objects with inherited enumerable properties (for...in vs Object.keys)', async () => {
+    const keys = (loop: string) =>
+      `export function keys(o: any): string[] {\n  const out: string[] = [];\n  ${loop}\n  return out;\n}\n`;
+    const repo = makeRepo(
+      { 'src/k.ts': keys('for (const k in o) out.push(k);') },
+      { 'src/k.ts': keys('for (const k of Object.keys(Object(o))) out.push(k);') },
+    );
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 1000, seed: 1 });
+    const f = r.functions[0]!;
+    expect(f.status).toBe('changed');
+    const calls = f.clusters.flatMap((c) => c.witnesses.map((w) => formatArgs(w.input)));
+    expect(calls.some((c) => c.includes('Object.create('))).toBe(true);
   });
 });

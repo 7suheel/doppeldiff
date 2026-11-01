@@ -1,11 +1,12 @@
-import { isFnDescriptor } from '../runner/tags.js';
+import { isFnDescriptor, isProtoDescriptor, PROTO_TAG } from '../runner/tags.js';
 
 /**
  * How realistic is an input? Findings on inputs that real callers pass matter more than findings on NaN, -0 or
  * lone surrogates. Tiers (higher is more realistic):
  *   3 seen      every number/string in the input appears in the project's tests or call sites
  *   2 ordinary  no exotic values, and within the domain observed in tests/call sites
- *   1 unusual   outside the observed domain (e.g. negative while every observed number is >= 0)
+ *   1 unusual   outside the observed domain (e.g. negative while every observed number is >= 0), or objects with
+ *               inherited enumerable properties
  *   0 edge      exotic values: NaN, ±Infinity, -0, huge/tiny magnitudes, lone surrogates, control or zero-width
  *               characters, invalid dates
  */
@@ -89,6 +90,16 @@ export function inputRealism(input: unknown[], ctx: RealismContext): Realism {
     if (typeof v !== 'object' || v === null || seen.has(v)) return;
     seen.add(v);
     if (isFnDescriptor(v)) return;
+    if (isProtoDescriptor(v)) {
+      consider({ tier: 1, reason: 'object with inherited enumerable properties' });
+      walk(v[PROTO_TAG].proto, depth + 1);
+      walk(v[PROTO_TAG].own, depth + 1);
+      return;
+    }
+    if (v instanceof ArrayBuffer || ArrayBuffer.isView(v)) {
+      consider({ tier: 2 });
+      return;
+    }
     if (v instanceof Date) {
       const t = v.getTime();
       if (Number.isNaN(t)) consider({ tier: 0, reason: 'Invalid Date' });

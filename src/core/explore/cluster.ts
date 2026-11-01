@@ -1,7 +1,7 @@
 import type { OutcomeDiff } from '../compare/compare.js';
 import type { Outcome } from '../compare/observed.js';
 import { outcomeCategory } from '../format/format.js';
-import { isFnDescriptor } from '../runner/tags.js';
+import { isFnDescriptor, isProtoDescriptor } from '../runner/tags.js';
 
 /**
  * A behavior difference is described by (a) the outcome transition, e.g. "returns number → returns NaN",
@@ -57,6 +57,8 @@ export function argFeature(v: unknown, thresholds: readonly number[]): string {
     case 'object':
       if (v === null) return 'null';
       if (isFnDescriptor(v)) return 'fn';
+      if (isProtoDescriptor(v)) return 'inherited{…}';
+      if (v instanceof ArrayBuffer || ArrayBuffer.isView(v)) return 'binary';
       if (Array.isArray(v)) return v.length === 0 ? 'empty[]' : '[…]';
       if (v instanceof Date) return Number.isNaN(v.getTime()) ? 'InvalidDate' : 'Date';
       if (v instanceof Map || v instanceof Set) return v.size === 0 ? 'empty' : 'nonempty';

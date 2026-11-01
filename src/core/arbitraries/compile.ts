@@ -1,6 +1,6 @@
 import fc, { type Arbitrary } from 'fast-check';
-import type { ArbSpec, SignatureSpec } from '../types/spec.js';
-import { FN_TAG, type FnDescriptor } from '../runner/tags.js';
+import type { ArbSpec, BinaryCtor, SignatureSpec } from '../types/spec.js';
+import { FN_TAG, PROTO_TAG, type FnDescriptor, type ProtoDescriptor } from '../runner/tags.js';
 import { emptyMined, type MinedValues } from './mine.js';
 import { regexArbitraries } from './regex.js';
 
@@ -112,6 +112,30 @@ function numberArb(ctx: Ctx): Arbitrary<unknown> {
 
 const regexCache = new WeakMap<object, Arbitrary<string>[]>();
 
+const sampleCache = new WeakMap<object, string[]>();
+
+/** A few short strings per code regex, as fragments: composed strings then contain format-shaped words. */
+function regexSamples(arbs: Arbitrary<string>[]): string[] {
+  let out = sampleCache.get(arbs);
+  if (!out) {
+    out = [];
+    arbs.forEach((arb, i) => {
+      try {
+        out!.push(
+          ...fc
+            .sample(arb, { numRuns: 6, seed: 7 + i })
+            .filter((x) => x.length > 0 && x.length <= 12)
+            .slice(0, 3),
+        );
+      } catch {
+        /* skip */
+      }
+    });
+    sampleCache.set(arbs, out);
+  }
+  return out;
+}
+
 function stringArb(ctx: Ctx): Arbitrary<unknown> {
   // Strings in the formats the code parses (its own regex literals), when there are any.
   let fromRegexes = regexCache.get(ctx.mined.regexes);
@@ -121,7 +145,9 @@ function stringArb(ctx: Ctx): Arbitrary<unknown> {
   }
   // Strings composed from a small shared pool of fragments (mined literals + structural characters): two
   // independently generated arguments then often share prefixes/suffixes, as paths and URLs do in real calls.
-  const fragments = [...new Set([...ctx.mined.fragments, ...STRUCTURAL_FRAGMENTS])];
+  const fragments = [
+    ...new Set([...ctx.mined.fragments, ...STRUCTURAL_FRAGMENTS, ...regexSamples(fromRegexes)]),
+  ];
   const composed = fc
     .array(fc.constantFrom(...fragments), { minLength: 1, maxLength: 5 })
     .map((xs) => xs.join(''));
@@ -136,6 +162,9 @@ function stringArb(ctx: Ctx): Arbitrary<unknown> {
       weight: 1,
     },
     ...(fromRegexes.length > 0 ? [{ arbitrary: fc.oneof(...fromRegexes), weight: 3 }] : []),
+    ...(ctx.mined.distinguishing?.length
+      ? [{ arbitrary: fc.constantFrom(...ctx.mined.distinguishing), weight: 3 }]
+      : []),
   );
   return weighted(typeDriven, ctx.mined.strings, ctx);
 }
@@ -147,6 +176,76 @@ function dateArb(ctx: Ctx): Arbitrary<unknown> {
     noInvalidDate: true,
   });
   return weighted(typeDriven, SPECIAL_DATES, { ...ctx, minedWeight: 0.2 });
+}
+
+const TYPED_ARRAYS = {
+  Uint8Array,
+  Uint8ClampedArray,
+  Int8Array,
+  Uint16Array,
+  Int16Array,
+  Uint32Array,
+  Int32Array,
+  Float32Array,
+  Float64Array,
+  BigInt64Array,
+  BigUint64Array,
+} as const;
+
+/**
+ * Typed arrays, ArrayBuffers and DataViews. Views are often windows into a larger buffer (non-zero `byteOffset`,
+ * shorter `byteLength`): code that copies `view.buffer` without the window is a classic bug.
+ */
+function binaryArb(ctor: BinaryCtor, ctx: Ctx): Arbitrary<unknown> {
+  const max = Math.max(1, ctx.maxLength);
+  const bytes = fc.uint8Array({ maxLength: max * 2 });
+  if (ctor === 'ArrayBuffer')
+    return bytes.map((b) => b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength));
+  if (ctor === 'DataView') {
+    return fc
+      .tuple(fc.uint8Array({ minLength: 0, maxLength: max * 2 }), fc.noBias(fc.nat(4)), fc.noBias(fc.nat(4)))
+      .map(([b, before, after]) => {
+        const buf = new Uint8Array(before + b.length + after);
+        buf.set(b, before);
+        return new DataView(buf.buffer, before, b.length);
+      });
+  }
+  const Ctor = TYPED_ARRAYS[ctor];
+  const size = Ctor.BYTES_PER_ELEMENT;
+  return fc
+    .tuple(
+      fc.nat(max),
+      fc.noBias(fc.nat(2)),
+      fc.noBias(fc.nat(2)),
+      fc.uint8Array({ minLength: max * size, maxLength: max * size }),
+    )
+    .map(([len, before, after, raw]) => {
+      // Elements from random bytes (covers NaN/negative values), viewed through a window of a larger buffer.
+      const buf = new ArrayBuffer((before + len + after) * size);
+      new Uint8Array(buf, before * size, len * size).set(raw.subarray(0, len * size));
+      return new Ctor(buf, before * size, len);
+    });
+}
+
+/**
+ * Objects with enumerable properties on their prototype (`Object.create({ inherited: 1 })`): `for...in` sees them,
+ * `Object.keys` does not. Sent to the runner as a descriptor (structured clone drops prototypes).
+ */
+function protoObjectArb(key: Arbitrary<string>, value: Arbitrary<unknown>): Arbitrary<unknown> {
+  const dict = (min: number) =>
+    fc.dictionary(key, value, { minKeys: min, maxKeys: 3, noNullPrototype: true });
+  return fc.tuple(dict(1), dict(0)).map(([proto, own]): ProtoDescriptor => ({ [PROTO_TAG]: { proto, own } }));
+}
+
+/** Rarer object kinds that untyped code handles specially: binary data and objects with inherited properties. */
+function zooArb(ctx: Ctx, key: Arbitrary<string>, value: Arbitrary<unknown>): Arbitrary<unknown> {
+  return fc.oneof(
+    binaryArb('Uint8Array', ctx),
+    binaryArb('Float64Array', ctx),
+    binaryArb('ArrayBuffer', ctx),
+    binaryArb('DataView', ctx),
+    protoObjectArb(key, value),
+  );
 }
 
 function anythingArb(ctx: Ctx): Arbitrary<unknown> {
@@ -179,11 +278,13 @@ function anythingArb(ctx: Ctx): Arbitrary<unknown> {
     withBoxedValues: false,
     withObjectString: false,
   });
+  const leaf = fc.oneof(numberArb(ctx), stringArb(ctx), fc.boolean());
   const mixed = fc.oneof(
-    { arbitrary: anything, weight: 2 },
-    { arbitrary: shaped, weight: 3 },
-    { arbitrary: numberArb(ctx), weight: 2 },
-    { arbitrary: stringArb(ctx), weight: 2 },
+    { arbitrary: anything, weight: 4 },
+    { arbitrary: shaped, weight: 6 },
+    { arbitrary: numberArb(ctx), weight: 4 },
+    { arbitrary: stringArb(ctx), weight: 4 },
+    { arbitrary: zooArb(ctx, key, leaf), weight: 2 },
   );
   return weighted(mixed, [...ctx.mined.numbers.slice(0, 20), ...ctx.mined.strings.slice(0, 20)], ctx);
 }
@@ -259,6 +360,8 @@ function compile(spec: ArbSpec, ctx: Ctx): Arbitrary<unknown> | null {
     }
     case 'date':
       return dateArb(ctx);
+    case 'binary':
+      return binaryArb(spec.ctor, ctx);
     case 'map': {
       const k = compile(spec.key, ctx);
       const v = compile(spec.value, ctx);

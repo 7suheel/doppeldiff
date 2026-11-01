@@ -115,3 +115,27 @@ export function reachableLocalFunctions(fn: Node, depth: number): Node[] {
   }
   return [...result];
 }
+
+/**
+ * Declarations of module-level constants (in the same file) that `nodes` reference and that are not functions:
+ * `const iso8601 = /^.../`, `const UNITS = { ms: 1, s: 1000 }`. Their literals describe the inputs the code expects.
+ */
+export function referencedModuleValues(nodes: Node[]): Node[] {
+  const result = new Set<Node>();
+  for (const node of nodes) {
+    const sf = node.getSourceFile();
+    for (const id of node.getDescendantsOfKind(SyntaxKind.Identifier)) {
+      for (const decl of id.getSymbol()?.getDeclarations() ?? []) {
+        if (decl.getSourceFile() !== sf || !Node.isVariableDeclaration(decl)) continue;
+        if (decl.getFirstAncestor((a) => Node.isFunctionLikeDeclaration(a))) continue;
+        const init = decl.getInitializer();
+        if (!init || Node.isArrowFunction(init) || Node.isFunctionExpression(init) || result.has(decl))
+          continue;
+        if (init.getText().length > 20_000) continue;
+        // The declaration, not the initializer: miners visit descendants, and a bare literal has none.
+        result.add(decl);
+      }
+    }
+  }
+  return [...result];
+}

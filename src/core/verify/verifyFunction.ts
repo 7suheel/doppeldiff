@@ -1,6 +1,13 @@
 import { mineValues, type MinedValues } from '../arbitraries/mine.js';
 import { compileSignature } from '../arbitraries/compile.js';
-import { asFunctionLike, reachableLocalFunctions, usesThis, type LocateResult } from '../analyze/locate.js';
+import {
+  asFunctionLike,
+  reachableLocalFunctions,
+  referencedModuleValues,
+  usesThis,
+  type LocateResult,
+} from '../analyze/locate.js';
+import { regexDiffStrings } from '../arbitraries/regex.js';
 import { indexModule } from '../detect/toplevel.js';
 import type { SourceFile } from 'ts-morph';
 import type { Arbitrary } from 'fast-check';
@@ -180,12 +187,14 @@ export async function verifyFunction(
   }
 
   // 3. Inputs: type-driven arbitrary biased with values mined from both versions and reachable helpers.
-  const mined = mineValues([
-    baseLoc.node,
-    headLoc.node,
-    ...reachableLocalFunctions(baseLoc.node, 3),
-    ...reachableLocalFunctions(headLoc.node, 3),
-  ]);
+  const baseNodes = [baseLoc.node, ...reachableLocalFunctions(baseLoc.node, 3)];
+  const headNodes = [headLoc.node, ...reachableLocalFunctions(headLoc.node, 3)];
+  // Module-level constants the code reads (`const iso8601 = /.../`) count too.
+  baseNodes.push(...referencedModuleValues(baseNodes));
+  headNodes.push(...referencedModuleValues(headNodes));
+  const mined = mineValues([...baseNodes, ...headNodes]);
+  // Strings on which a changed regex disagrees between the versions.
+  mined.distinguishing = regexDiffStrings(mineValues(baseNodes).regexes, mineValues(headNodes).regexes);
   // Values real callers and tests use come first: they bias generation and make findings more realistic.
   const usage = options.usage;
   if (usage) {

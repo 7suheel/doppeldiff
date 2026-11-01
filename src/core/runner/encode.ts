@@ -1,4 +1,5 @@
 import type { Enc } from '../compare/observed.js';
+import { viewBytes } from './tags.js';
 
 /**
  * Encode an arbitrary runtime value into the canonical `Enc` representation.
@@ -95,7 +96,11 @@ export function encode(value: unknown, limits: EncodeLimits = DEFAULT_LIMITS): E
       return { t: 'set', items };
     }
     if (tag === 'Promise') return { t: 'promise' };
-    if (ArrayBuffer.isView(obj) && !(obj instanceof DataView)) {
+    if (tag === 'DataView' || tag === 'ArrayBuffer' || tag === 'SharedArrayBuffer') {
+      // Bytes of the visible window: a DataView over the wrong offset/length shows different bytes.
+      return { t: 'typed', ctor: tag, items: viewBytes(obj as ArrayBuffer | DataView) };
+    }
+    if (ArrayBuffer.isView(obj)) {
       const arr = obj as unknown as ArrayLike<number | bigint>;
       return {
         t: 'typed',

@@ -1,4 +1,4 @@
-import { FN_TAG, isFnDescriptor } from '../runner/tags.js';
+import { FN_TAG, isFnDescriptor, isProtoDescriptor, PROTO_TAG, viewBytes } from '../runner/tags.js';
 
 /**
  * Deterministic string key for a generated JavaScript value. Distinguishes -0/0, NaN, undefined,
@@ -30,6 +30,10 @@ export function stableKey(value: unknown): string {
       if (isFnDescriptor(v)) return `fn->${k(v[FN_TAG].returns)}${v[FN_TAG].async ? 'a' : ''}`;
       if (Array.isArray(v)) return `[${v.map(k).join(',')}]`;
       if (v instanceof Date) return `D${v.getTime()}`;
+      if (isProtoDescriptor(v)) return `P{${k(v[PROTO_TAG].proto)}|${k(v[PROTO_TAG].own)}}`;
+      if (v instanceof ArrayBuffer) return `AB[${viewBytes(v).join(',')}]`;
+      if (ArrayBuffer.isView(v))
+        return `V:${v.constructor.name}:${v.byteOffset}:${v.byteLength}:[${viewBytes(new Uint8Array(v.buffer)).join(',')}]`;
       if (v instanceof Map) return `M{${[...v].map(([a, b]) => `${k(a)}=>${k(b)}`).join(',')}}`;
       if (v instanceof Set) return `S{${[...v].map(k).join(',')}}`;
       const proto = Object.getPrototypeOf(v) as unknown;
