@@ -4,6 +4,7 @@ import { formatArgs, formatEnc, formatOutcome } from '../format/format.js';
 import type { RunResult } from '../run.js';
 import type { FunctionResult } from '../verify/verifyFunction.js';
 import { groupBehaviors } from './behaviors.js';
+import { REALISM_NAMES } from '../explore/realism.js';
 import { analyzeClaim, helpersFromReason, ruleLabel, type RuleLabel } from '../claims/rules.js';
 import { argsToCode, encToCode } from './codegen.js';
 import {
@@ -129,6 +130,8 @@ function functionReport(f: FunctionResult): FunctionReport {
     id: `${f.id}/${i + 1}`,
     key: b.key,
     title: b.title,
+    realism: REALISM_NAMES[b.realism.tier],
+    ...(b.realism.tier < 2 && b.realism.reason ? { realismNote: b.realism.reason } : {}),
     label: 'behavior-change',
     labelSource: 'none',
     count: b.count,
@@ -149,6 +152,8 @@ function functionReport(f: FunctionResult): FunctionReport {
     failures: f.failures,
     durationMs: f.durationMs,
     seed: f.seed,
+    ...(f.usage ? { usage: f.usage } : {}),
+    ...(f.guards ? { guards: f.guards.map((g) => g.slice(0, 300)) } : {}),
     ...(f.llmInputs !== undefined ? { llmInputs: f.llmInputs } : {}),
     behaviors,
     ...(nd
@@ -169,8 +174,13 @@ export function summarize(
   skippedListed: number,
   durationMs: number,
 ): Report['summary'] {
-  const behaviors = functions.flatMap((f) => f.behaviors);
-  const unclaimed = behaviors.filter((b) => b.label === 'unclaimed' || b.label === 'suspicious').length;
+  const all = functions.flatMap((f) => f.behaviors);
+  const behaviors = all.filter((b) => b.realism !== 'edge');
+  const isUnclaimed = (b: Behavior) => b.label === 'unclaimed' || b.label === 'suspicious';
+  const unclaimed = behaviors.filter(isUnclaimed).length;
+  const unclaimedRealistic = behaviors.filter(
+    (b) => isUnclaimed(b) && (b.realism === 'seen' || b.realism === 'ordinary'),
+  ).length;
   return {
     verdict: behaviors.length === 0 ? 'no-change' : unclaimed > 0 ? 'unclaimed' : 'changes',
     functions: functions.length,
@@ -179,7 +189,9 @@ export function summarize(
     skipped: functions.filter((f) => f.status === 'skipped').length + skippedListed,
     nondeterministic: functions.filter((f) => f.status === 'nondeterministic').length,
     behaviors: behaviors.length,
+    edgeCaseBehaviors: all.length - behaviors.length,
     unclaimed,
+    unclaimedRealistic,
     inputsRun: functions.reduce((s, f) => s + f.inputsRun, 0),
     durationMs,
   };

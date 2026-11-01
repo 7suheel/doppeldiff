@@ -19,7 +19,8 @@ export type FailOn = 'unclaimed' | 'any' | 'never';
 export function exitCodeFor(report: Report, failOn: FailOn): 0 | 1 {
   if (failOn === 'never') return 0;
   if (failOn === 'any') return report.summary.behaviors > 0 ? 1 : 0;
-  return report.summary.unclaimed > 0 ? 1 : 0;
+  // Unclaimed changes on unusual or edge-case-only inputs are reported but do not fail the run.
+  return report.summary.unclaimedRealistic > 0 ? 1 : 0;
 }
 
 const list = (v: unknown): string[] | undefined => {

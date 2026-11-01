@@ -12,6 +12,11 @@ export interface FunctionConfig {
   args?: (fc: typeof fcType) => Arbitrary<unknown[]>;
   /** Extra inputs to always try first. */
   examples?: unknown[][];
+  /**
+   * Input domain: only inputs for which this returns true are generated and reported, e.g.
+   * `where: ([a, b]) => typeof a !== 'number' || a >= 0`.
+   */
+  where?: (args: unknown[]) => boolean;
   /** Do not verify this function (true or a reason). */
   skip?: boolean | string;
   runs?: number;

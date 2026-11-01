@@ -50,7 +50,9 @@ function sampleReport(claim: string | null = 'Fix discount rounding for prices o
       skipped: 0,
       nondeterministic: 0,
       behaviors: 2,
+      edgeCaseBehaviors: 0,
       unclaimed: 0,
+      unclaimedRealistic: 0,
       inputsRun: 2000,
       durationMs: 1,
     },
@@ -71,6 +73,7 @@ function sampleReport(claim: string | null = 'Fix discount rounding for prices o
             title: 'return value changed',
             label: 'behavior-change',
             labelSource: 'none',
+            realism: 'ordinary',
             count: 3,
             variants: [],
             examples: [
@@ -101,6 +104,7 @@ function sampleReport(claim: string | null = 'Fix discount rounding for prices o
             title: 'now returns NaN (previously a number)',
             label: 'behavior-change',
             labelSource: 'none',
+            realism: 'ordinary',
             count: 40,
             variants: [],
             examples: [

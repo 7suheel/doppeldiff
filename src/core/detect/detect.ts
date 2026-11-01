@@ -336,7 +336,7 @@ function relativeTo(root: string, abs: string): string {
 }
 
 /** Tracked (and, for the working tree, untracked non-ignored) files of the head version. */
-function listSourceFiles(repo: string, headSha?: string): string[] {
+export function listSourceFiles(repo: string, headSha?: string): string[] {
   const out = headSha
     ? git(['ls-tree', '-r', '--name-only', '-z', headSha], repo)
     : git(['ls-files', '--cached', '--others', '--exclude-standard', '-z'], repo);

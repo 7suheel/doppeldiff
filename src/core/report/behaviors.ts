@@ -2,6 +2,7 @@ import type { Outcome } from '../compare/observed.js';
 import type { Cluster, Witness } from '../explore/explore.js';
 import { encCategory, formatOutcome } from '../format/format.js';
 import { inputComplexity } from '../explore/humanize.js';
+import type { RealismTier } from '../explore/realism.js';
 
 /**
  * A behavior is what a reviewer reasons about: "now returns NaN where it used to return a number".
@@ -16,8 +17,10 @@ export interface Behavior {
   count: number;
   /** Fine-grained variants (transition + input region). */
   variants: { transition: string; features: string[]; count: number }[];
-  /** Up to `maxExamples` examples, simplest first, from distinct variants when possible. */
+  /** Up to `maxExamples` examples, most realistic and simplest first, from distinct variants when possible. */
   examples: Witness[];
+  /** Realism of the most realistic witness (0 edge … 3 seen) and why it is not higher. */
+  realism: { tier: RealismTier; reason?: string };
 }
 
 /** Coarse value category: numbers of any sign (including ±Infinity) are "number"; NaN stays distinct. */
@@ -103,12 +106,11 @@ export function groupBehaviors(clusters: Cluster[], maxExamples = 3): Behavior[]
   for (const [key, g] of groups) {
     const sorted = [...g.clusters].sort((x, y) => y.count - x.count);
     // Prefer simple examples that show *different* old → new outcomes; then fill with the next simplest.
-    const firsts = sorted
-      .map((c) => c.witnesses[0]!)
-      .sort((x, y) => inputComplexity(x.input) - inputComplexity(y.input));
-    const rest = sorted
-      .flatMap((c) => c.witnesses.slice(1))
-      .sort((x, y) => inputComplexity(x.input) - inputComplexity(y.input));
+    const tier = (w: Witness) => w.realism?.tier ?? 2;
+    const order = (x: Witness, y: Witness) =>
+      tier(y) - tier(x) || inputComplexity(x.input) - inputComplexity(y.input);
+    const firsts = sorted.map((c) => c.witnesses[0]!).sort(order);
+    const rest = sorted.flatMap((c) => c.witnesses.slice(1)).sort(order);
     const candidates = [...firsts, ...rest];
     const pairKey = (w: Witness) => `${formatOutcome(w.base)}\u0000${formatOutcome(w.head)}`;
     const usedPairs = new Set<string>();
@@ -123,7 +125,12 @@ export function groupBehaviors(clusters: Cluster[], maxExamples = 3): Behavior[]
       if (examples.length >= maxExamples) break;
       if (!examples.includes(w)) examples.push(w);
     }
+    const best = [...firsts, ...rest].sort(order)[0];
     behaviors.push({
+      realism: {
+        tier: best ? (tier(best) as RealismTier) : 2,
+        ...(best?.realism?.reason ? { reason: best.realism.reason } : {}),
+      },
       key,
       title: g.title,
       count: sorted.reduce((s, c) => s + c.count, 0),
@@ -131,5 +138,5 @@ export function groupBehaviors(clusters: Cluster[], maxExamples = 3): Behavior[]
       examples: examples.map((e, i) => ({ ...e, minimal: i === 0 })),
     });
   }
-  return behaviors.sort((x, y) => y.count - x.count);
+  return behaviors.sort((x, y) => y.realism.tier - x.realism.tier || y.count - x.count);
 }

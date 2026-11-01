@@ -342,3 +342,24 @@ describe('CommonJS end to end', () => {
     for (const c of f.clusters) expect(c.witnesses[0]!.input[1]).toBe(true);
   });
 });
+
+describe('input domains', () => {
+  it('honours a declared `where` domain from the config', async () => {
+    const repo = makeRepo(
+      { 'src/id.ts': 'export function cmp(a: number, b: number) { return a < b ? -1 : a > b ? 1 : 0; }' },
+      {
+        'src/id.ts':
+          'export function cmp(a: number, b: number) { return a < 0 || b < 0 ? 0 : a < b ? -1 : a > b ? 1 : 0; }',
+      },
+    );
+    cleanups.push(repo.cleanup);
+    const free = await run({ cwd: repo.root, runs: 300 });
+    expect(free.functions[0]!.status).toBe('changed');
+    const domain = await run({
+      cwd: repo.root,
+      runs: 300,
+      functions: { cmp: { where: ([a, b]) => (a as number) >= 0 && (b as number) >= 0 } },
+    });
+    expect(domain.functions[0]!.status).toBe('unchanged');
+  });
+});

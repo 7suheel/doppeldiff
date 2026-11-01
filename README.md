@@ -166,9 +166,9 @@ export default defineConfig({
   exclude: ['src/legacy/**'],
   compare: { epsilon: 1e-9 },
   functions: {
-    // Declare the real input domain when generated inputs are too broad.
-    'src/semver.ts#compareIdentifiers': {
-      args: (fc) => fc.tuple(fc.nat(), fc.nat()),
+    // Declare the real input domain when inference from tests and call sites is not enough.
+    'src/internal/identifiers.ts#compareIdentifiers': {
+      where: ([a, b]) => [a, b].every((x) => typeof x === 'string' || (Number.isInteger(x) && x >= 0)),
     },
     parseConfig: { skip: 'reads files; covered by integration tests' },
   },

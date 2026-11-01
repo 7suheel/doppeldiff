@@ -33,7 +33,7 @@ beforeAll(() => {
 });
 
 describe('CLI', () => {
-  it('honest fix: neutral behavior change, Markdown + JSON + tests, exit 0', () => {
+  it('honest fix: claimed, realistic behavior change; Markdown + JSON + tests, exit 0', () => {
     const md = join(honest.repo, 'report.md');
     const json = join(honest.repo, 'report.json');
     const r = cli(honest.repo, [
@@ -59,7 +59,10 @@ describe('CLI', () => {
       functions: 1,
       changed: 1,
     });
-    expect(report.functions[0]!.behaviors[0]!.examples[0]!.call).toBe('applyDiscount(2000, 0.07)');
+    // The PR's own test input runs first and is ranked first: its values are "seen" in the project's tests.
+    expect(report.functions[0]!.behaviors[0]!.examples[0]!.call).toBe('applyDiscount(1000.07, 0.5)');
+    expect(report.functions[0]!.behaviors[0]!.realism).toBe('seen');
+    expect(report.functions[0]!.usage!.callSites).toBeGreaterThan(0);
     // Keyless rules: "discount" in the claim names applyDiscount.
     expect(report.functions[0]!.behaviors[0]).toMatchObject({ label: 'claimed', labelSource: 'rules' });
     expect(normalizeMarkdown(readFileSync(md, 'utf8'))).toMatchSnapshot();

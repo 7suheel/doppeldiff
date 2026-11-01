@@ -49,6 +49,12 @@ export const Behavior = z.object({
   /** Where the label came from: no claim analysis, the deterministic refactor rule, or an LLM. */
   labelSource: z.enum(['none', 'rules', 'llm']),
   explanation: text(1000).optional(),
+  /**
+   * How realistic the inputs are: seen (values from tests/call sites), ordinary, unusual (outside what tests and
+   * call sites use), edge (NaN, Infinity, -0, lone surrogates, …). Edge-only behaviors are listed separately.
+   */
+  realism: z.enum(['seen', 'ordinary', 'unusual', 'edge']),
+  realismNote: text(300).optional(),
   count: z.number().int().nonnegative(),
   variants: z.array(z.object({ transition: text(), features: z.array(text(200)), count: z.number().int() })),
   examples: z.array(Example),
@@ -71,6 +77,10 @@ export const FunctionReport = z.object({
   failures: z.number().int().nonnegative(),
   durationMs: z.number().nonnegative(),
   seed: z.number().int(),
+  usage: z
+    .object({ files: z.number().int(), callSites: z.number().int(), values: z.number().int() })
+    .optional(),
+  guards: z.array(text(300)).optional(),
   /** Inputs suggested by the optional LLM step that passed type validation. */
   llmInputs: z.number().int().nonnegative().optional(),
   behaviors: z.array(Behavior),
@@ -110,14 +120,21 @@ export const Report = z.object({
     freeze: z.boolean(),
   }),
   summary: z.object({
+    /** `no-change` can still come with edge-case-only behaviors (see edgeCaseBehaviors). */
     verdict: z.enum(['no-change', 'changes', 'unclaimed']),
     functions: z.number().int(),
     changed: z.number().int(),
     unchanged: z.number().int(),
     skipped: z.number().int(),
     nondeterministic: z.number().int(),
+    /** Behavior changes on realistic or unusual inputs (edge-case-only ones excluded). */
     behaviors: z.number().int(),
+    /** Behavior changes that only occur on edge-case inputs. */
+    edgeCaseBehaviors: z.number().int(),
+    /** Unclaimed/suspicious behaviors (edge-case-only ones excluded). */
     unclaimed: z.number().int(),
+    /** Unclaimed/suspicious behaviors on seen or ordinary inputs: what `--fail-on unclaimed` counts. */
+    unclaimedRealistic: z.number().int(),
     inputsRun: z.number().int(),
     durationMs: z.number(),
   }),

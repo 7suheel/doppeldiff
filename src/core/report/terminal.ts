@@ -58,6 +58,8 @@ function behaviorLines(f: FunctionReport, b: Behavior, width: number): string[] 
     `    ${LABEL[b.label](pc.bold(b.title))} ${pc.dim(`(${n(b.count)} of ${n(f.inputsRun)} inputs)`)}`,
   ];
   if (b.explanation) lines.push(`      ${pc.dim(clip(b.explanation, width - 6))}`);
+  if (b.realism === 'unusual')
+    lines.push(`      ${pc.dim(clip(`only on unusual inputs: ${b.realismNote ?? ''}`, width - 6))}`);
   for (const ex of b.examples) {
     lines.push(`      ${clip(ex.call, width - 6)}`);
     lines.push(`        ${pc.dim('old:')} ${clip(ex.old.display, width - 14)}`);
@@ -89,7 +91,19 @@ export function renderTerminal(r: Report, width = Math.min(process.stdout.column
     out.push(
       `  ${pc.bold(f.exportName)} ${pc.dim(f.file)}${f.targetReason && f.targetReason !== 'code changed' ? pc.dim(`  (${f.targetReason})`) : ''}`,
     );
-    for (const b of f.behaviors) out.push(...behaviorLines(f, b, width));
+    for (const b of f.behaviors.filter((x) => x.realism !== 'edge')) out.push(...behaviorLines(f, b, width));
+    const edge = f.behaviors.filter((x) => x.realism === 'edge');
+    if (edge.length > 0) {
+      out.push(
+        `    ${pc.dim(
+          `edge-case inputs only (${edge
+            .map((b) => b.realismNote)
+            .filter(Boolean)
+            .join(', ')}):`,
+        )}`,
+      );
+      for (const b of edge) out.push(...behaviorLines(f, b, width).map((l) => pc.dim(l)));
+    }
     out.push('');
   }
 
@@ -130,9 +144,11 @@ export function renderTerminal(r: Report, width = Math.min(process.stdout.column
               ),
             )
           : pc.cyan(pc.bold(`${s.behaviors} behavior change${s.behaviors === 1 ? '' : 's'}`));
+  const edgeNote =
+    s.edgeCaseBehaviors > 0 ? pc.dim(` (+${s.edgeCaseBehaviors} on edge-case inputs only)`) : '';
   out.push('');
   out.push(
-    `  ${verdict}  ${pc.dim(`${n(s.inputsRun)} inputs · ${s.functions} function${s.functions === 1 ? '' : 's'} · ${secs(s.durationMs)} · seed ${r.settings.seed}`)}`,
+    `  ${verdict}${edgeNote}  ${pc.dim(`${n(s.inputsRun)} inputs · ${s.functions} function${s.functions === 1 ? '' : 's'} · ${secs(s.durationMs)} · seed ${r.settings.seed}`)}`,
   );
   out.push('');
   return out.join('\n');
