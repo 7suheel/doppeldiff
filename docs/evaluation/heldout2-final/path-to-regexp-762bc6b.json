@@ -1,0 +1,191 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "762bc6b^",
+    "sha": "b45871bb2e844d6ec05f13ddb76dceb52ac6d8c1"
+  },
+  "head": {
+    "ref": "762bc6b",
+    "sha": "762bc6b0d637874e4dba04e9d21e4ce9c4c1bcf3"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix invalid matching of `:name*` parameter (#261)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 3,
+    "changed": 1,
+    "unchanged": 2,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 3000,
+    "durationMs": 1752
+  },
+  "functions": [
+    {
+      "id": "src/index.ts#match",
+      "file": "src/index.ts",
+      "exportName": "match",
+      "signature": "match(str: string | <unsupported: built-in type `RegExp`> | (string | <unsupported: built-in type `RegExp`>)[], options?: undefined | { delimiter?: string; prefixes?: string; sensitive?: boolean; strict?: boolean; end?: boolean; start?: boolean; endsWith?: string; encode?: () => string; decode?: () => string })",
+      "status": "unchanged",
+      "targetReason": "uses changed `tokensToRegexp` (via pathToRegexp → stringToRegexp)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 534,
+      "seed": 3686800688,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 400
+      },
+      "behaviors": []
+    },
+    {
+      "id": "src/index.ts#tokensToRegexp",
+      "file": "src/index.ts",
+      "exportName": "tokensToRegexp",
+      "signature": "tokensToRegexp(tokens: (string | { name: string | number; prefix: string; suffix: string; pattern: string; modifier: string })[], keys?: undefined | { name: string | number; prefix: string; suffix: string; pattern: string; modifier: string }[], options?: { sensitive?: boolean; strict?: boolean; end?: boolean; start?: boolean; delimiter?: string; endsWith?: string; encode?: () => string } | undefined)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 454,
+      "seed": 1757345441,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 400
+      },
+      "behaviors": [
+        {
+          "id": "src/index.ts#tokensToRegexp/1",
+          "key": "throws SyntaxError: error changed",
+          "title": "still throws SyntaxError, but with a different message",
+          "realism": "seen",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 1,
+          "variants": [
+            {
+              "transition": "throws SyntaxError: message changed",
+              "features": ["[…]", "undefined", "{…}"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "tokensToRegexp([{ name: \"\", prefix: \"\", suffix: \"\", pattern: \"*\", modifier: \"*\" }], undefined, { encode: () => \"\" })",
+              "argsCode": "[{ name: \"\", prefix: \"\", suffix: \"\", pattern: \"*\", modifier: \"*\" }], undefined, { encode: () => \"\" }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /^(*)*[\\/#\\?]?$/i: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /^(*)*[\\/#\\?]?$/i: Nothing to repeat"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /^((?:*)*)[\\/#\\?]?$/i: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /^((?:*)*)[\\/#\\?]?$/i: Nothing to repeat"
+              },
+              "minimal": true
+            },
+            {
+              "call": "tokensToRegexp([{ name: \"\", prefix: \"\", suffix: \"\", pattern: \"\", modifier: \"\" }, { name: \"\", prefix: \"\", suffix: \"\", pattern: \"*\", modifier: \"*\" }, \"\"], undefined, { sensitive: true, strict: false, end: true, start: false, delimiter: \"\", endsWith: \"\", encode: () => \"\" })",
+              "argsCode": "[{ name: \"\", prefix: \"\", suffix: \"\", pattern: \"\", modifier: \"\" }, { name: \"\", prefix: \"\", suffix: \"\", pattern: \"*\", modifier: \"*\" }, \"\"], undefined, { sensitive: true, strict: false, end: true, start: false, delimiter: \"\", endsWith: \"\", encode: () => \"\" }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /(?:)(*)*[\\/#\\?]?$/: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /(?:)(*)*[\\/#\\?]?$/: Nothing to repeat"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /(?:)((?:*)*)[\\/#\\?]?$/: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /(?:)((?:*)*)[\\/#\\?]?$/: Nothing to repeat"
+              },
+              "minimal": false
+            },
+            {
+              "call": "tokensToRegexp([{ name: \"/#?\", prefix: \"/#?\", suffix: \"/\", pattern: \"*\", modifier: \"*\" }], undefined, { encode: () => \"\" })",
+              "argsCode": "[{ name: \"/#?\", prefix: \"/#?\", suffix: \"/\", pattern: \"*\", modifier: \"*\" }], undefined, { encode: () => \"\" }",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /^(*)*[\\/#\\?]?$/i: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /^(*)*[\\/#\\?]?$/i: Nothing to repeat"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws SyntaxError: Invalid regular expression: /^((?:*)*)[\\/#\\?]?$/i: Nothing to repeat",
+                "errorClass": "SyntaxError",
+                "message": "Invalid regular expression: /^((?:*)*)[\\/#\\?]?$/i: Nothing to repeat"
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "src/index.ts#pathToRegexp",
+      "file": "src/index.ts",
+      "exportName": "pathToRegexp",
+      "signature": "pathToRegexp(path: string | <unsupported: built-in type `RegExp`> | (string | <unsupported: built-in type `RegExp`>)[], keys?: undefined | { name: string | number; prefix: string; suffix: string; pattern: string; modifier: string }[], options?: undefined | { sensitive?: boolean; strict?: boolean; end?: boolean; start?: boolean; delimiter?: string; endsWith?: string; encode?: () => string; prefixes?: string })",
+      "status": "unchanged",
+      "targetReason": "uses changed `tokensToRegexp` (via stringToRegexp)",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 322,
+      "seed": 1415706068,
+      "usage": {
+        "files": 2,
+        "callSites": 13,
+        "values": 400
+      },
+      "guards": ["Array.isArray(path)"],
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1752,
+    "materializeMs": 74,
+    "dependenciesMs": 0,
+    "detectMs": 285,
+    "verifyMs": 1393
+  }
+}

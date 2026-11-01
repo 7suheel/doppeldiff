@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "54f7f3b^",
+    "sha": "a2667af367b13fe0e5cc5bc8aad176ea57160f8b"
+  },
+  "head": {
+    "ref": "54f7f3b",
+    "sha": "54f7f3b7b8df3d59a05255be1ef81208fdee1412"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "[Fix] `stringify`: do not sort the caller's `filter` array in place",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 2170
+  },
+  "functions": [
+    {
+      "id": "lib/stringify.js#default",
+      "file": "lib/stringify.js",
+      "exportName": "default",
+      "signature": "default(object: unknown, opts: unknown)",
+      "status": "unchanged",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1111,
+      "seed": 3808993718,
+      "usage": {
+        "files": 5,
+        "callSites": 60,
+        "values": 414
+      },
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2170,
+    "materializeMs": 134,
+    "dependenciesMs": 5,
+    "detectMs": 819,
+    "verifyMs": 1212
+  }
+}

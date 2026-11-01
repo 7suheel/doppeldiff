@@ -84,7 +84,48 @@ function isThenable(v: unknown): v is PromiseLike<unknown> {
 const guardContext = vm.createContext({});
 const guardScript = new vm.Script('__dd_fn(...__dd_args)');
 
+/**
+ * Built-in prototypes and their own keys at startup. Code under test can pollute them on some inputs
+ * (`set({}, "__proto__.x", 1)`); without cleanup every later call in this process would see the pollution.
+ */
+const PROTOTYPES: object[] = [
+  Object.prototype,
+  Array.prototype,
+  Function.prototype,
+  String.prototype,
+  Number.prototype,
+  Boolean.prototype,
+  Map.prototype,
+  Set.prototype,
+  Date.prototype,
+  RegExp.prototype,
+  Promise.prototype,
+  Error.prototype,
+];
+const PROTOTYPE_KEYS = PROTOTYPES.map((p) => new Set<PropertyKey>(Reflect.ownKeys(p)));
+
+function restorePrototypes(): void {
+  PROTOTYPES.forEach((proto, i) => {
+    for (const key of Reflect.ownKeys(proto)) {
+      if (!PROTOTYPE_KEYS[i]!.has(key)) Reflect.deleteProperty(proto, key);
+    }
+  });
+}
+
 async function callOnce(
+  fn: (...a: unknown[]) => unknown,
+  input: unknown[],
+  timeoutMs: number,
+  guard: boolean,
+): Promise<Outcome> {
+  try {
+    return await callInner(fn, input, timeoutMs, guard);
+  } finally {
+    restorePrototypes();
+  }
+}
+
+async function callInner(
   fn: (...a: unknown[]) => unknown,
   input: unknown[],
   timeoutMs: number,

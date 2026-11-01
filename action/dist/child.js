@@ -77,7 +77,18 @@ function encode(value, limits = DEFAULT_LIMITS) {
     const tag = toStringTag(obj);
     if (Array.isArray(obj)) {
       const items = [];
-      for (let i = 0; i < obj.length; i++) items.push(readProp(obj, String(i), depth));
+      const populated = obj.length > limits.maxNodes ? Object.keys(obj) : void 0;
+      if (populated && populated.length < limits.maxNodes) {
+        const entries2 = populated.slice(0, 20).map((k) => `${k}: ${JSON.stringify(readProp(obj, k, depth))}`);
+        return { t: "truncated", reason: `sparse array of length ${obj.length} {${entries2.join(", ")}}` };
+      }
+      for (let i = 0; i < obj.length; i++) {
+        if (nodes > limits.maxNodes) {
+          items.push({ t: "truncated", reason: `array of length ${obj.length}` });
+          break;
+        }
+        items.push(readProp(obj, String(i), depth));
+      }
       return { t: "array", items };
     }
     if (tag === "Date") return { t: "date", v: Date.prototype.getTime.call(obj) };
@@ -332,7 +343,36 @@ function isThenable(v) {
 }
 var guardContext = vm.createContext({});
 var guardScript = new vm.Script("__dd_fn(...__dd_args)");
+var PROTOTYPES = [
+  Object.prototype,
+  Array.prototype,
+  Function.prototype,
+  String.prototype,
+  Number.prototype,
+  Boolean.prototype,
+  Map.prototype,
+  Set.prototype,
+  Date.prototype,
+  RegExp.prototype,
+  Promise.prototype,
+  Error.prototype
+];
+var PROTOTYPE_KEYS = PROTOTYPES.map((p) => new Set(Reflect.ownKeys(p)));
+function restorePrototypes() {
+  PROTOTYPES.forEach((proto, i) => {
+    for (const key of Reflect.ownKeys(proto)) {
+      if (!PROTOTYPE_KEYS[i].has(key)) Reflect.deleteProperty(proto, key);
+    }
+  });
+}
 async function callOnce(fn, input, timeoutMs, guard) {
+  try {
+    return await callInner(fn, input, timeoutMs, guard);
+  } finally {
+    restorePrototypes();
+  }
+}
+async function callInner(fn, input, timeoutMs, guard) {
   const args = materialize(structuredClone(input));
   determinism?.reset();
   let result;

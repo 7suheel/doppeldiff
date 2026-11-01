@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "766dea98^",
+    "sha": "21006241cf39789e1ac4671b0f225638ca55c698"
+  },
+  "head": {
+    "ref": "766dea98",
+    "sha": "766dea98b704f119e221b8365909b44301500ae4"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix tpStartOfISOWeekYear to return `Temporal.ZonedDateTime` when possible",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 2,
+    "changed": 0,
+    "unchanged": 2,
+    "skipped": 1,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 2000,
+    "durationMs": 7841
+  },
+  "functions": [
+    {
+      "id": "pkgs/core/src/startOfISOWeekYear/index.tp.ts#tpyStartOfISOWeekYear",
+      "file": "pkgs/core/src/startOfISOWeekYear/index.tp.ts",
+      "exportName": "tpyStartOfISOWeekYear",
+      "signature": "tpyStartOfISOWeekYear(date: string | number | Date, options?: undefined | { in?: () => Date })",
+      "status": "unchanged",
+      "targetReason": "uses changed `tpStartOfISOWeekYear` from pkgs/core/src/tp/startOfISOWeekYear/index.ts",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1273,
+      "seed": 40503015,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 0
+      },
+      "behaviors": []
+    },
+    {
+      "id": "pkgs/core/src/tp/addISOWeekYears/index.ts#tpAddISOWeekYears",
+      "file": "pkgs/core/src/tp/addISOWeekYears/index.ts",
+      "exportName": "tpAddISOWeekYears",
+      "signature": "tpAddISOWeekYears(date: unknown, amount: number)",
+      "status": "unchanged",
+      "targetReason": "uses changed `tpStartOfISOWeekYear` from pkgs/core/src/tp/startOfISOWeekYear/index.ts",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 135,
+      "seed": 3601531191,
+      "usage": {
+        "files": 3,
+        "callSites": 0,
+        "values": 0
+      },
+      "behaviors": []
+    }
+  ],
+  "skipped": [
+    {
+      "id": "pkgs/core/src/tp/startOfISOWeekYear/index.ts#tpStartOfISOWeekYear",
+      "file": "pkgs/core/src/tp/startOfISOWeekYear/index.ts",
+      "exportName": "tpStartOfISOWeekYear",
+      "kind": "function",
+      "reason": "overloaded function"
+    }
+  ],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 7841,
+    "materializeMs": 385,
+    "dependenciesMs": 1,
+    "detectMs": 5984,
+    "verifyMs": 1471
+  }
+}

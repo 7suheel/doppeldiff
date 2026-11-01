@@ -1,0 +1,252 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "db70acb^",
+    "sha": "1d09eb71cc2f8488c03f730178f512d11846b14f"
+  },
+  "head": {
+    "ref": "db70acb",
+    "sha": "db70acb42f59ef8b1407d9efeac1ee3b4394e3ef"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix \"thousandsSeparator\" incorrecting formatting fractional part",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 2,
+    "changed": 2,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 2,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 2000,
+    "durationMs": 2189
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(value: string | number, options: undefined | { case: [string]; decimalPlaces: [number]; fixedDecimals: [boolean]; thousandsSeparator: [string]; unitSeparator: [string] })",
+      "status": "changed",
+      "targetReason": "uses changed `format`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1044,
+      "seed": 2354929897,
+      "usage": {
+        "files": 1,
+        "callSites": 0,
+        "values": 5
+      },
+      "guards": ["typeof value === 'string'", "typeof value === 'number'"],
+      "behaviors": [
+        {
+          "id": "index.js#default/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "ordinary",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 47,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": [">0", "{…}"],
+              "count": 31
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["<0", "{…}"],
+              "count": 16
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(1, { case: [\"\"], decimalPlaces: [5], fixedDecimals: [true], thousandsSeparator: [\"a\"], unitSeparator: [\"\"] })",
+              "argsCode": "1, { case: [\"\"], decimalPlaces: [5], fixedDecimals: [true], thousandsSeparator: [\"a\"], unitSeparator: [\"\"] }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1.00a000B\"",
+                "code": "\"1.00a000B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1.00000B\"",
+                "code": "\"1.00000B\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(-1, { case: [\"\"], decimalPlaces: [5], fixedDecimals: [true], thousandsSeparator: [\" \"], unitSeparator: [\"\"] })",
+              "argsCode": "-1, { case: [\"\"], decimalPlaces: [5], fixedDecimals: [true], thousandsSeparator: [\" \"], unitSeparator: [\"\"] }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-1.00 000B\"",
+                "code": "\"-1.00 000B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-1.00000B\"",
+                "code": "\"-1.00000B\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(1000, { case: [\"\"], decimalPlaces: [6], fixedDecimals: [true], thousandsSeparator: [\"a\"], unitSeparator: [\"\"] })",
+              "argsCode": "1000, { case: [\"\"], decimalPlaces: [6], fixedDecimals: [true], thousandsSeparator: [\"a\"], unitSeparator: [\"\"] }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1a000.000a000B\"",
+                "code": "\"1a000.000a000B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"1a000.000000B\"",
+                "code": "\"1a000.000000B\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "index.js#format",
+      "file": "index.js",
+      "exportName": "format",
+      "signature": "format(value: number, options: undefined | { decimalPlaces?: number; fixedDecimals?: number; thousandsSeparator?: string; unit?: string; unitSeparator?: string })",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 276,
+      "seed": 4139566119,
+      "usage": {
+        "files": 2,
+        "callSites": 23,
+        "values": 37
+      },
+      "guards": ["!Number.isFinite(value)"],
+      "behaviors": [
+        {
+          "id": "index.js#format/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "seen",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 62,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": [">0", "{…}"],
+              "count": 33
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["<0", "{…}"],
+              "count": 28
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["=0", "{…}"],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "format(0, { decimalPlaces: 5, fixedDecimals: 1, thousandsSeparator: \" \" })",
+              "argsCode": "0, { decimalPlaces: 5, fixedDecimals: 1, thousandsSeparator: \" \" }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0.00 000B\"",
+                "code": "\"0.00 000B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"0.00000B\"",
+                "code": "\"0.00000B\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "format(100000, { decimalPlaces: 50, thousandsSeparator: \"a\", unit: \"\", unitSeparator: \"\" })",
+              "argsCode": "100000, { decimalPlaces: 50, thousandsSeparator: \"a\", unit: \"\", unitSeparator: \"\" }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"97.65a625KB\"",
+                "code": "\"97.65a625KB\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"97.65625KB\"",
+                "code": "\"97.65625KB\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "format(-1, { decimalPlaces: 5, fixedDecimals: 1, thousandsSeparator: \"a\" })",
+              "argsCode": "-1, { decimalPlaces: 5, fixedDecimals: 1, thousandsSeparator: \"a\" }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-1.00a000B\"",
+                "code": "\"-1.00a000B\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"-1.00000B\"",
+                "code": "\"-1.00000B\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2189,
+    "materializeMs": 70,
+    "dependenciesMs": 0,
+    "detectMs": 785,
+    "verifyMs": 1334
+  }
+}

@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 6000,
-    "durationMs": 3559
+    "durationMs": 3401
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 980,
+      "durationMs": 769,
       "seed": 3007061362,
       "usage": {
         "files": 3,
@@ -70,7 +70,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 202,
+      "durationMs": 173,
       "seed": 3834644065,
       "usage": {
         "files": 3,
@@ -89,7 +89,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 453,
+      "durationMs": 488,
       "seed": 2990958073,
       "usage": {
         "files": 3,
@@ -108,7 +108,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 306,
+      "durationMs": 280,
       "seed": 1488209232,
       "usage": {
         "files": 3,
@@ -127,7 +127,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 402,
+      "durationMs": 383,
       "seed": 3873104889,
       "usage": {
         "files": 3,
@@ -146,7 +146,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 313,
+      "durationMs": 338,
       "seed": 127409958,
       "usage": {
         "files": 3,
@@ -163,10 +163,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 3559,
-    "materializeMs": 77,
-    "dependenciesMs": 0,
-    "detectMs": 785,
-    "verifyMs": 2697
+    "totalMs": 3401,
+    "materializeMs": 65,
+    "dependenciesMs": 1,
+    "detectMs": 857,
+    "verifyMs": 2478
   }
 }

@@ -37,20 +37,20 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 1000,
-    "durationMs": 1880
+    "durationMs": 2003
   },
   "functions": [
     {
       "id": "index.js#default",
       "file": "index.js",
       "exportName": "default",
-      "signature": "default(val: string | number, options: undefined | <unsupported: built-in type `Object`>)",
+      "signature": "default(val: string | number, options: undefined | unknown)",
       "status": "changed",
       "targetReason": "uses changed `parse`",
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 985,
+      "durationMs": 1251,
       "seed": 2354929897,
       "usage": {
         "files": 0,
@@ -65,28 +65,108 @@
           "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 49,
+          "count": 66,
           "variants": [
             {
               "transition": "returns undefined → returns negative number",
               "features": ["text", "undefined"],
-              "count": 33
+              "count": 17
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "text"],
+              "count": 12
             },
             {
               "transition": "returns undefined → returns positive number",
               "features": ["text", "undefined"],
-              "count": 15
+              "count": 7
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "binary"],
+              "count": 5
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "(0,100)"],
+              "count": 4
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "<0"],
+              "count": 4
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "[…]"],
+              "count": 2
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "empty"],
+              "count": 2
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", ">100"],
+              "count": 2
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "true"],
+              "count": 2
+            },
+            {
+              "transition": "returns undefined → returns positive number",
+              "features": ["text", "(0,100)"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns positive number",
+              "features": ["text", "binary"],
+              "count": 1
             },
             {
               "transition": "returns undefined → returns -0",
               "features": ["text", "undefined"],
               "count": 1
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "blank"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns positive number",
+              "features": ["text", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "empty[]"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns 0",
+              "features": ["text", "binary"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "=0"],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → returns negative number",
+              "features": ["text", "neg"],
+              "count": 1
             }
           ],
           "examples": [
             {
-              "call": "default(\"-1\", undefined)",
-              "argsCode": "\"-1\", undefined",
+              "call": "default(\"-1\", 0)",
+              "argsCode": "\"-1\", 0",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -119,8 +199,8 @@
               "minimal": false
             },
             {
-              "call": "default(\"3-9\", undefined)",
-              "argsCode": "\"3-9\", undefined",
+              "call": "default(\"-4\", -103187186644611047586730116942583462820581456459031912292828085041505n)",
+              "argsCode": "\"-4\", -103187186644611047586730116942583462820581456459031912292828085041505n",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -130,8 +210,8 @@
               "new": {
                 "kind": "return",
                 "async": false,
-                "display": "3",
-                "code": "3"
+                "display": "-4",
+                "code": "-4"
               },
               "minimal": false
             }
@@ -147,10 +227,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 1880,
-    "materializeMs": 68,
-    "dependenciesMs": 0,
-    "detectMs": 819,
-    "verifyMs": 993
+    "totalMs": 2003,
+    "materializeMs": 64,
+    "dependenciesMs": 1,
+    "detectMs": 680,
+    "verifyMs": 1258
   }
 }

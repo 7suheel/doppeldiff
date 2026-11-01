@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "5cb9c95^",
+    "sha": "deb9a2c6d2aaa2789e51411ebfcc7dd52446a2e9"
+  },
+  "head": {
+    "ref": "5cb9c95",
+    "sha": "5cb9c956e8c88f102bdbbe4b6a5c3e5613da92cd"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix fractional digit formatting when localization is disabled (#92)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 1,
+    "changed": 0,
+    "unchanged": 1,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 2765
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(number: unknown, options: unknown)",
+      "status": "unchanged",
+      "targetReason": "uses changed `toLocaleString`",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1075,
+      "seed": 2354929897,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 0
+      },
+      "guards": ["typeof number !== 'bigint' && !Number.isFinite(number)"],
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2765,
+    "materializeMs": 864,
+    "dependenciesMs": 0,
+    "detectMs": 808,
+    "verifyMs": 1093
+  }
+}

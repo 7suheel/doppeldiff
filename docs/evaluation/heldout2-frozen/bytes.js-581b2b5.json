@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "581b2b5^",
+    "sha": "1925beb7c083528de763005ce91dfdfa312d0f45"
+  },
+  "head": {
+    "ref": "581b2b5",
+    "sha": "581b2b5b96d10fe75bda7ae03ee6afab64b6abcb"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix return value for un-parsable strings",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 0,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 0,
+    "durationMs": 1710
+  },
+  "functions": [],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1710,
+    "materializeMs": 923,
+    "dependenciesMs": 0,
+    "detectMs": 787,
+    "verifyMs": 0
+  }
+}

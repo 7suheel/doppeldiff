@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "5fb69c0^",
+    "sha": "0eb37b4e285727dfc93f375e8416775f4aa26f1d"
+  },
+  "head": {
+    "ref": "5fb69c0",
+    "sha": "5fb69c04398199224c9c71ec76dcac2c9eeaf53f"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "Fix splitting plural acronyms",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "changes",
+    "functions": 1,
+    "changed": 1,
+    "unchanged": 0,
+    "skipped": 0,
+    "nondeterministic": 0,
+    "behaviors": 1,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 1000,
+    "durationMs": 1919
+  },
+  "functions": [
+    {
+      "id": "index.js#default",
+      "file": "index.js",
+      "exportName": "default",
+      "signature": "default(text: unknown, arg1?: { separator?: string; preserveConsecutiveUppercase?: boolean } | undefined)",
+      "status": "changed",
+      "targetReason": "code changed",
+      "inputsRun": 1000,
+      "stoppedBy": "runs",
+      "failures": 0,
+      "durationMs": 1051,
+      "seed": 2354929897,
+      "usage": {
+        "files": 2,
+        "callSites": 0,
+        "values": 0
+      },
+      "guards": ["text.length < 2"],
+      "behaviors": [
+        {
+          "id": "index.js#default/1",
+          "key": "returns string: value changed",
+          "title": "return value changed",
+          "realism": "ordinary",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 8,
+          "variants": [
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "{…}"],
+              "count": 8
+            }
+          ],
+          "examples": [
+            {
+              "call": "default(\"aA\", { separator: \"0\", preserveConsecutiveUppercase: true })",
+              "argsCode": "\"aA\", { separator: \"0\", preserveConsecutiveUppercase: true }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a0A\"",
+                "code": "\"a0A\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"a0a\"",
+                "code": "\"a0a\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "default(\"oİ\", { separator: \"0\", preserveConsecutiveUppercase: true })",
+              "argsCode": "\"oİ\", { separator: \"0\", preserveConsecutiveUppercase: true }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"o0İ\"",
+                "code": "\"o0İ\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"o0i̇\"",
+                "code": "\"o0i̇\""
+              },
+              "minimal": false
+            },
+            {
+              "call": "default(\"L2C\", { separator: \"\", preserveConsecutiveUppercase: true })",
+              "argsCode": "\"L2C\", { separator: \"\", preserveConsecutiveUppercase: true }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"L2C\"",
+                "code": "\"L2C\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"L2c\"",
+                "code": "\"L2c\""
+              },
+              "minimal": false
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 1919,
+    "materializeMs": 63,
+    "dependenciesMs": 0,
+    "detectMs": 793,
+    "verifyMs": 1063
+  }
+}

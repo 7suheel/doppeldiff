@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "doppeldiff",
+    "version": "0.0.0"
+  },
+  "base": {
+    "ref": "109ae60^",
+    "sha": "b2ce7f8413a187d2807acd536c7ef0f631dee252"
+  },
+  "head": {
+    "ref": "109ae60",
+    "sha": "109ae605ab830c6a36f7f5103d071b5da987f3c0"
+  },
+  "claim": {
+    "source": "flag",
+    "text": "fix: format precision values with the default locale ref:0 (#381)",
+    "refactor": false,
+    "llm": null
+  },
+  "settings": {
+    "seed": 1,
+    "runs": 1000,
+    "timeoutMs": 250,
+    "timeBudgetMs": null,
+    "freeze": true
+  },
+  "summary": {
+    "verdict": "no-change",
+    "functions": 3,
+    "changed": 0,
+    "unchanged": 0,
+    "skipped": 3,
+    "nondeterministic": 0,
+    "behaviors": 0,
+    "edgeCaseBehaviors": 0,
+    "unclaimed": 0,
+    "unclaimedRealistic": 0,
+    "inputsRun": 0,
+    "durationMs": 2585
+  },
+  "functions": [
+    {
+      "id": "src/helpers.js#handleZeroValue",
+      "file": "src/helpers.js",
+      "exportName": "handleZeroValue",
+      "signature": "handleZeroValue(precision: number, actualStandard: string, bits: boolean, symbols: <unsupported: built-in type `Object`>, full: boolean, fullforms: unknown[], output: string, spacer: string, pad: boolean, round: number, symbol: undefined | string, locale?: undefined | string | boolean, localeOptions?: undefined | <unsupported: built-in type `Object`>, separator?: undefined | string)",
+      "status": "skipped",
+      "reason": "unsupported parameter type: parameter `symbols`: built-in type `Object` (provide `args` in doppeldiff.config.ts)",
+      "targetReason": "uses changed `applyNumberFormatting`",
+      "inputsRun": 0,
+      "failures": 0,
+      "durationMs": 676,
+      "seed": 1243138757,
+      "behaviors": []
+    },
+    {
+      "id": "src/helpers.js#applyNumberFormatting",
+      "file": "src/helpers.js",
+      "exportName": "applyNumberFormatting",
+      "signature": "applyNumberFormatting(value: string | number, locale: string | boolean, localeOptions: <unsupported: built-in type `Object`>, separator: string, pad: boolean, round: number, roundingFunc: unknown)",
+      "status": "skipped",
+      "reason": "unsupported parameter type: parameter `localeOptions`: built-in type `Object` (provide `args` in doppeldiff.config.ts)",
+      "targetReason": "code changed",
+      "inputsRun": 0,
+      "failures": 0,
+      "durationMs": 11,
+      "seed": 1028428758,
+      "behaviors": []
+    },
+    {
+      "id": "src/helpers.js#decorateResult",
+      "file": "src/helpers.js",
+      "exportName": "decorateResult",
+      "signature": "decorateResult(result: unknown[], neg: boolean, symbols: <unsupported: built-in type `Object`>, locale: string | boolean, localeOptions: <unsupported: built-in type `Object`>, separator: string, pad: boolean, round: number, full: boolean, fullforms: unknown[], actualStandard: string, e: number, bits: boolean, roundingFunc: unknown)",
+      "status": "skipped",
+      "reason": "unsupported parameter type: parameter `symbols`: built-in type `Object` (provide `args` in doppeldiff.config.ts)",
+      "targetReason": "uses changed `applyNumberFormatting`",
+      "inputsRun": 0,
+      "failures": 0,
+      "durationMs": 7,
+      "seed": 2253021542,
+      "behaviors": []
+    }
+  ],
+  "skipped": [],
+  "added": [],
+  "removed": [],
+  "identical": [],
+  "errors": [],
+  "regressionTests": null,
+  "timing": {
+    "totalMs": 2585,
+    "materializeMs": 984,
+    "dependenciesMs": 0,
+    "detectMs": 801,
+    "verifyMs": 800
+  }
+}

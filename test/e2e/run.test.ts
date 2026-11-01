@@ -463,3 +463,24 @@ describe('detection and runtime edge cases', () => {
     expect(size.status).toBe('changed');
   });
 });
+
+describe('runner robustness', () => {
+  it('undoes prototype pollution between calls', async () => {
+    const poll = (tail: string) =>
+      `export function poll(k: string): unknown {\n  const before = ({} as any).polluted;\n  (Object.prototype as any).polluted = k;\n  return before${tail};\n}\n`;
+    const repo = makeRepo({ 'src/p.ts': poll('') }, { 'src/p.ts': poll(' ?? undefined') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 100, seed: 1 });
+    expect(r.functions[0]!.status).toBe('unchanged');
+  });
+
+  it('encodes huge sparse arrays without hanging', async () => {
+    const sparse = (v: string) =>
+      `export function sparse(n: number): unknown[] {\n  const a: unknown[] = [];\n  a[4294967294] = ${v};\n  return a;\n}\n`;
+    const repo = makeRepo({ 'src/s.ts': sparse('1') }, { 'src/s.ts': sparse('2') });
+    cleanups.push(repo.cleanup);
+    const r = await run({ cwd: repo.root, runs: 50, seed: 1 });
+    expect(r.functions[0]!.status).toBe('changed');
+    expect(r.functions[0]!.durationMs).toBeLessThan(20_000);
+  });
+});
