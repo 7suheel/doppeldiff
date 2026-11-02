@@ -3,7 +3,8 @@ name: Release
 # Publishes a version tag (v1.2.3) to npm, with provenance.
 # - Runs when a tag is pushed (also when GitHub creates the tag while publishing a release), or manually from the
 #   Actions tab: "Run workflow" → "Use workflow from" → Tags → the version tag. It refuses to run on a branch.
-# - Authentication: the NPM_TOKEN secret when it exists, otherwise npm trusted publishing (OIDC). See docs/RELEASING.md.
+# - Publishing: npm trusted publishing (OIDC) first. If that fails and the NPM_TOKEN secret exists, the version is
+#   staged with `npm stage publish` instead, and a maintainer approves it on npmjs.com with 2FA. See docs/RELEASING.md.
 on:
   push:
     tags: ['v*.*.*']
@@ -13,7 +14,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: npm-publish
   cancel-in-progress: false
 
 jobs:
@@ -36,8 +37,8 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org
           package-manager-cache: false # no dependency cache in release builds (npm's recommendation)
-      # Trusted publishing needs npm >= 11.5.1 (and Node >= 22.14).
-      - run: npm install -g npm@11
+      # Trusted publishing needs npm >= 11.5.1, staged publishing npm >= 11.15.0 (both Node >= 22.14).
+      - run: npm install -g npm@^11.15.0 && npm --version
       - name: Tag matches package.json version
         run: |
           version=$(node -p "require('./package.json').version")
@@ -60,22 +61,39 @@ jobs:
       - name: package.json needs no corrections
         # npm silently "auto-corrects" package.json on publish, e.g. it drops a `bin` entry written as "./dist/cli.js".
         run: |
+          set -o pipefail
           npm publish --dry-run 2>&1 | tee publish-dry-run.log
           if grep -q "auto-corrected" publish-dry-run.log; then
             echo "::error::npm would change package.json on publish (see above); run npm pkg fix"
             exit 1
           fi
-      - name: Publish
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Publish (trusted publishing)
+        id: trusted
+        continue-on-error: true
         run: |
-          if [ -n "$NPM_TOKEN" ]; then
-            echo "Authenticating with the NPM_TOKEN secret"
-            export NODE_AUTH_TOKEN="$NPM_TOKEN"
-          else
-            echo "No NPM_TOKEN secret: authenticating with npm trusted publishing (OIDC)"
-            unset NODE_AUTH_TOKEN
-            # setup-node's .npmrc refers to ${NODE_AUTH_TOKEN}; without a token npm must use OIDC only.
-            npm config delete "//registry.npmjs.org/:_authToken" --location=user || true
-          fi
+          # OIDC only: a separate user config without setup-node's token line (left intact for the fallback step).
+          unset NODE_AUTH_TOKEN
+          export NPM_CONFIG_USERCONFIG="$RUNNER_TEMP/oidc.npmrc"
+          echo "registry=https://registry.npmjs.org/" > "$NPM_CONFIG_USERCONFIG"
           npm publish --provenance --access public
+      - name: Stage with NPM_TOKEN (fallback)
+        id: staged
+        if: steps.trusted.outcome == 'failure'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -o pipefail
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::trusted publishing failed and there is no NPM_TOKEN secret to stage with"
+            exit 1
+          fi
+          if npm stage publish --provenance --access public 2>&1 | tee stage.log; then
+            :
+          elif grep -qi "provenance" stage.log && ! grep -qi "staged" stage.log; then
+            echo "::warning::staging with provenance failed; staging without provenance"
+            npm stage publish --access public
+          else
+            exit 1
+          fi
+          echo "::notice::Staged; approve it on npmjs.com (package page → Staged Packages → Approve, with 2FA)"
+          echo "Staged \`doppeldiff@${GITHUB_REF_NAME#v}\`. Approve it on npmjs.com: package page → **Staged Packages** → **Approve** (2FA)." >> "$GITHUB_STEP_SUMMARY"

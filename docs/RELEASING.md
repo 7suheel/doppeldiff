@@ -1,17 +1,28 @@
 # Releasing
 
-Releases are published to npm by [`.github/workflows/release.yml`](../.github/workflows/release.yml) when a
-version tag is created (pushing it, or publishing a GitHub release that creates it). It can also be run by hand:
-**Actions** → **Release** → **Run workflow** → **Use workflow from** → **Tags** → the version tag. It refuses to run on
-a branch, refuses a tag that does not match `package.json`, and refuses a version already on npm.
+Two workflows publish to npm:
 
-Authentication: the `NPM_TOKEN` secret if it exists, otherwise npm **trusted publishing** (OIDC). Both publish with
-a provenance statement that links the package to the commit and workflow run that built it. The goal is trusted
-publishing only: set it up below, then delete the secret.
+- [`release.yml`](../.github/workflows/release.yml) runs when a version tag is created (pushing it, or publishing a
+  GitHub release that creates it), or by hand on a tag. It publishes with npm **trusted publishing** (OIDC). If that
+  fails and the `NPM_TOKEN` secret exists, it **stages** the version with `npm stage publish` instead, and a
+  maintainer approves it on npmjs.com with 2FA.
+- [`stage-publish.yml`](../.github/workflows/stage-publish.yml) stages an existing tag by hand: **Actions** → **Stage
+  publish** → **Run workflow** → tag. It builds exactly the tagged commit. It works with a granular token that does
+  not bypass 2FA, and for a package that does not exist on npm yet (npm then shows a public `0.0.0-stage`
+  placeholder until the staged version is approved).
+
+Both refuse a tag that does not match `package.json` or a version already on npm, run the full check, and request
+a provenance statement.
+
+## Approving a staged version
+
+1. Sign in at [npmjs.com](https://www.npmjs.com) and open the `doppeldiff` package page.
+2. Open the **Staged Packages** tab and check the version (and the files, if you like).
+3. Click **Approve** and confirm with your second factor. The version is then live.
 
 ## One-time setup: npm trusted publishing
 
-The package must exist on npm first (v0.1.0 is published with a temporary `NPM_TOKEN`).
+The package must exist on npm first (v0.1.0 is staged with `NPM_TOKEN` and approved by hand).
 
 1. Sign in at [npmjs.com](https://www.npmjs.com) and open
    [npmjs.com/package/doppeldiff](https://www.npmjs.com/package/doppeldiff).
@@ -22,8 +33,9 @@ The package must exist on npm first (v0.1.0 is published with a temporary `NPM_T
    - **Repository**: `doppeldiff`
    - **Workflow filename**: `release.yml` (only the file name, not `.github/workflows/release.yml`)
    - **Environment name**: `npm` (the job runs in this GitHub environment)
-   - **Allowed actions**: tick **`npm publish`**. Trusted publishers created after September 3, 2026 only allow
-     `npm stage publish` by default, and the workflow runs `npm publish`.
+   - **Allowed actions**: tick **`npm publish`** for releases that go live without a manual step, or leave only
+     **`npm stage publish`** if every release should wait for your approval on npmjs.com. (Trusted publishers
+     created after September 3, 2026 allow only `npm stage publish` by default; `release.yml` runs `npm publish`.)
 5. Click the button that saves the trusted publisher.
 6. Still in **Settings**, under **Publishing access**, select **Require two-factor authentication and disallow
    tokens**, then click **Update Package Settings**. This does not affect trusted publishing.
@@ -33,7 +45,7 @@ The package must exist on npm first (v0.1.0 is published with a temporary `NPM_T
    - npm: avatar menu → **Access Tokens** → find the granular token → **Delete** (or open it and click **Delete
      token**).
 
-The next tag then publishes without any token. If it fails with `ENEEDAUTH` / "Unable to authenticate", one of the
+The next tag then publishes without any token (and without the staged fallback, which needs `NPM_TOKEN`). If it fails with `ENEEDAUTH` / "Unable to authenticate", one of the
 fields in step 4 does not match exactly.
 
 Optional hardening: on GitHub, **Settings** → **Environments** → **npm** → **Required reviewers** (a pushed tag then

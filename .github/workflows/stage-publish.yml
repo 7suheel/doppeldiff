@@ -1,0 +1,105 @@
+name: Stage publish
+
+# Stages an existing version tag on npm with `npm stage publish`; a maintainer then approves it on npmjs.com with 2FA.
+# Works with a granular NPM_TOKEN that does not bypass 2FA, and for a package that does not exist on npm yet.
+# Run it from the Actions tab: Stage publish → Run workflow → (branch: main) → tag, e.g. v0.1.0.
+# It builds exactly the commit the tag points to; the workflow file itself comes from main.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Version tag to stage (must already exist), e.g. v0.1.0'
+        required: true
+        default: v0.1.0
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write # provenance signature
+    env:
+      TAG: ${{ inputs.tag }}
+    steps:
+      - name: Tag name is a version
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::'$TAG' is not a version tag like v1.2.3"
+            exit 1
+          fi
+      - uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+      - name: Checked out the tagged commit
+        run: |
+          tagged=$(git rev-parse "refs/tags/$TAG^{commit}")
+          head=$(git rev-parse HEAD)
+          echo "$TAG -> $tagged, checked out $head"
+          [ "$tagged" = "$head" ] || { echo "::error::checkout is not the tagged commit"; exit 1; }
+          echo "### Staging $TAG ($head)" >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          package-manager-cache: false # no dependency cache in release builds (npm's recommendation)
+      - name: npm >= 11.15.0 (staged publishing)
+        run: |
+          npm install -g npm@^11.15.0
+          npm --version
+          node -e "const [a,b]=process.argv[1].split('.').map(Number); if (a<11||(a===11&&b<15)) process.exit(1)" "$(npm --version)"
+      - name: Tag matches package.json version
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::tag $TAG does not match package.json version $version"
+            exit 1
+          fi
+      - name: Version is not on npm yet
+        run: |
+          version=$(node -p "require('./package.json').version")
+          if npm view "doppeldiff@$version" version >/dev/null 2>&1; then
+            echo "::error::doppeldiff@$version is already on npm"
+            exit 1
+          fi
+      - run: npm ci
+      - run: npm run check
+      - run: npm run build
+      - name: action/dist is up to date
+        run: npm run build:action && git diff --exit-code -- action/dist
+      - name: package.json needs no corrections
+        # npm silently "auto-corrects" package.json on publish, e.g. it drops a `bin` entry written as "./dist/cli.js".
+        run: |
+          set -o pipefail
+          npm stage publish --dry-run --access public 2>&1 | tee stage-dry-run.log
+          if grep -q "auto-corrected" stage-dry-run.log; then
+            echo "::error::npm would change package.json on publish (see above); run npm pkg fix"
+            exit 1
+          fi
+      - name: Stage on npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          set -o pipefail
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::the NPM_TOKEN secret is not set"
+            exit 1
+          fi
+          if npm stage publish --provenance --access public 2>&1 | tee stage.log; then
+            :
+          elif grep -qi "provenance" stage.log && ! grep -qi "staged" stage.log; then
+            echo "::warning::staging with provenance failed; staging without provenance"
+            npm stage publish --access public
+          else
+            exit 1
+          fi
+          {
+            echo "Staged \`doppeldiff@${TAG#v}\`. Approve it on npmjs.com: package page → **Staged Packages** → **Approve** (2FA)."
+          } >> "$GITHUB_STEP_SUMMARY"
