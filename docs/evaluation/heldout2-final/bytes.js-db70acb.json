@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "doppeldiff",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "base": {
     "ref": "db70acb^",
@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 2000,
-    "durationMs": 2420
+    "durationMs": 2409
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1204,
+      "durationMs": 1214,
       "seed": 2354929897,
       "usage": {
         "files": 1,
@@ -145,7 +145,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 379,
+      "durationMs": 403,
       "seed": 4139566119,
       "usage": {
         "files": 2,
@@ -243,10 +243,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2420,
-    "materializeMs": 67,
+    "totalMs": 2409,
+    "materializeMs": 57,
     "dependenciesMs": 1,
-    "detectMs": 754,
-    "verifyMs": 1598
+    "detectMs": 715,
+    "verifyMs": 1635
   }
 }

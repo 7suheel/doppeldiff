@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "doppeldiff",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "base": {
     "ref": "4cab190^",
@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 4000,
-    "durationMs": 2437
+    "durationMs": 2580
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 532,
+      "durationMs": 665,
       "seed": 1044542413,
       "usage": {
         "files": 6,
@@ -141,7 +141,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 381,
+      "durationMs": 325,
       "seed": 319641992,
       "usage": {
         "files": 10,
@@ -237,7 +237,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 211,
+      "durationMs": 208,
       "seed": 1696643510,
       "usage": {
         "files": 10,
@@ -316,7 +316,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 186,
+      "durationMs": 179,
       "seed": 1436177815,
       "usage": {
         "files": 6,
@@ -420,10 +420,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 2437,
-    "materializeMs": 60,
-    "dependenciesMs": 1,
-    "detectMs": 871,
-    "verifyMs": 1505
+    "totalMs": 2580,
+    "materializeMs": 94,
+    "dependenciesMs": 0,
+    "detectMs": 892,
+    "verifyMs": 1594
   }
 }

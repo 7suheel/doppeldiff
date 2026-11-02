@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "doppeldiff",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "base": {
     "ref": "e583226^",
@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 0,
-    "durationMs": 1197
+    "durationMs": 1126
   },
   "functions": [],
   "skipped": [
@@ -55,10 +55,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 1197,
-    "materializeMs": 219,
+    "totalMs": 1126,
+    "materializeMs": 87,
     "dependenciesMs": 0,
-    "detectMs": 978,
+    "detectMs": 1038,
     "verifyMs": 0
   }
 }

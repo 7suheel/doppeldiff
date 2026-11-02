@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "doppeldiff",
-    "version": "0.1.0"
+    "version": "0.1.1"
   },
   "base": {
     "ref": "109ae60^",
@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 5000,
-    "durationMs": 8224
+    "durationMs": 8002
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1179,
+      "durationMs": 1165,
       "seed": 1243138757,
       "usage": {
         "files": 7,
@@ -69,7 +69,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1493,
+      "durationMs": 1566,
       "seed": 1028428758,
       "usage": {
         "files": 6,
@@ -340,7 +340,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 3677,
+      "durationMs": 3443,
       "seed": 2253021542,
       "usage": {
         "files": 7,
@@ -1148,7 +1148,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 252,
+      "durationMs": 260,
       "seed": 435064967,
       "usage": {
         "files": 15,
@@ -1167,7 +1167,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 253,
+      "durationMs": 239,
       "seed": 3163464905,
       "usage": {
         "files": 11,
@@ -1184,10 +1184,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 8224,
-    "materializeMs": 78,
-    "dependenciesMs": 0,
-    "detectMs": 1041,
-    "verifyMs": 7105
+    "totalMs": 8002,
+    "materializeMs": 134,
+    "dependenciesMs": 1,
+    "detectMs": 949,
+    "verifyMs": 6918
   }
 }
