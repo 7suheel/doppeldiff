@@ -40,7 +40,8 @@ asked to look for that, and no test covered it. The same comment flags a second 
 
 **See it live:** [doppeldiff-playground#1](https://github.com/7suheel/doppeldiff-playground/pull/1) is a small
 repository set up exactly as described below, with an open "pure refactor" PR. Its tests pass, and doppeldiff's
-comment shows `splitBill(10, 4)` returning `[3, 3, 3, 3]` instead of `[3, 3, 2, 2]`.
+comment leads with `splitBill(3, 4)`: the old code returned `[1, 1, 1, 0]` and the new code returns `[1, 1, 1, 1]`,
+so the shares no longer add up to the bill.
 
 ## What doppeldiff is good at, and what it is not good at yet
 
@@ -114,11 +115,11 @@ a regression test for you.
 The [`examples/demo-shop`](examples/demo-shop) library ships with three pull requests. All three pass the existing
 test suite.
 
-| PR                                                            | What doppeldiff says                                                                                                                                                                                                      |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Honest fix**: "Fix discount rounding for prices over $1000" | One behavior change, only for prices above 1000: `applyDiscount(2000, 0.07)` was `1859.99`, now `1860`.                                                                                                                   |
-| **"AI refactor"**: "Pure refactor, no behavior change"        | ⚠️ 3 unclaimed changes: negative totals are now clamped to `0`, `cartTotal` returns `NaN` for zero-quantity items with a non-finite price, and `slugify("é")` was `"e"` and is now `""`. `itemCount` really is unchanged. |
-| **Pure refactor**: "No behavior change intended"              | ✅ No behavior change in 4 functions across 3,242 inputs. The report notes that `addBusinessDays` stopped early (242 inputs) because huge `days` values make both versions loop past the timeout.                         |
+| PR                                                            | What doppeldiff says                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Honest fix**: "Fix discount rounding for prices over $1000" | One behavior change, only for prices above 1000: `applyDiscount(2000, 0.07)` was `1859.99`, now `1860`.                                                                                                                                                                                      |
+| **"AI refactor"**: "Pure refactor, no behavior change"        | ⚠️ Unclaimed changes: `slugify("é")` was `"e"` and is now `""`; negative cart totals are now clamped to `0` (flagged as unusual inputs, since the tests only use prices ≥ 0); `cartTotal` returns `NaN` for a non-finite price (collapsed as an edge case). `itemCount` really is unchanged. |
+| **Pure refactor**: "No behavior change intended"              | ✅ No behavior change in 4 functions across 4,000 inputs. A collapsed note says that `addBusinessDays` timed out on 2 edge-case inputs (huge `days`); similar inputs were skipped and exploration continued.                                                                                 |
 
 Try it: `node examples/demo-shop/try.mjs ai-refactor` creates a scenario repository and prints the command.
 
@@ -246,15 +247,22 @@ v1 is deliberately narrow. Known gaps:
 - **Pure-ish code.** Functions that read files, call the network or depend on global state either fail in the
   sandbox or are reported as nondeterministic. They are not mocked.
 - **Generated inputs are not a proof.** "No behavior change across 10,000 inputs" is strong evidence, not a
-  guarantee. Bugs that need a very specific input (a valid ISO ordinal date, prototype-chain objects, `DataView`)
-  can be missed; see the [misses in the evaluation](docs/EVALUATION.md#why-the-misses-happen). Optional LLM input
-  suggestions help with some of these.
-- **Input domain.** Generators follow the types, not the documentation. A function that is only ever called with
-  non-negative numbers may report differences for negative ones. Declare the domain in the config (`args`).
+  guarantee. Bugs that need several specific conditions at once (an option combination plus a particular kind of
+  text), a real callback such as a sort comparator, or global state can be missed; see the
+  [misses in the evaluation](docs/EVALUATION.md#why-the-misses-happen). Optional LLM input suggestions help with
+  some of these.
+- **Input domain.** Generators follow the types, not the documentation. Differences that only happen on inputs
+  unlike those in the project's tests and call sites (negative numbers when they only use non-negative ones) are
+  flagged as unusual, and edge cases (NaN, huge numbers, lone surrogates) are collapsed, but they are still
+  reported. To exclude inputs, declare the domain in the config with `where` (as in the example above), or
+  replace the generator with `args`.
 - **Signature changes.** If the parameter types change incompatibly, the old and new versions cannot receive
   the same inputs, so the function is reported as skipped.
-- **Slow paths.** Functions that loop for a long time on large inputs hit the per-call timeout. Exploration stops
-  after 20 such inputs, and the report says how many inputs actually ran.
+- **Slow paths.** Counts, lengths and loop bounds are generated mostly in realistic ranges, but a function can
+  still hit the per-call timeout (250 ms). Timeouts on edge-case inputs are noted in the collapsed section and
+  similar inputs are skipped; exploration continues. If ordinary inputs keep timing out (20 of them, each
+  re-checked with a 4x longer limit), exploration of that function stops, and the report says how many inputs
+  actually ran.
 - **The sandbox is a guardrail, not a security boundary.** The code under test runs with the Node.js permission
   model, no network and a scrubbed environment, but you should only run doppeldiff on code you would run tests
   for. See [SECURITY.md](SECURITY.md).

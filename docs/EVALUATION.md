@@ -235,15 +235,18 @@ program was rebuilt once per analyzed file. It now takes 2.7 s.
 
 ## Performance
 
-| Run                                                                                  | Wall time | Breakdown                                                                                             |
-| ------------------------------------------------------------------------------------ | --------- | ----------------------------------------------------------------------------------------------------- |
-| Real commits above (1,000 inputs/function)                                           | 0.5–8 s   | detection 0.5–6 s, verification 0.2–4 s                                                               |
-| Demo AI refactor, Action settings (10,000 inputs/function, 60 s budget), 3 functions | 6.3 s     | verification 4.7 s                                                                                    |
-| Demo pure refactor, Action settings, 4 functions                                     | 7.4 s     | `addBusinessDays` stopped after 242 inputs because of repeated timeouts on huge `days` values (5.0 s) |
+| Run                                                                                                              | Wall time | Breakdown                                                                                                                                       |
+| ---------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Real commits above (1,000 inputs/function)                                                                       | 0.5–8 s   | detection 0.5–6 s, verification 0.2–4 s                                                                                                         |
+| Demo AI refactor, Action settings (10,000 inputs/function, 60 s budget), 3 functions                             | 9.4 s     | verification 7.8 s, every function at 10,000 inputs                                                                                             |
+| Demo pure refactor, Action settings, 4 functions                                                                 | 6.7 s     | verification 5.2 s, every function at 10,000 inputs; `addBusinessDays` timed out on 2 edge-case inputs (huge `days`), similar ones were skipped |
+| [Playground PR](https://github.com/7suheel/doppeldiff-playground/pull/1) on GitHub Actions (v0.1.1), 5 functions | 19 s job  | analysis 8.1 s (55 s with v0.1.0, which stopped one function at 242 inputs); the action step including its install took 14 s                    |
 
-Measured on a 4-CPU Linux container, Node 22. GitHub Actions additionally spends about 10–20 s on
-`npm ci --omit=dev` for the action itself (not included above). The budget of < 60 s for ≤ 10 functions holds
-with a wide margin on these examples; functions that loop for a long time on large inputs are the main risk.
+Measured on a 4-CPU Linux container, Node 22 (the playground row on GitHub's `ubuntu-latest`). GitHub Actions
+additionally spends a few seconds on `npm ci --omit=dev` for the action itself (not included in the local rows).
+The budget of < 60 s for ≤ 10 functions holds with a wide margin on these examples. Functions that loop for a long
+time on ordinary inputs are the main risk; since v0.1.1, counts and loop bounds are generated mostly in realistic
+ranges, and timeouts on edge-case inputs no longer stop exploration.
 
 ## Not evaluated
 
