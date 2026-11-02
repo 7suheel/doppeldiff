@@ -1,8 +1,7 @@
 name: Release
 
 # Publishes to npm when a version tag (v1.2.3) is pushed, with npm provenance.
-# Authentication: npm trusted publishing (OIDC, no token). See docs/RELEASING.md for the one-time setup;
-# the very first publish of a new package name needs an npm token or a manual publish.
+# Authentication: npm trusted publishing (OIDC, no token). See docs/RELEASING.md.
 on:
   push:
     tags: ['v*.*.*']
@@ -23,8 +22,8 @@ jobs:
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
-          cache: npm
-      # Trusted publishing needs npm >= 11.5.1.
+          package-manager-cache: false # no dependency cache in release builds (npm's recommendation)
+      # Trusted publishing needs npm >= 11.5.1 (and Node >= 22.14).
       - run: npm install -g npm@11
       - name: Tag matches package.json version
         run: |
@@ -39,8 +38,6 @@ jobs:
       - name: action/dist is up to date
         run: npm run build:action && git diff --exit-code -- action/dist
       - name: Publish
-        # With trusted publishing configured, no token is needed. NPM_TOKEN is only a fallback for the first
-        # publish of a new package; remove the secret once trusted publishing is set up.
+        # Authenticated by npm trusted publishing (OIDC): no token. npm must list this repository, release.yml and
+        # the `npm` environment as the package's trusted publisher (docs/RELEASING.md).
         run: npm publish --provenance --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
