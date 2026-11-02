@@ -32,6 +32,13 @@ commits before the noise work), `results/` (first 21, current version), `heldout
 
 ## Headline numbers
 
+**v0.1.1 re-run:** all 39 commits were re-run after the v0.1.1 changes (realistic sizes, timeouts that do not stop
+exploration, compact values). For every function, the status (changed / unchanged / not verified) and the number
+of behaviors are the same as before, and so is the realism grouping that decides the main list. One filesize
+behavior now leads with an "ordinary" example instead of a "seen" one. Detection and precision are therefore
+unchanged. Run times varied within machine noise. The raw reports in `results/` and `heldout2-final/` are from
+this re-run.
+
 |                                                                            | Commits | Behavioral bug fixes found       | Not verifiable (out of v1 scope) |
 | -------------------------------------------------------------------------- | ------- | -------------------------------- | -------------------------------- |
 | Tuning set, before tuning                                                  | 8       | 2 of 7                           | 0                                |

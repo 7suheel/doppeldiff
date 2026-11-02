@@ -18,4 +18,4 @@ jobs:
       actions: read
       pull-requests: write
     steps:
-      - uses: 7suheel/doppeldiff@v0.1.0
+      - uses: 7suheel/doppeldiff@v0.1.1

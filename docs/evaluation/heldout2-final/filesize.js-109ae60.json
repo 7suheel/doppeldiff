@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "tool": {
     "name": "doppeldiff",
-    "version": "0.0.0"
+    "version": "0.1.0"
   },
   "base": {
     "ref": "109ae60^",
@@ -37,7 +37,7 @@
     "unclaimed": 0,
     "unclaimedRealistic": 0,
     "inputsRun": 5000,
-    "durationMs": 7025
+    "durationMs": 8224
   },
   "functions": [
     {
@@ -50,7 +50,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1077,
+      "durationMs": 1179,
       "seed": 1243138757,
       "usage": {
         "files": 7,
@@ -69,7 +69,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 1355,
+      "durationMs": 1493,
       "seed": 1028428758,
       "usage": {
         "files": 6,
@@ -84,22 +84,12 @@
           "realism": "seen",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 36,
+          "count": 42,
           "variants": [
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", ">0", "text", "true", "<0", "text"],
-              "count": 3
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", "{…}", "text", "false", ">0", "text"],
-              "count": 3
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", ">0", "text", "true", "<0", ">0"],
-              "count": 3
+              "features": ["text", "true", "text", "text", "true", ">0", "text"],
+              "count": 8
             },
             {
               "transition": "returns string: value changed",
@@ -108,32 +98,27 @@
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "text", "text", "true", ">0", ">0"],
+              "features": ["text", "true", "[…]", "text", "false", ">0", ">0"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "text", "text", "false", ">0", ">0"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", ">0", "text", "true", ">0", "text"],
+              "count": 3
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "<0", "text", "false", ">0", "text"],
               "count": 2
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", ">0", "text", "false", "<0", "text"],
-              "count": 2
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", "binary", "text", "false", "<0", ">0"],
-              "count": 2
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", ">0", "text", "true", ">0", ">0"],
-              "count": 2
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", "{…}", "text", "true", "<0", "binary"],
-              "count": 2
-            },
-            {
-              "transition": "returns string: value changed",
-              "features": ["text", "true", "text", "text", "true", ">0", "text"],
+              "features": ["text", "true", "blank", "text", "true", ">0", "{…}"],
               "count": 2
             },
             {
@@ -148,27 +133,42 @@
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "{}", "text", "false", "<0", "binary"],
+              "features": ["text", "true", ">0", "text", "true", ">0", "Date"],
+              "count": 2
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "{…}", "text", "false", ">0", "text"],
               "count": 1
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "{}", "text", "true", "<0", ">0"],
+              "features": ["text", "true", "{…}", "text", "false", ">0", "{…}"],
               "count": 1
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "{…}", "text", "false", "<0", "{…}"],
+              "features": ["text", "true", "nonempty", "text", "false", "<0", "blank"],
               "count": 1
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "binary", "text", "true", "<0", "text"],
+              "features": ["text", "true", ">0", "empty", "false", "-Inf", "<0"],
               "count": 1
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "{…}", "text", "false", ">0", ">0"],
+              "features": ["text", "true", ">0", "text", "true", "=0", "text"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "text", "text", "true", ">0", ">0"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", ">0", "text", "true", "=0", "undefined"],
               "count": 1
             },
             {
@@ -178,19 +178,46 @@
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", ">0", "text", "true", "=0", ">0"],
+              "features": ["text", "true", "<0", "text", "true", ">0", ">0"],
               "count": 1
             },
             {
               "transition": "returns string: value changed",
-              "features": ["text", "true", "text", "text", "false", ">0", ">0"],
+              "features": ["text", "true", "text", "text", "false", "=0", "neg"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "{…}", "text", "true", ">0", ">0"],
+              "count": 1
+            },
+            {
+              "transition": "returns string: value changed",
+              "features": ["text", "true", "inherited{…}", "text", "true", ">0", "text"],
               "count": 1
             }
           ],
           "examples": [
             {
-              "call": "applyNumberFormatting(\"string\", true, { \"\": {} }, \"string\", false, 1, 8)",
-              "argsCode": "\"string\", true, { \"\": {} }, \"string\", false, 1, 8",
+              "call": "applyNumberFormatting(\"si\", true, \" \", \"si\", true, 1, { \"\": -1 })",
+              "argsCode": "\"si\", true, \" \", \"si\", true, 1, { \"\": -1 }",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"si\"",
+                "code": "\"si\""
+              },
+              "new": {
+                "kind": "return",
+                "async": false,
+                "display": "\"NaN\"",
+                "code": "\"NaN\""
+              },
+              "minimal": true
+            },
+            {
+              "call": "applyNumberFormatting(\"string\", true, [[]], \"string\", false, 5, \"Bytes\")",
+              "argsCode": "\"string\", true, [[]], \"string\", false, 5, \"Bytes\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -203,33 +230,16 @@
                 "display": "\"NaN\"",
                 "code": "\"NaN\""
               },
-              "minimal": true
+              "minimal": false
             },
             {
-              "call": "applyNumberFormatting(\"a\", true, 1, \"a\", true, 0, 1)",
-              "argsCode": "\"a\", true, 1, \"a\", true, 0, 1",
+              "call": "applyNumberFormatting(\"a\", true, { toLocaleString: false }, \"a\", false, 1, { \"\": 0n })",
+              "argsCode": "\"a\", true, { toLocaleString: false }, \"a\", false, 1, { \"\": 0n }",
               "old": {
                 "kind": "return",
                 "async": false,
                 "display": "\"a\"",
                 "code": "\"a\""
-              },
-              "new": {
-                "kind": "return",
-                "async": false,
-                "display": "\"NaN\"",
-                "code": "\"NaN\""
-              },
-              "minimal": false
-            },
-            {
-              "call": "applyNumberFormatting(\"n\", true, 1, \"a\", true, 0, 1)",
-              "argsCode": "\"n\", true, 1, \"a\", true, 0, 1",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"n\"",
-                "code": "\"n\""
               },
               "new": {
                 "kind": "return",
@@ -245,54 +255,26 @@
           "id": "src/helpers.js#applyNumberFormatting/2",
           "key": "returns string → throws RangeError",
           "title": "now throws RangeError (previously returned a string)",
-          "realism": "seen",
+          "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 4,
+          "count": 3,
           "variants": [
             {
               "transition": "returns string → throws RangeError",
-              "features": ["text", "true", ">0", "text", "true", ">0", "empty"],
-              "count": 1
+              "features": ["text", "true", ">0", "text", "true", ">0", "text"],
+              "count": 2
             },
             {
               "transition": "returns string → throws RangeError",
-              "features": ["text", "true", "text", "text", "true", ">0", "<0"],
-              "count": 1
-            },
-            {
-              "transition": "returns string → throws RangeError",
-              "features": ["text", "true", "<0", "text", "true", ">0", "[…]"],
-              "count": 1
-            },
-            {
-              "transition": "returns string → throws RangeError",
-              "features": ["text", "true", "Date", "text", "true", ">0", "text"],
+              "features": ["text", "true", "<0", "text", "true", ">0", "undefined"],
               "count": 1
             }
           ],
           "examples": [
             {
-              "call": "applyNumberFormatting(\"si\", true, 1234.5678, \"si\", true, 101, new Set([]))",
-              "argsCode": "\"si\", true, 1234.5678, \"si\", true, 101, new Set([])",
-              "old": {
-                "kind": "return",
-                "async": false,
-                "display": "\"si\"",
-                "code": "\"si\""
-              },
-              "new": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws RangeError: minimumFractionDigits value is out of range.",
-                "errorClass": "RangeError",
-                "message": "minimumFractionDigits value is out of range."
-              },
-              "minimal": true
-            },
-            {
-              "call": "applyNumberFormatting(\"a\", true, -1, \"a\", true, 200, [\"\", false])",
-              "argsCode": "\"a\", true, -1, \"a\", true, 200, [\"\", false]",
+              "call": "applyNumberFormatting(\"a\", true, 1, \"a\", true, 200, \"a\")",
+              "argsCode": "\"a\", true, 1, \"a\", true, 200, \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -306,16 +288,34 @@
                 "errorClass": "RangeError",
                 "message": "minimumFractionDigits value is out of range."
               },
-              "minimal": false
+              "minimal": true
             },
             {
-              "call": "applyNumberFormatting(\".\", true, -1, \"string\", true, 100.01, [\"\", false])",
-              "argsCode": "\".\", true, -1, \"string\", true, 100.01, [\"\", false]",
+              "call": "applyNumberFormatting(\"string\", true, 0.01, \"string\", true, 101, \"number\")",
+              "argsCode": "\"string\", true, 0.01, \"string\", true, 101, \"number\"",
               "old": {
                 "kind": "return",
                 "async": false,
-                "display": "\".\"",
-                "code": "\".\""
+                "display": "\"string\"",
+                "code": "\"string\""
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws RangeError: minimumFractionDigits value is out of range.",
+                "errorClass": "RangeError",
+                "message": "minimumFractionDigits value is out of range."
+              },
+              "minimal": false
+            },
+            {
+              "call": "applyNumberFormatting(\"si\", true, -1.4947902726e-314, \"\\udfff\", true, 647, undefined)",
+              "argsCode": "\"si\", true, -1.4947902726e-314, \"\\udfff\", true, 647, undefined",
+              "old": {
+                "kind": "return",
+                "async": false,
+                "display": "\"si\"",
+                "code": "\"si\""
               },
               "new": {
                 "kind": "throw",
@@ -340,7 +340,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 2960,
+      "durationMs": 3677,
       "seed": 2253021542,
       "usage": {
         "files": 7,
@@ -350,35 +350,155 @@
       "behaviors": [
         {
           "id": "src/helpers.js#decorateResult/1",
-          "key": "returns undefined: mutates argument 0 differently",
+          "key": "throws TypeError: mutates argument 0 differently",
           "title": "mutates argument 1 differently",
           "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 12,
+          "count": 10,
           "variants": [
             {
-              "transition": "returns undefined: argument 0 mutated differently",
+              "transition": "throws TypeError: argument 0 mutated differently",
               "features": [
                 "[…]",
                 "true",
-                "text",
-                "true",
-                ">1",
-                "text",
-                "true",
-                ">1",
-                "false",
                 "[…]",
-                "text",
-                "(0,1)",
                 "true",
-                "text"
+                "<0",
+                "text",
+                "false",
+                "<0",
+                "true",
+                "empty[]",
+                "text",
+                ">1",
+                "true",
+                ">1"
               ],
               "count": 1
             },
             {
-              "transition": "returns undefined: argument 0 mutated differently",
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "true",
+                "blank",
+                "text",
+                "false",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "nonempty"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                "inherited{…}",
+                "true",
+                "empty[]",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                ">1",
+                "true",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "false",
+                "{}",
+                "true",
+                ">1",
+                "text",
+                "true",
+                "(0,1)",
+                "true",
+                "[…]",
+                "text",
+                "NaN",
+                "true",
+                "(0,1)"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "false",
+                ">1",
+                "true",
+                "text",
+                "text",
+                "false",
+                "(0,1)",
+                "true",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "empty"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "false",
+                "<0",
+                "true",
+                ">1",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "<0",
+                "false",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "true",
+                "empty[]",
+                "text",
+                "false",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                ">1",
+                "true",
+                "null"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
               "features": [
                 "[…]",
                 "false",
@@ -387,13 +507,161 @@
                 "text",
                 "text",
                 "false",
-                "<0",
+                "+Inf",
+                "true",
+                "empty[]",
+                "text",
+                "=0",
+                "true",
+                ">1"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                "text",
+                "true",
+                "(0,1)",
+                "text",
                 "false",
+                ">1",
+                "true",
                 "[…]",
                 "text",
                 ">1",
                 "false",
-                ">1"
+                "text"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "throws TypeError: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "true",
+                "[…]",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "empty[]",
+                "text",
+                ">1",
+                "true",
+                "[…]"
+              ],
+              "count": 1
+            }
+          ],
+          "examples": [
+            {
+              "call": "decorateResult([\"\"], true, 2, true, [false], \"a\", true, -1, true, [], \"a\", 3, true, [0])",
+              "argsCode": "[\"\"], true, 2, true, [false], \"a\", true, -1, true, [], \"a\", 3, true, [0]",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '3')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '3')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '3')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '3')"
+              },
+              "minimal": true,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"-\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"\"], true, [[]], true, -1, \"a\", false, -1, true, [], \"a\", 5, true, 2)",
+              "argsCode": "[\"\"], true, [[]], true, -1, \"a\", false, -1, true, [], \"a\", 5, true, 2",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '5')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '5')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '5')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '5')"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"-\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            },
+            {
+              "call": "decorateResult([\"a\"], false, 2, true, \"a\", \"a\", false, 0.1, true, [0], \"a\", 10, false, new Map([]))",
+              "argsCode": "[\"a\"], false, 2, true, \"a\", \"a\", false, 0.1, true, [0], \"a\", 10, false, new Map([])",
+              "old": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '10')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '10')"
+              },
+              "new": {
+                "kind": "throw",
+                "async": false,
+                "display": "throws TypeError: Cannot read properties of undefined (reading '10')",
+                "errorClass": "TypeError",
+                "message": "Cannot read properties of undefined (reading '10')"
+              },
+              "minimal": false,
+              "mutation": {
+                "argIndex": 0,
+                "old": "[\"a\"]",
+                "new": "[\"NaN\"]",
+                "newCode": "[\"NaN\"]"
+              }
+            }
+          ]
+        },
+        {
+          "id": "src/helpers.js#decorateResult/2",
+          "key": "returns undefined: mutates argument 0 differently",
+          "title": "mutates argument 1 differently",
+          "realism": "ordinary",
+          "label": "behavior-change",
+          "labelSource": "none",
+          "count": 8,
+          "variants": [
+            {
+              "transition": "returns undefined: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                ">1",
+                "true",
+                ">1",
+                "text",
+                "true",
+                "<0",
+                "true",
+                "[…]",
+                "text",
+                "=0",
+                "false",
+                "(0,1)"
               ],
               "count": 1
             },
@@ -401,18 +669,18 @@
               "transition": "returns undefined: argument 0 mutated differently",
               "features": [
                 "[…]",
-                "true",
-                "text",
+                "false",
+                ">1",
                 "true",
                 "text",
                 "text",
                 "false",
-                "(0,1)",
+                ">1",
                 "false",
                 "[…]",
                 "text",
                 ">1",
-                "true",
+                "false",
                 "text"
               ],
               "count": 1
@@ -431,7 +699,7 @@
                 "false",
                 "[…]",
                 "text",
-                "<0",
+                ">1",
                 "true",
                 "nonempty"
               ],
@@ -441,98 +709,18 @@
               "transition": "returns undefined: argument 0 mutated differently",
               "features": [
                 "[…]",
-                "false",
-                "[…]",
-                "true",
-                "{…}",
-                "text",
-                "false",
-                "<0",
-                "false",
-                "empty[]",
-                "text",
-                "<0",
-                "false",
-                "undefined"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "returns undefined: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "true",
-                "text",
-                "true",
-                "blank",
-                "text",
-                "true",
-                "<0",
-                "false",
-                "[…]",
-                "text",
-                "<0",
-                "false",
-                "text"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "returns undefined: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "text",
                 "true",
                 ">1",
+                "true",
+                "inherited{…}",
                 "text",
                 "true",
                 "<0",
-                "false",
-                "[…]",
-                "text",
-                "<0",
-                "false",
-                "inherited{…}"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "returns undefined: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "nonempty",
-                "true",
-                "empty[]",
-                "text",
-                "false",
-                "(0,1)",
-                "false",
-                "[…]",
-                "text",
-                "-Inf",
-                "true",
-                "{}"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "returns undefined: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "[…]",
-                "true",
-                ">1",
-                "text",
-                "false",
-                ">1",
                 "false",
                 "[…]",
                 "text",
                 ">1",
-                "true",
+                "false",
                 "{…}"
               ],
               "count": 1
@@ -541,39 +729,19 @@
               "transition": "returns undefined: argument 0 mutated differently",
               "features": [
                 "[…]",
-                "true",
-                "true",
-                "true",
-                "[…]",
-                "text",
                 "false",
-                "<0",
-                "false",
-                "[…]",
-                "text",
-                "(0,1)",
-                "false",
-                "null"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "returns undefined: argument 0 mutated differently",
-              "features": [
-                "[…]",
+                ">1",
                 "true",
                 "text",
-                "true",
-                "<0",
                 "text",
                 "true",
                 ">1",
                 "false",
-                "[…]",
+                "empty[]",
                 "text",
                 ">1",
                 "false",
-                ">1"
+                "text"
               ],
               "count": 1
             },
@@ -596,12 +764,52 @@
                 "text"
               ],
               "count": 1
+            },
+            {
+              "transition": "returns undefined: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                "text",
+                "true",
+                "binary",
+                "text",
+                "false",
+                ">1",
+                "false",
+                "[…]",
+                "empty",
+                ">1",
+                "false",
+                "{…}"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined: argument 0 mutated differently",
+              "features": [
+                "[…]",
+                "true",
+                "[…]",
+                "true",
+                "empty[]",
+                "text",
+                "false",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "false",
+                "text"
+              ],
+              "count": 1
             }
           ],
           "examples": [
             {
-              "call": "decorateResult([\"\"], true, \"a\", true, \"a\", \"a\", false, 0.01, false, [{}], \"a\", 2, true, \"a\")",
-              "argsCode": "[\"\"], true, \"a\", true, \"a\", \"a\", false, 0.01, false, [{}], \"a\", 2, true, \"a\"",
+              "call": "decorateResult([\"a\"], false, 2, true, \"a\", \"a\", true, 10, false, [], \"a\", 9, false, \"a\")",
+              "argsCode": "[\"a\"], false, 2, true, \"a\", \"a\", true, 10, false, [], \"a\", 9, false, \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -617,14 +825,14 @@
               "minimal": true,
               "mutation": {
                 "argIndex": 0,
-                "old": "[\"-\"]",
+                "old": "[\"a\"]",
                 "new": "[\"NaN\"]",
                 "newCode": "[\"NaN\"]"
               }
             },
             {
-              "call": "decorateResult([\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false })",
-              "argsCode": "[\"a\"], false, [new Date(\"1970-01-01T00:00:00.000Z\")], true, 2, \"a\", false, 2, false, [0], \"a\", 2, true, { \"\": false }",
+              "call": "decorateResult([\"a\"], false, 2, true, \"a\", \"a\", false, 2, false, [0], \"v\", 2, false, \"a\")",
+              "argsCode": "[\"a\"], false, 2, true, \"a\", \"a\", false, 2, false, [0], \"v\", 2, false, \"a\"",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -646,8 +854,8 @@
               }
             },
             {
-              "call": "decorateResult([\"\"], true, \"a\", true, \" \", \"a\", true, -1, false, [0], \"a\", -1, false, \"a\")",
-              "argsCode": "[\"\"], true, \"a\", true, \" \", \"a\", true, -1, false, [0], \"a\", -1, false, \"a\"",
+              "call": "decorateResult([\"\"], true, 1000, true, 2, \"a\", true, -1, true, [\" \"], \"a\", 0, false, 0.5)",
+              "argsCode": "[\"\"], true, 1000, true, 2, \"a\", true, -1, true, [\" \"], \"a\", 0, false, 0.5",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -663,257 +871,9 @@
               "minimal": false,
               "mutation": {
                 "argIndex": 0,
-                "old": "[\"-\"]",
-                "new": "[\"NaN\"]",
-                "newCode": "[\"NaN\"]"
-              }
-            }
-          ]
-        },
-        {
-          "id": "src/helpers.js#decorateResult/2",
-          "key": "throws TypeError: mutates argument 0 differently",
-          "title": "mutates argument 1 differently",
-          "realism": "ordinary",
-          "label": "behavior-change",
-          "labelSource": "none",
-          "count": 8,
-          "variants": [
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "{…}",
-                "true",
-                "empty",
-                "text",
-                "false",
-                ">1",
-                "true",
-                "[…]",
-                "text",
-                "<0",
-                "false",
-                "empty"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "true",
-                "text",
-                "true",
-                "text",
-                "text",
-                "true",
-                "<0",
-                "true",
-                "[…]",
-                "text",
-                "<0",
-                "true",
-                "text"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "true",
-                "text",
-                "true",
-                "{}",
-                "text",
-                "false",
-                ">1",
-                "true",
-                "[…]",
-                "text",
-                ">1",
-                "true",
-                "text"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "<0",
-                "true",
-                "empty",
-                "text",
-                "true",
-                "<0",
-                "true",
-                "[…]",
-                "text",
-                "<0",
-                "false",
-                "text"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                ">1",
-                "true",
-                "text",
-                "text",
-                "false",
-                ">1",
-                "true",
-                "[…]",
-                "text",
-                "(0,1)",
-                "false",
-                "<0"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                ">1",
-                "true",
-                "empty",
-                "text",
-                "false",
-                ">1",
-                "true",
-                "[…]",
-                "text",
-                ">1",
-                "true",
-                "null"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "true",
-                "=0",
-                "true",
-                "=1",
-                "text",
-                "true",
-                "<0",
-                "true",
-                "[…]",
-                "text",
-                "(0,1)",
-                "false",
-                "binary"
-              ],
-              "count": 1
-            },
-            {
-              "transition": "throws TypeError: argument 0 mutated differently",
-              "features": [
-                "[…]",
-                "false",
-                "text",
-                "true",
-                ">1",
-                "text",
-                "false",
-                "(0,1)",
-                "true",
-                "[…]",
-                "text",
-                ">1",
-                "false",
-                "nonempty"
-              ],
-              "count": 1
-            }
-          ],
-          "examples": [
-            {
-              "call": "decorateResult([\"\"], true, \"a\", true, {}, \"a\", false, 2, true, [\"\"], \"a\", 2, true, \"a\")",
-              "argsCode": "[\"\"], true, \"a\", true, {}, \"a\", false, 2, true, [\"\"], \"a\", 2, true, \"a\"",
-              "old": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '2')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '2')"
-              },
-              "new": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '2')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '2')"
-              },
-              "minimal": true,
-              "mutation": {
-                "argIndex": 0,
-                "old": "[\"-\"]",
-                "new": "[\"NaN\"]",
-                "newCode": "[\"NaN\"]"
-              }
-            },
-            {
-              "call": "decorateResult([\"a\"], false, { \"\": new Map([]) }, true, \"\", \"a\", false, 2, true, [[]], \"a\", -1, false, \"\")",
-              "argsCode": "[\"a\"], false, { \"\": new Map([]) }, true, \"\", \"a\", false, 2, true, [[]], \"a\", -1, false, \"\"",
-              "old": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '-1')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '-1')"
-              },
-              "new": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '-1')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '-1')"
-              },
-              "minimal": false,
-              "mutation": {
-                "argIndex": 0,
-                "old": "[\"a\"]",
-                "new": "[\"NaN\"]",
-                "newCode": "[\"NaN\"]"
-              }
-            },
-            {
-              "call": "decorateResult([\"a\"], false, 3, true, \"a\", \"a\", false, 2, true, [\"\"], \"a\", 0.01, false, -1)",
-              "argsCode": "[\"a\"], false, 3, true, \"a\", \"a\", false, 2, true, [\"\"], \"a\", 0.01, false, -1",
-              "old": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '0.01')"
-              },
-              "new": {
-                "kind": "throw",
-                "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '0.01')",
-                "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '0.01')"
-              },
-              "minimal": false,
-              "mutation": {
-                "argIndex": 0,
-                "old": "[\"a\"]",
-                "new": "[\"NaN\"]",
-                "newCode": "[\"NaN\"]"
+                "old": "[\"-\", \" \"]",
+                "new": "[\"NaN\", \" \"]",
+                "newCode": "[\"NaN\", \" \"]"
               }
             }
           ]
@@ -925,25 +885,25 @@
           "realism": "ordinary",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 2,
+          "count": 5,
           "variants": [
             {
               "transition": "returns undefined → throws RangeError",
               "features": [
                 "[…]",
-                "false",
-                "nonempty",
                 "true",
-                "{…}",
+                ">1",
+                "true",
+                "text",
                 "text",
                 "true",
                 ">1",
                 "false",
                 "[…]",
                 "text",
-                "<0",
+                ">1",
                 "true",
-                "text"
+                "binary"
               ],
               "count": 1
             },
@@ -952,9 +912,49 @@
               "features": [
                 "[…]",
                 "true",
+                ">1",
+                "true",
+                "[…]",
                 "text",
                 "true",
-                "{…}",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                "<0",
+                "true",
+                "<0"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "false",
+                ">1",
+                "true",
+                "empty[]",
+                "text",
+                "true",
+                ">1",
+                "false",
+                "[…]",
+                "blank",
+                ">1",
+                "false",
+                "{…}"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "empty",
+                "true",
+                "text",
                 "text",
                 "true",
                 ">1",
@@ -963,15 +963,35 @@
                 "text",
                 ">1",
                 "false",
-                ">1"
+                "empty[]"
+              ],
+              "count": 1
+            },
+            {
+              "transition": "returns undefined → throws RangeError",
+              "features": [
+                "[…]",
+                "true",
+                "{…}",
+                "true",
+                ">1",
+                "text",
+                "true",
+                ">1",
+                "false",
+                "[…]",
+                "text",
+                ">1",
+                "true",
+                "{…}"
               ],
               "count": 1
             }
           ],
           "examples": [
             {
-              "call": "decorateResult([\"\"], true, \"a\", true, { \"\": 0 }, \"a\", true, 200, false, [\"\"], \"a\", 2, false, 2)",
-              "argsCode": "[\"\"], true, \"a\", true, { \"\": 0 }, \"a\", true, 200, false, [\"\"], \"a\", 2, false, 2",
+              "call": "decorateResult([\"\"], true, \"\", true, \"a\", \"a\", true, 200, false, [0], \"a\", 7, false, [])",
+              "argsCode": "[\"\"], true, \"\", true, \"a\", \"a\", true, 200, false, [0], \"a\", 7, false, []",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -988,8 +1008,8 @@
               "minimal": true
             },
             {
-              "call": "decorateResult([\"a\"], false, new Set([0n]), true, { fullform: \"\" }, \"a\", true, 200, false, [{}], \"a\", -1, true, \"a\")",
-              "argsCode": "[\"a\"], false, new Set([0n]), true, { fullform: \"\" }, \"a\", true, 200, false, [{}], \"a\", -1, true, \"a\"",
+              "call": "decorateResult([\"\"], true, 2, true, [0], \"a\", true, 200, false, [0], \"a\", -1, true, -1)",
+              "argsCode": "[\"\"], true, 2, true, [0], \"a\", true, 200, false, [0], \"a\", -1, true, -1",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -1006,8 +1026,8 @@
               "minimal": false
             },
             {
-              "call": "decorateResult([\"string\"], true, \"si\", true, { \"\": 0 }, \"si\", true, 101, false, [\"\"], \"si\", 122.08, false, 12)",
-              "argsCode": "[\"string\"], true, \"si\", true, { \"\": 0 }, \"si\", true, 101, false, [\"\"], \"si\", 122.08, false, 12",
+              "call": "decorateResult([\"\"], true, { \"\": null }, true, 2, \"a\", true, 200, false, [new Float64Array([])], \"a\", 10, true, { \"4k duY1\": { \"\\\"ef#.=g.\": 0 } })",
+              "argsCode": "[\"\"], true, { \"\": null }, true, 2, \"a\", true, 200, false, [new Float64Array([])], \"a\", 10, true, { \"4k duY1\": { \"\\\"ef#.=g.\": 0 } }",
               "old": {
                 "kind": "return",
                 "async": false,
@@ -1033,28 +1053,8 @@
           "realismNote": "huge number",
           "label": "behavior-change",
           "labelSource": "none",
-          "count": 2,
+          "count": 1,
           "variants": [
-            {
-              "transition": "throws TypeError → throws RangeError",
-              "features": [
-                "[…]",
-                "false",
-                "text",
-                "true",
-                "{…}",
-                "text",
-                "true",
-                ">1",
-                "true",
-                "[…]",
-                "text",
-                "<0",
-                "false",
-                "{…}"
-              ],
-              "count": 1
-            },
             {
               "transition": "throws TypeError → throws RangeError",
               "features": [
@@ -1069,7 +1069,7 @@
                 "true",
                 "empty[]",
                 "text",
-                "<0",
+                ">1",
                 "true",
                 "text"
               ],
@@ -1078,14 +1078,14 @@
           ],
           "examples": [
             {
-              "call": "decorateResult([\"\"], true, [null], true, [0], \"a\", true, 1000000000000000, true, [], \"a\", -1, true, \"a\")",
-              "argsCode": "[\"\"], true, [null], true, [0], \"a\", true, 1000000000000000, true, [], \"a\", -1, true, \"a\"",
+              "call": "decorateResult([\"\"], true, [null], true, [0], \"a\", true, 1000000000000000, true, [], \"a\", 2, true, \"a\")",
+              "argsCode": "[\"\"], true, [null], true, [0], \"a\", true, 1000000000000000, true, [], \"a\", 2, true, \"a\"",
               "old": {
                 "kind": "throw",
                 "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '-1')",
+                "display": "throws TypeError: Cannot read properties of undefined (reading '2')",
                 "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '-1')"
+                "message": "Cannot read properties of undefined (reading '2')"
               },
               "new": {
                 "kind": "throw",
@@ -1097,14 +1097,14 @@
               "minimal": true
             },
             {
-              "call": "decorateResult([\"si\"], true, [null], true, [0], \"-\", true, 1000000000000000, true, [], \"si\", -0.01, true, \"_\")",
-              "argsCode": "[\"si\"], true, [null], true, [0], \"-\", true, 1000000000000000, true, [], \"si\", -0.01, true, \"_\"",
+              "call": "decorateResult([\"\", new Uint8Array([117, 251, 199, 119, 194, 155, 23]), \"\", 0], true, [\"\", new Date(\"-037088-02-29T06:59:38.893Z\"), undefined, null], true, [\"\", 0], \"a\", true, 1000000000000000, true, [], \"a\", 4, true, \"a\")",
+              "argsCode": "[\"\", new Uint8Array([117, 251, 199, 119, 194, 155, 23]), \"\", 0], true, [\"\", new Date(\"-037088-02-29T06:59:38.893Z\"), undefined, null], true, [\"\", 0], \"a\", true, 1000000000000000, true, [], \"a\", 4, true, \"a\"",
               "old": {
                 "kind": "throw",
                 "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '-0.01')",
+                "display": "throws TypeError: Cannot read properties of undefined (reading '4')",
                 "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '-0.01')"
+                "message": "Cannot read properties of undefined (reading '4')"
               },
               "new": {
                 "kind": "throw",
@@ -1116,14 +1116,14 @@
               "minimal": false
             },
             {
-              "call": "decorateResult([\"a\", [false, \"\", 0], \"\"], false, \"a\", true, { \"-=JXW \": {} }, \"a\", true, 1000, true, [new Uint8Array([134]).buffer], \"a\", -1.7976931348623137e+308, false, { \"\": null, fullform: new Date(\"-220857-09-13T04:23:15.309Z\"), \"D~R9\": null, \"\\\\ZOO\": true })",
-              "argsCode": "[\"a\", [false, \"\", 0], \"\"], false, \"a\", true, { \"-=JXW \": {} }, \"a\", true, 1000, true, [new Uint8Array([134]).buffer], \"a\", -1.7976931348623137e+308, false, { \"\": null, fullform: new Date(\"-220857-09-13T04:23:15.309Z\"), \"D~R9\": null, \"\\\\ZOO\": true }",
+              "call": "decorateResult([\"si\"], true, [null], true, [0], \"-\", true, 1000000000000000, true, [], \"si\", 2, true, \"_\")",
+              "argsCode": "[\"si\"], true, [null], true, [0], \"-\", true, 1000000000000000, true, [], \"si\", 2, true, \"_\"",
               "old": {
                 "kind": "throw",
                 "async": false,
-                "display": "throws TypeError: Cannot read properties of undefined (reading '-1.7976931348623137e+308')",
+                "display": "throws TypeError: Cannot read properties of undefined (reading '2')",
                 "errorClass": "TypeError",
-                "message": "Cannot read properties of undefined (reading '-1.7976931348623137e+308')"
+                "message": "Cannot read properties of undefined (reading '2')"
               },
               "new": {
                 "kind": "throw",
@@ -1148,7 +1148,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 241,
+      "durationMs": 252,
       "seed": 435064967,
       "usage": {
         "files": 15,
@@ -1167,7 +1167,7 @@
       "inputsRun": 1000,
       "stoppedBy": "runs",
       "failures": 0,
-      "durationMs": 232,
+      "durationMs": 253,
       "seed": 3163464905,
       "usage": {
         "files": 11,
@@ -1184,10 +1184,10 @@
   "errors": [],
   "regressionTests": null,
   "timing": {
-    "totalMs": 7025,
-    "materializeMs": 97,
+    "totalMs": 8224,
+    "materializeMs": 78,
     "dependenciesMs": 0,
-    "detectMs": 858,
-    "verifyMs": 6070
+    "detectMs": 1041,
+    "verifyMs": 7105
   }
 }

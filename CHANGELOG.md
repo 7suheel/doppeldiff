@@ -4,6 +4,32 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 Before 1.0, minor versions may contain breaking changes to the CLI, the config and the JSON report.
 
+## [0.1.1] - Unreleased
+
+Faster and tidier on code that loops over a count or allocates by a length. On the playground demo PR, one run went
+from 55 s to 9 s, and every function is now explored to the full input budget.
+
+### Changed
+
+- **Realistic sizes.** Parameters used as counts, lengths, indexes or loop bounds (`for (…; i < n; …)`,
+  `Array.from({ length: n })`, `s.repeat(n)`, `xs[i]`, or names such as `count`, `size`, `limit`) are generated
+  mostly as small non-negative integers and values from the code and its tests. Huge values and NaN/Infinity
+  stay in as rare edge cases (about 1.5%).
+- **Timeouts no longer stop a function.** A timeout on an edge-case input (huge number, NaN, …) does not count
+  towards stopping. After two, similar inputs are skipped and exploration continues. A timeout on an ordinary
+  input is re-run once on its own before it counts, because a busy machine can make a fast call miss its
+  deadline.
+- **Compact report.** Long arrays, objects, maps and sets are abbreviated (`[0, 1, 0, 1, 0, 1, … 994 more]`), or
+  shown in full when abbreviating would hide the difference. Examples with long outputs rank lower. Behaviors
+  that involve a timeout get one example in the collapsed edge-case section, with a one-line note of which
+  functions timed out on edge-case inputs.
+- JSON report: optional `edgeTimeouts` and `skippedEdgeInputs` per function.
+
+### Fixed
+
+- After a call was stopped by the in-process timeout, the runner kept its heap. A call that grew a huge array
+  slowed the following inputs into false timeouts. The runner process is now replaced after such a timeout.
+
 ## [0.1.0] - 2026-11-02
 
 First public release.
@@ -47,4 +73,5 @@ First public release.
 - Random generation misses bugs that need several specific conditions at once; see
   [docs/EVALUATION.md](docs/EVALUATION.md) for measured detection rates and every miss.
 
+[0.1.1]: https://github.com/7suheel/doppeldiff/releases/tag/v0.1.1
 [0.1.0]: https://github.com/7suheel/doppeldiff/releases/tag/v0.1.0

@@ -17,4 +17,4 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: 7suheel/doppeldiff@v0.1.0
+      - uses: 7suheel/doppeldiff@v0.1.1
