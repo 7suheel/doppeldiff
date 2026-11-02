@@ -21,6 +21,10 @@ describe('size-like parameters', () => {
     expect([...sizeLikeParams([len])]).toEqual(['w']);
     const idx = fnNode('export function f(xs: number[], at: number) { return xs[at]; }');
     expect([...sizeLikeParams([idx])]).toEqual(['at']);
+    const indirect = fnNode(
+      'export function f(date: Date, days: number) { let remaining = Math.abs(days); while (remaining > 0) { remaining--; } return date; }',
+    );
+    expect([...sizeLikeParams([indirect])]).toEqual(['days']);
     const rep = fnNode('export function f(s: string, times: number) { return s.repeat(times); }');
     expect([...sizeLikeParams([rep])]).toEqual(['times']);
   });

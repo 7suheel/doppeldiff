@@ -80,6 +80,8 @@ interface Job {
   moduleId: string;
   exportName: string;
   inputs: unknown[][];
+  /** Per-call timeout multiplier (re-checks of suspected timeouts use a longer limit). */
+  timeoutScale?: number;
 }
 
 /** One sandboxed runner process, respawned transparently after timeouts and crashes. */
@@ -187,7 +189,7 @@ class RunnerProcess {
 
   /** Execute a job; timeouts and crashes become outcomes, and the process is respawned. */
   async run(job: Job): Promise<Outcome[]> {
-    const { timeoutMs } = this.options;
+    const timeoutMs = Math.round(this.options.timeoutMs * (job.timeoutScale ?? 1));
     const watchdogMs = timeoutMs + Math.max(150, Math.round(timeoutMs * 0.3));
     const guardKey = `${job.moduleId}#${job.exportName}`;
     const outcomes: Outcome[] = new Array(job.inputs.length);
@@ -307,19 +309,29 @@ export class RunnerPool {
   }
 
   /** Run inputs, spreading them across processes. Outcomes are returned in input order. */
-  run(moduleId: string, exportName: string, inputs: unknown[][]): Promise<Outcome[]> {
-    const result = this.lock.then(() => this.runUnlocked(moduleId, exportName, inputs));
+  run(
+    moduleId: string,
+    exportName: string,
+    inputs: unknown[][],
+    options: { timeoutScale?: number } = {},
+  ): Promise<Outcome[]> {
+    const result = this.lock.then(() => this.runUnlocked(moduleId, exportName, inputs, options.timeoutScale));
     this.lock = result.catch(() => undefined);
     return result;
   }
 
-  private async runUnlocked(moduleId: string, exportName: string, inputs: unknown[][]): Promise<Outcome[]> {
+  private async runUnlocked(
+    moduleId: string,
+    exportName: string,
+    inputs: unknown[][],
+    timeoutScale?: number,
+  ): Promise<Outcome[]> {
     await this.start();
     const chunkSize = Math.max(16, Math.ceil(inputs.length / this.procs.length));
     const chunks: unknown[][][] = [];
     for (let i = 0; i < inputs.length; i += chunkSize) chunks.push(inputs.slice(i, i + chunkSize));
     const results = await Promise.all(
-      chunks.map((c, i) => this.procs[i]!.run({ moduleId, exportName, inputs: c })),
+      chunks.map((c, i) => this.procs[i]!.run({ moduleId, exportName, inputs: c, timeoutScale })),
     );
     return results.flat();
   }

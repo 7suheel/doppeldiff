@@ -13,8 +13,11 @@ export interface PairOutcome {
   head: Outcome;
 }
 
-/** Runs inputs on both versions. Must return outcomes in input order. */
-export type Evaluator = (inputs: unknown[][]) => Promise<PairOutcome[]>;
+/**
+ * Runs inputs on both versions. Must return outcomes in input order. `timeoutScale` multiplies the per-call timeout
+ * (used to re-check suspected timeouts).
+ */
+export type Evaluator = (inputs: unknown[][], options?: { timeoutScale?: number }) => Promise<PairOutcome[]>;
 
 export interface ExploreOptions {
   arbitrary: Arbitrary<unknown[]>;
@@ -41,6 +44,8 @@ export interface ExploreOptions {
    */
   maxFailures?: number;
   maxEdgeFailures?: number;
+  /** Max timeouts on ordinary inputs re-checked with a longer limit (see `confirmTimeouts`). */
+  maxTimeoutChecks?: number;
   /** Number of inputs run twice per version to detect nondeterminism. */
   selfCheck?: number;
   /** Max evaluations of the humanizing pass per witness. */
@@ -130,6 +135,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     maxWitnesses = 3,
     maxFailures = 20,
     maxEdgeFailures = 2,
+    maxTimeoutChecks = 12,
     selfCheck = 50,
     humanizeBudget = 150,
   } = options;
@@ -186,17 +192,24 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   const realisticFailures = () => failures - edgeFailures;
 
   /**
-   * A timeout on an ordinary input is re-run once on its own before it is believed: under CPU contention (other
-   * runners spinning on genuinely hanging inputs) a fast call can miss its deadline. Edge-case inputs are not
-   * re-run: they are expected to be slow, and each re-run costs a full timeout.
+   * A timeout on an ordinary input is re-run once with a 4x longer limit before it is believed: on a busy machine,
+   * or for a call that takes about as long as the limit, one version can finish just under it and the other just
+   * over, which is not a behavior change. A real hang still times out. Edge-case inputs are not re-run: they are
+   * expected to be slow, and each re-run costs a long timeout. At most `maxTimeoutChecks` re-checks per function.
    */
+  let timeoutChecks = 0;
   const timedOut = (r: PairOutcome) => r.base.kind === 'timeout' || r.head.kind === 'timeout';
   const confirmTimeouts = async (inputs: unknown[][], results: PairOutcome[]): Promise<void> => {
     const idx = results
       .map((r, i) => i)
-      .filter((i) => timedOut(results[i]!) && !(options.realism && tierOf(inputs[i]!) === 0));
+      .filter((i) => timedOut(results[i]!) && !(options.realism && tierOf(inputs[i]!) === 0))
+      .slice(0, Math.max(0, maxTimeoutChecks - timeoutChecks));
     if (idx.length === 0) return;
-    const again = await evaluate(idx.map((i) => inputs[i]!));
+    timeoutChecks += idx.length;
+    const again = await evaluate(
+      idx.map((i) => inputs[i]!),
+      { timeoutScale: 4 },
+    );
     idx.forEach((i, j) => {
       const first = results[i]!;
       const second = again[j]!;

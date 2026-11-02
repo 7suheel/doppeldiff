@@ -277,10 +277,10 @@ export async function verifyFunction(
   }
 
   // 5. Explore.
-  const evaluate = async (inputs: unknown[][]): Promise<PairOutcome[]> => {
+  const evaluate = async (inputs: unknown[][], opts?: { timeoutScale?: number }): Promise<PairOutcome[]> => {
     const [b, h] = await Promise.all([
-      session.pools.base.run(baseMod.moduleId, target.exportName, inputs),
-      session.pools.head.run(headMod.moduleId, target.exportName, inputs),
+      session.pools.base.run(baseMod.moduleId, target.exportName, inputs, opts),
+      session.pools.head.run(headMod.moduleId, target.exportName, inputs, opts),
     ]);
     return b.map((o, i) => ({ base: o, head: h[i]! }));
   };

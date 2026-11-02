@@ -9,7 +9,8 @@ import { Node, SyntaxKind } from 'ts-morph';
  *   - loop bound: `i < n` / `n > i` in a `for` or `while` condition
  *   - length or count: `new Array(n)`, `Array(n)`, `{ length: n }`, `s.repeat(n)`, `padStart(n)`, `padEnd(n)`
  *   - index: `xs[n]`, `xs.at(n)`, `slice(…n…)`, `substring(…)`, `splice(n, …)`
- * or when its name says so (`count`, `size`, `length`, `index`, `limit`, `times`, `pageSize`, …).
+ * directly or through a local variable computed from it (`let remaining = Math.abs(days)`), or when its name says
+ * so (`count`, `size`, `length`, `index`, `limit`, `times`, `pageSize`, …).
  */
 const SIZE_NAME =
   /^(n|k|count|size|length|len|times|limit|index|idx|width|height|depth|pages?|parts|chunks?|rows|cols|columns|steps|retries|attempts|digits|places|precision|decimals|people|items|level|levels)$|(Count|Size|Length|Index|Limit|Width|Height|Depth|Times)$/;
@@ -87,7 +88,23 @@ export function sizeLikeParams(fns: Node[]): Set<string> {
           const p = id.getParent();
           return !(Node.isPropertyAccessExpression(p) && p.getNameNode() === id);
         });
-      if (refs.some(usedAsSize)) out.add(name);
+      if (refs.some(usedAsSize)) {
+        out.add(name);
+        continue;
+      }
+      // One step further: `let remaining = Math.abs(days); while (remaining > 0) …` makes `days` a size.
+      for (const decl of body.getDescendantsOfKind(SyntaxKind.VariableDeclaration)) {
+        const init = decl.getInitializer();
+        const local = decl.getNameNode();
+        if (!init || !Node.isIdentifier(local) || !refs.some((r) => isWithin(r, init))) continue;
+        const localRefs = body
+          .getDescendantsOfKind(SyntaxKind.Identifier)
+          .filter((id) => id.getText() === local.getText() && id !== local);
+        if (localRefs.some(usedAsSize)) {
+          out.add(name);
+          break;
+        }
+      }
     }
   }
   return out;
