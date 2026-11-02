@@ -124,7 +124,8 @@ describe('CLI', () => {
       '--runs',
       '300',
     ]);
-    expect(r.code).toBe(0);
+    // Print the report on failure: this test failed once on a Windows runner and the cause was not visible.
+    expect(r.code, `${r.stdout}\n${r.stderr}`).toBe(0);
     expect(r.stdout).toContain('✅ **No behavior change** detected in 4 functions');
   });
 
