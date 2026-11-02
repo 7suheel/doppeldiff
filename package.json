@@ -1,7 +1,7 @@
 {
   "name": "doppeldiff",
   "version": "0.1.0",
-  "description": "See what your PR actually changed: runs the old and new version of every changed function on thousands of generated inputs and reports minimal counterexamples.",
+  "description": "See what your PR actually changed: runs the old and new version of every changed function on inputs your tests never tried and shows every difference. Built for refactors.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -31,6 +31,7 @@
     "schema"
   ],
   "keywords": [
+    "refactoring",
     "differential-testing",
     "regression-testing",
     "property-based-testing",

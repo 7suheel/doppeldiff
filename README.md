@@ -4,8 +4,8 @@
 
 **See what your PR actually changed.**
 
-doppeldiff runs the old and the new version of every changed function on thousands of generated inputs
-and shows you, as concrete examples, every input where they behave differently.
+Built for refactors and "no behavior change" pull requests. doppeldiff runs the old and the new version of every
+changed function on thousands of inputs your tests never tried, and shows every input where they disagree.
 
 <img src="docs/assets/pr-comment.png" alt="A doppeldiff pull request comment listing unclaimed behavior changes with concrete inputs and old/new results" width="760">
 
@@ -33,6 +33,32 @@ code. Its description says _"Pure refactor, no behavior change. All tests pass."
 
 The refactor clamps the total at zero, so a cart with a credit or refund line no longer adds up. No reviewer was
 asked to look for that, and no test covered it. The same comment flags a second unclaimed change, in `slugify`.
+
+## What doppeldiff is good at, and what it is not good at yet
+
+**Good at**
+
+- **Refactors and "no behavior change" PRs**, AI-written or not. Either it ran thousands of inputs through both
+  versions and found no difference, or it shows the exact input where the refactor changed the result, like the
+  `cartTotal` example above. `--refactor` (CLI) and `verify_refactor` (MCP) turn that into a pass/fail check.
+- **Finding inputs your tests never tried**: negative amounts, empty and blank strings, `-0`, values just past a
+  threshold in the code, strings in the formats the code's regexes parse, accents and lone surrogates. Each
+  finding comes with the old and the new result and can be written out as a regression test.
+- **Plain TypeScript/JavaScript functions**: utilities, parsing, formatting, money and string handling in
+  libraries and app code.
+- **Running on every PR**: a few seconds per PR, no API key, nothing leaves the machine.
+
+**Not good at yet**
+
+- **Finding arbitrary bugs.** doppeldiff only reports what differs between two versions, and random inputs rarely
+  hit a change that needs several specific conditions at once (an option combination plus a particular kind of
+  text). On the latest held-out set of real bug-fix commits it found **3 of 13**
+  ([evaluation](docs/EVALUATION.md)). Use it next to your tests and review, not instead of them.
+- **Code with side effects** (network, filesystem, databases): the sandbox blocks it, and nothing is mocked.
+- **Class methods, overloaded functions, UMD bundles and class-instance parameters**: reported as not verified.
+- **Callback-heavy APIs**: generated callbacks return fixed values, so a custom sort comparator never reorders
+  anything.
+- **"No behavior change" is evidence, not proof**: inputs are sampled, not exhaustive.
 
 ## The problem
 
@@ -96,8 +122,14 @@ Try it: `node examples/demo-shop/try.mjs ai-refactor` creates a scenario reposit
 ## Results on real commits
 
 We ran doppeldiff on 39 historical commits from 17 libraries (ufo, validator.js, es-toolkit, date-fns, qs, radash,
-…). **The full write-up, misses included, is in [docs/EVALUATION.md](docs/EVALUATION.md).** In short:
+…). Most are bug fixes, which is a harder test than its main use: a bug fix changes behavior on purpose, often
+only for a narrow set of inputs. **The full write-up, misses included, is in
+[docs/EVALUATION.md](docs/EVALUATION.md).** In short:
 
+- **Refactors:** defu's `isPlainObject` refactor was correctly reported as "no behavior change" across 6
+  functions. semver's "faster paths for compare" differs only for negative numbers, which semver never passes;
+  that difference is reported but collapsed as "unusual inputs". Real refactor commits are only 2 of the 39, so
+  most of the refactor evidence comes from the demo scenarios above.
 - **Latest held-out set** (18 commits from 9 new libraries, picked by a fixed rule, code frozen before the run): it
   found **3 of 13** verifiable bug fixes. The run also exposed tool bugs (a CommonJS export pattern, JSDoc
   `{Object}`, cross-file impact). After fixing those, it finds 7 of 15; those numbers are no longer held out.

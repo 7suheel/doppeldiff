@@ -1,6 +1,6 @@
-name: doppeldiff
-description: 'See what your PR actually changed: runs old and new versions of changed functions on generated inputs and posts the differences as one sticky comment.'
-author: doppeldiff
+name: doppeldiff behavioral diff
+description: 'Catch silent behavior changes in PRs: runs old and new code on generated inputs and comments every difference.'
+author: 7suheel
 branding:
   icon: git-pull-request
   color: purple
