@@ -16,7 +16,7 @@
     "node": ">=22.13"
   },
   "bin": {
-    "doppeldiff": "./dist/cli.js"
+    "doppeldiff": "dist/cli.js"
   },
   "exports": {
     ".": {

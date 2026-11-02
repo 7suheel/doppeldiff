@@ -1,12 +1,17 @@
 # Releasing
 
 Releases are published to npm by [`.github/workflows/release.yml`](../.github/workflows/release.yml) when a
-version tag is pushed. Authentication uses npm **trusted publishing** (OIDC): no npm token is stored anywhere, and
-npm attaches a provenance statement that links the package to the commit and workflow run that built it.
+version tag is created (pushing it, or publishing a GitHub release that creates it). It can also be run by hand:
+**Actions** → **Release** → **Run workflow** → **Use workflow from** → **Tags** → the version tag. It refuses to run on
+a branch, refuses a tag that does not match `package.json`, and refuses a version already on npm.
+
+Authentication: the `NPM_TOKEN` secret if it exists, otherwise npm **trusted publishing** (OIDC). Both publish with
+a provenance statement that links the package to the commit and workflow run that built it. The goal is trusted
+publishing only: set it up below, then delete the secret.
 
 ## One-time setup: npm trusted publishing
 
-The package must exist on npm first (v0.1.0 was published with a temporary token).
+The package must exist on npm first (v0.1.0 is published with a temporary `NPM_TOKEN`).
 
 1. Sign in at [npmjs.com](https://www.npmjs.com) and open
    [npmjs.com/package/doppeldiff](https://www.npmjs.com/package/doppeldiff).
