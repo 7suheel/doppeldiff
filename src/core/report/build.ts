@@ -70,14 +70,14 @@ export function applyRuleLabels(report: Report, forceRefactor = false): Report {
 
 const MAX_DISPLAY = 300;
 
-export function outcomeView(o: Outcome): OutcomeView {
+export function outcomeView(o: Outcome, abbreviate = true): OutcomeView {
   switch (o.kind) {
     case 'return': {
       const code = encToCode(o.value);
       return {
         kind: 'return',
         async: o.async,
-        display: formatOutcome(o, MAX_DISPLAY),
+        display: formatOutcome(o, MAX_DISPLAY, abbreviate),
         ...(code !== undefined && code.length < 4000 ? { code } : {}),
       };
     }
@@ -86,7 +86,7 @@ export function outcomeView(o: Outcome): OutcomeView {
       return {
         kind: 'throw',
         async: o.async,
-        display: formatOutcome(o, MAX_DISPLAY),
+        display: formatOutcome(o, MAX_DISPLAY, abbreviate),
         ...(e.t === 'error' ? { errorClass: e.ctor.slice(0, 200), message: e.message.slice(0, 4000) } : {}),
       };
     }
@@ -104,6 +104,11 @@ export function exampleFrom(exportName: string, w: Witness): Example {
     new: outcomeView(w.head),
     minimal: w.minimal,
   };
+  // Abbreviated long lists can hide the difference: then show both in full (still length-limited).
+  if (ex.old.display === ex.new.display) {
+    ex.old = outcomeView(w.base, false);
+    ex.new = outcomeView(w.head, false);
+  }
   if (
     w.diff.aspect === 'mutation' &&
     (w.base.kind === 'return' || w.base.kind === 'throw') &&
@@ -114,10 +119,11 @@ export function exampleFrom(exportName: string, w: Witness): Example {
     const b = w.head.args[i];
     if (a && b) {
       const newCode = encToCode(b);
+      const full = formatEnc(a, MAX_DISPLAY) === formatEnc(b, MAX_DISPLAY);
       ex.mutation = {
         argIndex: i,
-        old: formatEnc(a, MAX_DISPLAY),
-        new: formatEnc(b, MAX_DISPLAY),
+        old: formatEnc(a, MAX_DISPLAY, !full),
+        new: formatEnc(b, MAX_DISPLAY, !full),
         ...(newCode !== undefined && newCode.length < 4000 ? { newCode } : {}),
       };
     }
@@ -150,6 +156,8 @@ function functionReport(f: FunctionResult): FunctionReport {
     inputsRun: f.inputsRun,
     ...(f.stoppedBy ? { stoppedBy: f.stoppedBy } : {}),
     failures: f.failures,
+    ...(f.edgeFailures ? { edgeTimeouts: f.edgeFailures } : {}),
+    ...(f.skippedEdgeInputs ? { skippedEdgeInputs: f.skippedEdgeInputs } : {}),
     durationMs: f.durationMs,
     seed: f.seed,
     ...(f.usage ? { usage: f.usage } : {}),

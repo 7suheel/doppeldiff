@@ -119,3 +119,67 @@ describe('explore', () => {
     expect(r.clusters).toHaveLength(1);
   });
 });
+
+describe('timeouts', () => {
+  const timeout: Outcome = { kind: 'timeout', ms: 250 };
+  const ret = (v: unknown): Outcome => ({ kind: 'return', value: encode(v), async: false, args: [] });
+  const sizes = fc.oneof(
+    { arbitrary: fc.integer({ min: 0, max: 50 }), weight: 9 },
+    { arbitrary: fc.integer({ min: 1e15, max: 1e15 + 1000 }), weight: 1 },
+  );
+  const huge = (n: number) => (n >= 1e9 ? { tier: 0 as const, reason: 'huge number' } : { tier: 2 as const });
+
+  it('keeps exploring after timeouts on edge-case inputs and skips similar ones', async () => {
+    const evaluate = async (inputs: unknown[][]): Promise<PairOutcome[]> =>
+      inputs.map(([n]) =>
+        (n as number) >= 1e9 ? { base: timeout, head: timeout } : { base: ret(n), head: ret(n) },
+      );
+    const r = await explore({
+      arbitrary: fc.tuple(sizes),
+      evaluate,
+      seed: 1,
+      runs: 200,
+      selfCheck: 0,
+      maxFailures: 3,
+      realism: ([n]) => huge(n as number),
+    });
+    expect(r.stoppedBy).not.toBe('failures');
+    expect(r.edgeFailures).toBeGreaterThanOrEqual(2);
+    expect(r.skippedEdgeInputs).toBeGreaterThan(0);
+  });
+
+  it('still stops after repeated timeouts on ordinary inputs', async () => {
+    const evaluate = async (inputs: unknown[][]): Promise<PairOutcome[]> =>
+      inputs.map(() => ({ base: timeout, head: timeout }));
+    const r = await explore({
+      arbitrary: fc.tuple(fc.integer({ min: 0, max: 1000 })),
+      evaluate,
+      seed: 1,
+      runs: 1000,
+      maxFailures: 5,
+      realism: () => ({ tier: 2 }),
+    });
+    expect(r.stoppedBy).toBe('failures');
+  });
+
+  it('re-runs a timeout on an ordinary input once before believing it', async () => {
+    let calls = 0;
+    // The first call for 7 times out (a busy machine), the second one returns.
+    const evaluate = async (inputs: unknown[][]): Promise<PairOutcome[]> =>
+      inputs.map(([n]) => {
+        if (n === 7 && calls++ === 0) return { base: timeout, head: ret(7) };
+        return { base: ret(n), head: ret(n) };
+      });
+    const r = await explore({
+      arbitrary: fc.tuple(fc.constantFrom(7, 8)),
+      evaluate,
+      seed: 1,
+      runs: 2,
+      examples: [[7]],
+      selfCheck: 0,
+      realism: () => ({ tier: 2 }),
+    });
+    expect(r.clusters).toEqual([]);
+    expect(r.failures).toBe(0);
+  });
+});

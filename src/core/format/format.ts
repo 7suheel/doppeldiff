@@ -12,6 +12,15 @@ function num(n: number): string {
   return String(n);
 }
 
+/** Long lists are abbreviated for display: `[1, 1, 1, 1, 1, 1, … 994 more]`. */
+const MAX_ITEMS = 10;
+const SHOWN_ITEMS = 6;
+let abbreviateLists = true;
+function list<T>(items: readonly T[], f: (x: T) => string): string {
+  if (!abbreviateLists || items.length <= MAX_ITEMS) return items.map(f).join(', ');
+  return `${items.slice(0, SHOWN_ITEMS).map(f).join(', ')}, … ${items.length - SHOWN_ITEMS} more`;
+}
+
 const IDENT = /^[A-Za-z_$][\w$]*$/;
 const key = (k: string) => (IDENT.test(k) ? k : JSON.stringify(k));
 
@@ -43,12 +52,11 @@ export function formatValue(v: unknown, max = MAX_LEN): string {
     if (seen.has(x)) return '[Circular]';
     seen.add(x);
     try {
-      if (Array.isArray(x)) return `[${x.map(f).join(', ')}]`;
+      if (Array.isArray(x)) return `[${list(x, f)}]`;
       if (x instanceof Date)
         return Number.isNaN(x.getTime()) ? 'new Date(NaN)' : `new Date(${JSON.stringify(x.toISOString())})`;
-      if (x instanceof Map)
-        return `new Map([${[...x].map(([k, val]) => `[${f(k)}, ${f(val)}]`).join(', ')}])`;
-      if (x instanceof Set) return `new Set([${[...x].map(f).join(', ')}])`;
+      if (x instanceof Map) return `new Map([${list([...x], ([k, val]) => `[${f(k)}, ${f(val)}]`)}])`;
+      if (x instanceof Set) return `new Set([${list([...x], f)}])`;
       if (x instanceof RegExp) return String(x);
       if (isProtoDescriptor(x)) {
         const { proto, own } = x[PROTO_TAG];
@@ -62,7 +70,7 @@ export function formatValue(v: unknown, max = MAX_LEN): string {
         return `new ${x.constructor.name}([${Array.from(x as unknown as ArrayLike<number>).join(', ')}])`;
       const entries = Object.entries(x as Record<string, unknown>);
       if (entries.length === 0) return '{}';
-      return `{ ${entries.map(([k, val]) => `${key(k)}: ${f(val)}`).join(', ')} }`;
+      return `{ ${list(entries, ([k, val]) => `${key(k)}: ${f(val)}`)} }`;
     } finally {
       seen.delete(x);
     }
@@ -74,8 +82,21 @@ export function formatArgs(args: unknown[], max = MAX_LEN): string {
   return clip(args.map((a) => formatValue(a, max)).join(', '), max);
 }
 
-/** Render an encoded value as a JS-like literal. */
-export function formatEnc(e: Enc, max = MAX_LEN): string {
+/**
+ * Render an encoded value as a JS-like literal. Long lists are abbreviated unless `abbreviate` is false (used when
+ * two abbreviated values would look identical).
+ */
+export function formatEnc(e: Enc, max = MAX_LEN, abbreviate = true): string {
+  const previous = abbreviateLists;
+  abbreviateLists = abbreviate;
+  try {
+    return formatEncInner(e, max);
+  } finally {
+    abbreviateLists = previous;
+  }
+}
+
+function formatEncInner(e: Enc, max: number): string {
   const f = (x: Enc): string => {
     switch (x.t) {
       case 'undefined':
@@ -93,18 +114,18 @@ export function formatEnc(e: Enc, max = MAX_LEN): string {
       case 'symbol':
         return `Symbol(${x.d})`;
       case 'array':
-        return `[${x.items.map(f).join(', ')}]`;
+        return `[${list(x.items, f)}]`;
       case 'object': {
         const prefix = x.ctor && x.ctor !== 'null-prototype' ? `${x.ctor} ` : '';
         if (x.entries.length === 0) return `${prefix}{}`;
-        return `${prefix}{ ${x.entries.map(([k, v]) => `${key(k)}: ${f(v)}`).join(', ')} }`;
+        return `${prefix}{ ${list(x.entries, ([k, v]) => `${key(k)}: ${f(v)}`)} }`;
       }
       case 'date':
         return Number.isNaN(x.v) ? 'Invalid Date' : new Date(x.v).toISOString();
       case 'map':
-        return `Map(${x.entries.length}) { ${x.entries.map(([k, v]) => `${f(k)} => ${f(v)}`).join(', ')} }`;
+        return `Map(${x.entries.length}) { ${list(x.entries, ([k, v]) => `${f(k)} => ${f(v)}`)} }`;
       case 'set':
-        return `Set(${x.items.length}) { ${x.items.map(f).join(', ')} }`;
+        return `Set(${x.items.length}) { ${list(x.items, f)} }`;
       case 'regexp':
         return `/${x.source}/${x.flags}`;
       case 'function':
@@ -112,7 +133,7 @@ export function formatEnc(e: Enc, max = MAX_LEN): string {
       case 'error':
         return `${x.ctor}: ${x.message}`;
       case 'typed':
-        return `${x.ctor} [${x.items.join(', ')}]`;
+        return `${x.ctor} [${list(x.items, String)}]`;
       case 'promise':
         return 'Promise';
       case 'cycle':
@@ -125,12 +146,15 @@ export function formatEnc(e: Enc, max = MAX_LEN): string {
 }
 
 /** Short behavior summary, e.g. `1104.99`, `throws RangeError: bad price`, `timeout`. */
-export function formatOutcome(o: Outcome, max = MAX_LEN): string {
+export function formatOutcome(o: Outcome, max = MAX_LEN, abbreviate = true): string {
   switch (o.kind) {
     case 'return':
-      return o.async ? `resolves ${formatEnc(o.value, max)}` : formatEnc(o.value, max);
+      return o.async
+        ? `resolves ${formatEnc(o.value, max, abbreviate)}`
+        : formatEnc(o.value, max, abbreviate);
     case 'throw': {
-      const e = o.error.t === 'error' ? `${o.error.ctor}: ${o.error.message}` : formatEnc(o.error, max);
+      const e =
+        o.error.t === 'error' ? `${o.error.ctor}: ${o.error.message}` : formatEnc(o.error, max, abbreviate);
       return clip(`${o.async ? 'rejects' : 'throws'} ${e}`, max);
     }
     case 'timeout':

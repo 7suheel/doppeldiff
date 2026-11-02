@@ -8,6 +8,7 @@ import {
   type LocateResult,
 } from '../analyze/locate.js';
 import { regexDiffStrings } from '../arbitraries/regex.js';
+import { sizeLikeParams } from '../analyze/sizeParams.js';
 import { indexModule } from '../detect/toplevel.js';
 import type { SourceFile } from 'ts-morph';
 import type { Arbitrary } from 'fast-check';
@@ -25,7 +26,7 @@ import type { Usage } from '../analyze/usage.js';
 import { inputRealism, realismContext } from '../explore/realism.js';
 import { Node } from 'ts-morph';
 import { signatureAccepts } from '../types/accepts.js';
-import { printSpec, signatureUnsupported, type SignatureSpec } from '../types/spec.js';
+import { markSize, printSpec, signatureUnsupported, type SignatureSpec } from '../types/spec.js';
 import { fnv1a } from '../util/stableKey.js';
 import type { VerifySession } from './session.js';
 
@@ -84,6 +85,8 @@ export interface FunctionResult {
   nondeterministic?: NondeterminismReport;
   stoppedBy?: ExploreResult['stoppedBy'];
   failures: number;
+  edgeFailures?: number;
+  skippedEdgeInputs?: number;
   shrinkEvaluations: number;
   durationMs: number;
   mined?: { numbers: number; strings: number; thresholds: number[] };
@@ -217,7 +220,16 @@ export async function verifyFunction(
   if (guards) base.guards = guards.conditions;
   const realismCtx = realismContext(usage);
   base.mined = { numbers: mined.numbers.length, strings: mined.strings.length, thresholds: mined.thresholds };
-  const arbitrary = options.arbitrary ?? compileSignature(headSig, { mined });
+  // Counts, lengths, indexes and loop bounds are generated in realistic ranges (huge values only rarely).
+  const sizeNames = sizeLikeParams([baseLoc.node, headLoc.node]);
+  const genSig =
+    sizeNames.size === 0
+      ? headSig
+      : {
+          ...headSig,
+          params: headSig.params.map((p) => (sizeNames.has(p.name) ? { ...p, spec: markSize(p.spec) } : p)),
+        };
+  const arbitrary = options.arbitrary ?? compileSignature(genSig, { mined });
   if (!arbitrary) return skip('could not build an input generator for the signature');
 
   // Optional suggested inputs (validated against the signature by the suggester).
@@ -298,6 +310,8 @@ export async function verifyFunction(
     flakyClusters: result.flakyClusters,
     stoppedBy: result.stoppedBy,
     failures: result.failures,
+    edgeFailures: result.edgeFailures,
+    skippedEdgeInputs: result.skippedEdgeInputs,
     shrinkEvaluations: result.shrinkEvaluations,
     durationMs: Date.now() - started,
   };

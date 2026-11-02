@@ -211,6 +211,13 @@ class RunnerProcess {
           if (m.t === 'result' && m.reqId === reqId) {
             outcomes[offset + m.index] = m.outcome;
             count = m.index + 1;
+            // A call stopped by the in-process timeout may leave a huge heap behind (an array growing towards
+            // 2^31 elements); later inputs would then time out in garbage collection. Start over in a new process.
+            if (m.outcome.kind === 'timeout') {
+              this.guarded.add(guardKey);
+              finish({ count }, true);
+              return;
+            }
             arm();
           } else if (m.t === 'done' && m.reqId === reqId) {
             finish({ count }, false);

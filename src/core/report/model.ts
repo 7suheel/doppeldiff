@@ -75,6 +75,10 @@ export const FunctionReport = z.object({
   inputsRun: z.number().int().nonnegative(),
   stoppedBy: z.enum(['runs', 'deadline', 'failures', 'exhausted']).optional(),
   failures: z.number().int().nonnegative(),
+  /** Timeouts/crashes on edge-case inputs (huge numbers, NaN, …), included in `failures`. */
+  edgeTimeouts: z.number().int().nonnegative().optional(),
+  /** Edge-case inputs skipped after repeated timeouts on edge-case inputs. */
+  skippedEdgeInputs: z.number().int().nonnegative().optional(),
   durationMs: z.number().nonnegative(),
   seed: z.number().int(),
   usage: z

@@ -2,7 +2,7 @@ import fc, { type Arbitrary } from 'fast-check';
 import { xoroshiro128plus } from 'pure-rand/generator/xoroshiro128plus';
 import { diffOutcome, type CompareOptions, type OutcomeDiff } from '../compare/compare.js';
 import type { Outcome } from '../compare/observed.js';
-import { formatArgs } from '../format/format.js';
+import { formatArgs, formatOutcome } from '../format/format.js';
 import { stableKey } from '../util/stableKey.js';
 import { clusterKey, describeTransition, inputFeatures } from './cluster.js';
 import { humanize, inputComplexity } from './humanize.js';
@@ -34,8 +34,13 @@ export interface ExploreOptions {
   shrinkBudget?: number;
   /** Max witnesses kept per cluster. */
   maxWitnesses?: number;
-  /** Stop exploring after this many timeouts/crashes (they are expensive: the runner is respawned). */
+  /**
+   * Stop exploring after this many timeouts/crashes on realistic inputs (they are expensive: the runner is
+   * respawned). Timeouts on edge-case inputs (huge numbers, NaN, …) do not count: after `maxEdgeFailures` of them,
+   * further edge-case inputs are skipped and exploration continues with the rest.
+   */
   maxFailures?: number;
+  maxEdgeFailures?: number;
   /** Number of inputs run twice per version to detect nondeterminism. */
   selfCheck?: number;
   /** Max evaluations of the humanizing pass per witness. */
@@ -88,6 +93,10 @@ export interface ExploreResult {
   stoppedBy: 'runs' | 'deadline' | 'failures' | 'exhausted';
   shrinkEvaluations: number;
   failures: number;
+  /** Timeouts/crashes on edge-case inputs (included in `failures`). */
+  edgeFailures: number;
+  /** Generated edge-case inputs skipped after `maxEdgeFailures` timeouts on edge-case inputs. */
+  skippedEdgeInputs: number;
 }
 
 interface Pending {
@@ -102,6 +111,12 @@ function biasFor(runIndex: number): number {
 
 const size = (input: unknown[]) => formatArgs(input, 10_000).length;
 
+/** How hard a witness is to read: its input, plus long outputs (a 1,000-element array is a poor example). */
+function witnessCost(input: unknown[], r: PairOutcome | undefined): number {
+  const out = r ? formatOutcome(r.base, 2000, false).length + formatOutcome(r.head, 2000, false).length : 0;
+  return inputComplexity(input) + Math.max(0, out - 40) / 20;
+}
+
 export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   const {
     arbitrary,
@@ -114,6 +129,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     shrinkBudget = 500,
     maxWitnesses = 3,
     maxFailures = 20,
+    maxEdgeFailures = 2,
     selfCheck = 50,
     humanizeBudget = 150,
   } = options;
@@ -132,8 +148,14 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     return t;
   };
   let outOfDomain = 0;
-  /** Domain filter for generated inputs (see `inDomain`). */
+  let edgeFailures = 0;
+  let skippedEdgeInputs = 0;
+  /** Domain filter for generated inputs (see `inDomain`), and no more edge cases once they keep timing out. */
   const wanted = (input: unknown[]): boolean => {
+    if (options.realism && edgeFailures >= maxEdgeFailures && tierOf(input) === 0) {
+      skippedEdgeInputs++;
+      return false;
+    }
     if (!options.inDomain || options.inDomain(input)) return true;
     if (options.strictDomain) return false;
     return outOfDomain++ % 4 === 0;
@@ -155,8 +177,34 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   let stoppedBy: ExploreResult['stoppedBy'] = 'runs';
 
   /** Inputs that timed out or crashed on either side (each one is expensive). */
-  const countFailures = (r: PairOutcome) => {
-    if ([r.base, r.head].some((o) => o.kind === 'timeout' || o.kind === 'crash')) failures++;
+  const countFailures = (input: unknown[], r: PairOutcome) => {
+    if (![r.base, r.head].some((o) => o.kind === 'timeout' || o.kind === 'crash')) return;
+    failures++;
+    if (options.realism && tierOf(input) === 0) edgeFailures++;
+  };
+  /** Failures that say something about the code (not about absurd inputs). */
+  const realisticFailures = () => failures - edgeFailures;
+
+  /**
+   * A timeout on an ordinary input is re-run once on its own before it is believed: under CPU contention (other
+   * runners spinning on genuinely hanging inputs) a fast call can miss its deadline. Edge-case inputs are not
+   * re-run: they are expected to be slow, and each re-run costs a full timeout.
+   */
+  const timedOut = (r: PairOutcome) => r.base.kind === 'timeout' || r.head.kind === 'timeout';
+  const confirmTimeouts = async (inputs: unknown[][], results: PairOutcome[]): Promise<void> => {
+    const idx = results
+      .map((r, i) => i)
+      .filter((i) => timedOut(results[i]!) && !(options.realism && tierOf(inputs[i]!) === 0));
+    if (idx.length === 0) return;
+    const again = await evaluate(idx.map((i) => inputs[i]!));
+    idx.forEach((i, j) => {
+      const first = results[i]!;
+      const second = again[j]!;
+      results[i] = {
+        base: first.base.kind === 'timeout' ? second.base : first.base,
+        head: first.head.kind === 'timeout' ? second.head : first.head,
+      };
+    });
   };
 
   const evalCached = async (inputs: unknown[][]): Promise<PairOutcome[]> => {
@@ -171,9 +219,10 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     });
     if (missing.length > 0) {
       const results = await evaluate(missing);
+      await confirmTimeouts(missing, results);
       results.forEach((r, i) => {
         cache.set(missingKeys[i]!, r);
-        countFailures(r);
+        countFailures(missing[i]!, r);
       });
     }
     return keys.map((k) => cache.get(k)!);
@@ -256,11 +305,13 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
             stoppedBy: 'runs',
             shrinkEvaluations: 0,
             failures,
+            edgeFailures,
+            skippedEdgeInputs,
           };
         }
       }
       cache.set(stableKey(inputs[i]!), a[i]!);
-      countFailures(a[i]!);
+      countFailures(inputs[i]!, a[i]!);
       record(first[i]!, a[i]!);
     }
     inputsRun = inputs.length;
@@ -275,7 +326,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
       stoppedBy = 'deadline';
       break;
     }
-    if (failures >= maxFailures) {
+    if (realisticFailures() >= maxFailures) {
       stoppedBy = 'failures';
       break;
     }
@@ -301,9 +352,13 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     }
     staleBatches = 0;
     const results = await evaluate(batch.map((p) => p.value.value));
+    await confirmTimeouts(
+      batch.map((p) => p.value.value),
+      results,
+    );
     results.forEach((r, i) => {
       cache.set(batch[i]!.key, r);
-      countFailures(r);
+      countFailures(batch[i]!.value.value, r);
       record(batch[i]!.value, r);
     });
     inputsRun += batch.length;
@@ -315,6 +370,14 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
   for (const cluster of clusters.values()) {
     let cur = cluster.seed;
     let evals = 0;
+    // A behavior that involves a timeout is not shrunk or humanized: every candidate may cost a full timeout.
+    // One example is enough to report it.
+    const w0 = cluster.witnesses[0]!;
+    if (w0.base.kind === 'timeout' || w0.head.kind === 'timeout') {
+      cluster.witnesses.length = 1;
+      cluster.witnesses[0]!.minimal = true;
+      continue;
+    }
     if (exampleValues.has(cur) && !arbitrary.canShrinkWithoutContext(cur.value)) continue;
     let improved = true;
     while (improved && evals < shrinkBudget) {
@@ -341,7 +404,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
           break;
         }
       }
-      if (failures >= maxFailures * 2) break;
+      if (realisticFailures() >= maxFailures * 2) break;
     }
     shrinkEvaluations += evals;
     // Humanize the shrunk witness and the other kept witnesses, then keep the simplest distinct ones.
@@ -359,7 +422,11 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     }
     const ranked = [...finals.values()]
       .filter((input) => classify(input, cache.get(stableKey(input))!)?.key === cluster.key)
-      .sort((a, b) => tierOf(b) - tierOf(a) || inputComplexity(a) - inputComplexity(b))
+      .sort(
+        (a, b) =>
+          tierOf(b) - tierOf(a) ||
+          witnessCost(a, cache.get(stableKey(a))) - witnessCost(b, cache.get(stableKey(b))),
+      )
       .slice(0, maxWitnesses);
     cluster.witnesses = ranked.map((input, i) => {
       const r = cache.get(stableKey(input))!;
@@ -380,7 +447,10 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     for (const cluster of clusters.values()) {
       for (const w of cluster.witnesses) w.realism ??= options.realism(w.input);
       cluster.witnesses.sort(
-        (a, b) => b.realism!.tier - a.realism!.tier || inputComplexity(a.input) - inputComplexity(b.input),
+        (a, b) =>
+          b.realism!.tier - a.realism!.tier ||
+          witnessCost(a.input, { base: a.base, head: a.head }) -
+            witnessCost(b.input, { base: b.base, head: b.head }),
       );
       cluster.witnesses.forEach((w, i) => (w.minimal = i === 0));
     }
@@ -416,5 +486,7 @@ export async function explore(options: ExploreOptions): Promise<ExploreResult> {
     stoppedBy,
     shrinkEvaluations,
     failures,
+    edgeFailures,
+    skippedEdgeInputs,
   };
 }

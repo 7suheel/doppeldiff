@@ -110,6 +110,28 @@ function numberArb(ctx: Ctx): Arbitrary<unknown> {
   return weighted(typeDriven, ctx.mined.numbers, ctx);
 }
 
+/** Values that make loops and allocations explode; rare for size-like parameters. */
+const HUGE_SIZES = [2 ** 31 - 1, 2 ** 32, Number.MAX_SAFE_INTEGER, 1e15, Infinity, -Infinity, NaN];
+
+/**
+ * Counts, lengths, indexes and loop bounds: mostly small non-negative integers and values from the code, its tests
+ * and call sites; some negatives and non-integers (validation); huge values and NaN/Infinity only rarely (~1.5%).
+ */
+function sizeArb(ctx: Ctx): Arbitrary<unknown> {
+  const typeDriven = fc.oneof(
+    { arbitrary: fc.integer({ min: 0, max: 10 }), weight: 40 },
+    { arbitrary: fc.integer({ min: 0, max: 100 }), weight: 25 },
+    { arbitrary: fc.integer({ min: 0, max: 1000 }), weight: 8 },
+    { arbitrary: fc.constantFrom(-1, -2, -10), weight: 3 },
+    { arbitrary: fc.constantFrom(0.5, 1.5, 2.25), weight: 2 },
+    { arbitrary: fc.constantFrom(...HUGE_SIZES), weight: 1 },
+  );
+  // Values from the code, its tests and call sites, at most 1,000: the pool is shared by all parameters, and a
+  // price of 9000 is not a realistic count of people.
+  const mined = ctx.mined.numbers.filter((n) => Number.isInteger(n) && n >= -10 && n <= 1000);
+  return weighted(typeDriven, mined, ctx);
+}
+
 const regexCache = new WeakMap<object, Arbitrary<string>[]>();
 
 const sampleCache = new WeakMap<object, string[]>();
@@ -292,7 +314,7 @@ function anythingArb(ctx: Ctx): Arbitrary<unknown> {
 function compile(spec: ArbSpec, ctx: Ctx): Arbitrary<unknown> | null {
   switch (spec.kind) {
     case 'number':
-      return numberArb(ctx);
+      return spec.size ? sizeArb(ctx) : numberArb(ctx);
     case 'bigint':
       return fc.oneof(fc.bigInt({ min: -1000n, max: 1000n }), fc.bigInt());
     case 'string':

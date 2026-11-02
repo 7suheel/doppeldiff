@@ -6,7 +6,8 @@
  * analysis testable without fast-check and lets us hash, compare and print specs.
  */
 export type ArbSpec =
-  | { kind: 'number' }
+  /** `size`: a count, length, index or loop bound (see analyze/sizeParams.ts), generated in realistic ranges. */
+  | { kind: 'number'; size?: boolean }
   | { kind: 'bigint' }
   | { kind: 'string' }
   | { kind: 'boolean' }
@@ -159,4 +160,11 @@ export function printSpec(spec: ArbSpec): string {
     default:
       return spec.kind;
   }
+}
+
+/** Mark number-typed parts of a parameter spec (including inside unions) as size-like. */
+export function markSize(spec: ArbSpec): ArbSpec {
+  if (spec.kind === 'number') return { kind: 'number', size: true };
+  if (spec.kind === 'union') return { ...spec, options: spec.options.map(markSize) };
+  return spec;
 }

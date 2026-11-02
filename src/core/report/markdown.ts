@@ -153,6 +153,22 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
   const edge = r.functions.flatMap((f) =>
     f.behaviors.filter((b) => b.realism === 'edge').map((b) => ({ f, b })),
   );
+  const timedOut = r.functions.filter((f) => (f.edgeTimeouts ?? 0) > 0);
+  const timeoutLine = timedOut.length
+    ? `⏱️ Timed out on edge-case inputs (huge numbers, NaN, …); similar inputs were skipped: ${timedOut
+        .map((f) => `${code(f.exportName, 60)} (${n(f.edgeTimeouts ?? 0)})`)
+        .join(', ')}.`
+    : '';
+  if (edge.length === 0 && timeoutLine) {
+    lines.push(
+      '',
+      `<details><summary>⏱️ Some edge-case inputs timed out</summary>`,
+      '',
+      timeoutLine,
+      '',
+      '</details>',
+    );
+  }
   if (edge.length > 0) {
     const reasons = [...new Set(edge.map(({ b }) => b.realismNote).filter(Boolean))].slice(0, 4).join(', ');
     const tag: Record<string, string> = {
@@ -165,7 +181,9 @@ function render(r: Report, maxExamples: number, sticky: boolean): string {
       '',
       `<details><summary>🧪 ${edge.length} behavior change${edge.length === 1 ? '' : 's'} only on edge-case inputs${reasons ? ` (${escapeText(reasons)})` : ''}</summary>`,
       '',
-      edge.map(({ f, b }) => `${tag[b.label] ?? ''}${behaviorBlock(f, b, maxExamples)}`).join('\n\n'),
+      // Compact: one example per edge-case behavior.
+      edge.map(({ f, b }) => `${tag[b.label] ?? ''}${behaviorBlock(f, b, 1)}`).join('\n\n'),
+      ...(timeoutLine ? ['', timeoutLine] : []),
       '',
       '</details>',
     );
