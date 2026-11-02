@@ -38,6 +38,10 @@ code. Its description says _"Pure refactor, no behavior change. All tests pass."
 The refactor clamps the total at zero, so a cart with a credit or refund line no longer adds up. No reviewer was
 asked to look for that, and no test covered it. The same comment flags a second unclaimed change, in `slugify`.
 
+**See it live:** [doppeldiff-playground#1](https://github.com/7suheel/doppeldiff-playground/pull/1) is a small
+repository set up exactly as described below, with an open "pure refactor" PR. Its tests pass, and doppeldiff's
+comment shows `splitBill(10, 4)` returning `[3, 3, 3, 3]` instead of `[3, 3, 2, 2]`.
+
 ## What doppeldiff is good at, and what it is not good at yet
 
 **Good at**

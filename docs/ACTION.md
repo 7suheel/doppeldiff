@@ -5,6 +5,9 @@ doppeldiff posts **one sticky comment** per pull request and updates it on every
 [`examples/workflows/doppeldiff-comment.yml`](../examples/workflows/doppeldiff-comment.yml) to `.github/workflows/`
 on your default branch. No secrets are required.
 
+A working example is [doppeldiff-playground](https://github.com/7suheel/doppeldiff-playground): the two files
+copied unchanged, and an open pull request with the resulting comment.
+
 They have to be two files: the comment job is triggered by the completion of the analyze workflow
 (`workflow_run`), and GitHub rejects a workflow file whose `workflow_run` trigger names the workflow itself. We
 verified this on GitHub: such a file is treated as invalid and fails on every push.
