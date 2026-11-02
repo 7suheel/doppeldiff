@@ -4,6 +4,10 @@
 
 **See what your PR actually changed.**
 
+[![npm](https://img.shields.io/npm/v/doppeldiff.svg)](https://www.npmjs.com/package/doppeldiff)
+[![CI](https://github.com/7suheel/doppeldiff/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/7suheel/doppeldiff/actions/workflows/ci.yml)
+[![license](https://img.shields.io/npm/l/doppeldiff.svg)](LICENSE)
+
 Built for refactors and "no behavior change" pull requests. doppeldiff runs the old and the new version of every
 changed function on thousands of inputs your tests never tried, and shows every input where they disagree.
 
