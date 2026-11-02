@@ -4,7 +4,7 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses [Semantic Versioning](https://semver.org/).
 Before 1.0, minor versions may contain breaking changes to the CLI, the config and the JSON report.
 
-## [0.1.1] - Unreleased
+## [0.1.1] - 2026-11-02
 
 Faster and tidier on code that loops over a count or allocates by a length. On the playground demo PR, one run went
 from 55 s to 9 s, and every function is now explored to the full input budget.
